@@ -206,6 +206,8 @@
     <string name="balancer_settings">Balancer settings</string>
     <string name="balancer_type">Type</string>
     <string name="balancer_strategy">Strategy</string>
+    <string name="balancer_use_landing_proxy">Use group landing proxy</string>
+    <string name="balancer_use_landing_proxy_summary">Route traffic through the group\'s landing proxy</string>
     <string name="chain_settings">Chain settings</string>
     <string name="config_settings">Config settings</string>
     <string name="circular_reference">Circular reference</string>

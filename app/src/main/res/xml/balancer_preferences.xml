@@ -29,6 +29,13 @@
         app:title="@string/menu_group"
         app:useSimpleSummaryProvider="true" />
 
+    <SwitchPreference
+        app:defaultValue="false"
+        app:icon="@drawable/baseline_public_24"
+        app:key="balancerUseLandingProxy"
+        app:title="@string/balancer_use_landing_proxy"
+        app:summary="@string/balancer_use_landing_proxy_summary" />
+
     <EditTextPreference
         app:icon="@drawable/ic_action_delete"
         app:key="balancerNameFilter"

@@ -45,6 +45,7 @@ public class BalancerBean extends InternalBean {
     public Integer probeInterval;
     public String nameFilter;
     public String nameFilter1;
+    public Boolean useLandingProxy;
 
     @Override
     public void initializeDefaultValues() {
@@ -58,6 +59,7 @@ public class BalancerBean extends InternalBean {
         if (probeInterval == null) probeInterval = 300;
         if (nameFilter == null) nameFilter = "";
         if (nameFilter1 == null) nameFilter1 = "";
+        if (useLandingProxy == null) useLandingProxy = false;
     }
 
     @Override
@@ -71,7 +73,7 @@ public class BalancerBean extends InternalBean {
 
     @Override
     public void serialize(ByteBufferOutput output) {
-        output.writeInt(3);
+        output.writeInt(4);
         output.writeInt(type);
         output.writeString(strategy);
         switch (type) {
@@ -93,6 +95,7 @@ public class BalancerBean extends InternalBean {
         if (type == TYPE_GROUP) {
             output.writeString(nameFilter);
             output.writeString(nameFilter1);
+            output.writeBoolean(useLandingProxy);
         }
     }
 
@@ -124,6 +127,9 @@ public class BalancerBean extends InternalBean {
         }
         if (version >= 3 && type == TYPE_GROUP) {
             nameFilter1 = input.readString();
+        }
+        if (version >= 4 && type == TYPE_GROUP) {
+            useLandingProxy = input.readBoolean();
         }
     }
 

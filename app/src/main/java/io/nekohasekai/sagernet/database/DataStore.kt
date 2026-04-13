@@ -392,6 +392,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var balancerProbeInterval by profileCacheStore.stringToInt(Key.PROBE_INTERVAL) { 300 }
     var balancerNameFilter by profileCacheStore.string(Key.BALANCER_NAME_FILTER)
     var balancerNameFilter1 by profileCacheStore.string(Key.BALANCER_NAME_FILTER1)
+    var balancerUseLandingProxy by profileCacheStore.boolean(Key.BALANCER_USE_LANDING_PROXY)
 
 
     var routeName by profileCacheStore.string(Key.ROUTE_NAME)

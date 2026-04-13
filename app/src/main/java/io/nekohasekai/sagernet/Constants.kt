@@ -261,6 +261,7 @@ object Key {
     const val BALANCER_STRATEGY = "balancerStrategy"
     const val BALANCER_NAME_FILTER = "balancerNameFilter"
     const val BALANCER_NAME_FILTER1 = "balancerNameFilter1"
+    const val BALANCER_USE_LANDING_PROXY = "balancerUseLandingProxy"
 
     const val ROUTE_NAME = "routeName"
     const val ROUTE_DOMAIN = "routeDomain"
