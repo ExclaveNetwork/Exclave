@@ -212,28 +212,8 @@ fun buildV2RayConfig(
             val beansMap = beans.associateBy { it.id }
             val beanList = ArrayList<ProxyEntity>()
 
-            // Check if we need to apply landing proxy for TYPE_GROUP balancer
-            val shouldUseLandingProxy = balancerBean!!.type == BalancerBean.TYPE_GROUP &&
-                                        balancerBean!!.useLandingProxy == true
-            val group = if (shouldUseLandingProxy) {
-                SagerDatabase.groupDao.getById(balancerBean!!.groupId)
-            } else null
-            val landingProxyEntity = if (group != null && group.landingProxy > 0L) {
-                SagerDatabase.proxyDao.getById(group.landingProxy)
-            } else null
-
-            // Validate landing proxy if it exists
-            if (shouldUseLandingProxy && landingProxyEntity != null) {
-                when (landingProxyEntity.type) {
-                    ProxyEntity.TYPE_BALANCER -> error("balancer can not be the landing proxy")
-                    ProxyEntity.TYPE_CONFIG -> if (landingProxyEntity.configBean!!.type == "v2ray")
-                        error("custom config can not be the landing proxy")
-                }
-                if (!landingProxyEntity.requireBean().canMapping()) {
-                    error("${landingProxyEntity.displayName()} can be the front proxy only and can not be the landing proxy")
-                }
-            }
-
+            // For balancer, we don't add landing proxy here
+            // It will be handled in buildChain() function
             for (proxyId in beansMap.keys) {
                 val item = beansMap[proxyId] ?: continue
                 if (item.id == id) continue
@@ -242,19 +222,7 @@ fun buildV2RayConfig(
                     ProxyEntity.TYPE_CHAIN -> error("proxy chain in balancer is not supported")
                     ProxyEntity.TYPE_CONFIG -> if (item.configBean!!.type == "v2ray") error("custom config in balancer is not supported")
                 }
-
-                // If useLandingProxy is enabled and landing proxy exists, build chain for each proxy
-                if (shouldUseLandingProxy && landingProxyEntity != null) {
-                    // Add the proxy item first
-                    beanList.add(item)
-                    // Then add landing proxy (it will be at the end of the chain, which means traffic goes through it last)
-                    when (landingProxyEntity.type) {
-                        ProxyEntity.TYPE_CHAIN -> beanList.addAll(0, landingProxyEntity.resolveChainRecursively().asReversed())
-                        else -> beanList.add(0, landingProxyEntity)
-                    }
-                } else {
-                    beanList.add(item)
-                }
+                beanList.add(item)
             }
             return beanList
         }
@@ -2066,6 +2034,63 @@ fun buildV2RayConfig(
 
             if (isBalancer) {
                 val balancerBean = balancer()!!
+
+                // Check if we need to apply landing proxy for TYPE_GROUP balancer
+                val shouldUseLandingProxy = balancerBean.type == BalancerBean.TYPE_GROUP &&
+                                            balancerBean.useLandingProxy == true
+
+                if (shouldUseLandingProxy) {
+                    // Get the group and landing proxy
+                    val group = SagerDatabase.groupDao.getById(balancerBean.groupId)
+                    val landingProxyEntity = if (group != null && group.landingProxy > 0L) {
+                        SagerDatabase.proxyDao.getById(group.landingProxy)
+                    } else null
+
+                    if (landingProxyEntity != null) {
+                        // Validate landing proxy
+                        when (landingProxyEntity.type) {
+                            ProxyEntity.TYPE_BALANCER -> error("balancer can not be the landing proxy")
+                            ProxyEntity.TYPE_CONFIG -> if (landingProxyEntity.configBean!!.type == "v2ray")
+                                error("custom config can not be the landing proxy")
+                        }
+                        if (!landingProxyEntity.requireBean().canMapping()) {
+                            error("${landingProxyEntity.displayName()} can be the front proxy only and can not be the landing proxy")
+                        }
+
+                        // Get landing proxy chain
+                        val landingProxyList = when (landingProxyEntity.type) {
+                            ProxyEntity.TYPE_CHAIN -> landingProxyEntity.resolveChainRecursively()
+                            else -> mutableListOf(landingProxyEntity)
+                        }
+
+                        // For each proxy in profileList, we need to create a chain with landing proxy
+                        // We'll rebuild chainOutbounds with chains
+                        val originalProxies = profileList.toList()
+                        chainOutbounds.clear()
+
+                        for (mainProxy in originalProxies) {
+                            // Create a chain: landingProxyList + mainProxy
+                            // Landing proxy goes first to bypass whitelists, then mainProxy
+                            val chainList = landingProxyList.toMutableList()
+                            chainList.add(mainProxy)
+
+                            // Build this chain as a sub-chain
+                            val chainTag = buildChain(
+                                "$tagOutbound-chain-${mainProxy.id}",
+                                chainList,
+                                false, // not a balancer
+                                { null }
+                            )
+
+                            // Find the first outbound of this chain and add it to chainOutbounds
+                            val chainFirstOutbound = outbounds.findLast { it.tag == chainTag }
+                            if (chainFirstOutbound != null) {
+                                chainOutbounds.add(chainFirstOutbound)
+                            }
+                        }
+                    }
+                }
+
                 val observatory = ObservatoryObject().apply {
                     probeURL = balancerBean.probeUrl.ifEmpty {
                         DataStore.connectionTestURL
