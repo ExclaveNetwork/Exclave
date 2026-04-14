@@ -1246,6 +1246,7 @@ public class V2RayConfig {
         public Integer maxEarlyData;
         public String earlyDataHeaderName;
         public Boolean useBrowserForwarding;
+        public Boolean parseXForwardedFor;
 
     }
 
@@ -1255,6 +1256,7 @@ public class V2RayConfig {
         public String path;
         public String method;
         public Map<String, List<String>> headers;
+        public Boolean parseXForwardedFor;
 
     }
 
@@ -1306,6 +1308,7 @@ public class V2RayConfig {
         public Integer maxEarlyData;
         public String earlyDataHeaderName;
         public List<HTTPUpgradeHeaderObject> header;
+        public Boolean parseXForwardedFor;
 
         public static class HTTPUpgradeHeaderObject {
 

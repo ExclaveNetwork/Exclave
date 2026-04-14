@@ -398,10 +398,14 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         socks5Password.summaryProvider = ProfileSettingsActivity.PasswordSummaryProvider
         socks5Password.isVisible = requireSocks.isChecked
         socks5Password.onPreferenceChangeListener = reloadListener
+        val socks5UDP = findPreference<SwitchPreference>(Key.SOCKS_UDP)!!
+        socks5UDP.isVisible = requireSocks.isChecked
+        socks5UDP.onPreferenceChangeListener = reloadListener
         requireSocks.setOnPreferenceChangeListener { _, newValue ->
             portSocks5.isVisible = newValue as Boolean
             socks5Username.isVisible = newValue
             socks5Password.isVisible = newValue
+            socks5UDP.isVisible = newValue
             allowAccess.isVisible = newValue || requireHttp.isChecked || requireTransproxy.isChecked || requireDns.isChecked
             needReload()
             true

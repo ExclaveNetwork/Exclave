@@ -246,6 +246,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var requireSocks by configurationStore.boolean(Key.REQUIRE_SOCKS) { true }
     var socksUsername by configurationStore.string(Key.SOCKS_USERNAME)
     var socksPassword by configurationStore.string(Key.SOCKS_PASSWORD)
+    var socksUDP by configurationStore.boolean(Key.SOCKS_UDP) { true }
     var requireHttp by configurationStore.boolean(Key.REQUIRE_HTTP) { false }
     var httpUsername by configurationStore.string(Key.HTTP_USERNAME)
     var httpPassword by configurationStore.string(Key.HTTP_PASSWORD)

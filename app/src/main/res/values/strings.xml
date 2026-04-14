@@ -606,4 +606,5 @@
     <string name="hysteria_bbr_profile">BBR profile</string>
     <string name="require_socks">Enable SOCKS5 inbound</string>
     <string name="custom_package_name_or_uid">Custom package name or UID</string>
+    <string name="udp" translatable="false">UDP</string>
 </resources>

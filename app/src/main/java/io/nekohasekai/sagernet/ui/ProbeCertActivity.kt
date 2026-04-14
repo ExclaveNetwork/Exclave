@@ -206,6 +206,16 @@ class ProbeCertActivity : ThemedActivity() {
             }
             return
         }
+        if (SagerNet.started && DataStore.startedProfile > 0 && DataStore.requireSocks && !DataStore.socksUDP && binding.probeCertProtocol.selectedItemPosition == 1) {
+            runOnMainDispatcher {
+                AlertDialog.Builder(this@ProbeCertActivity)
+                    .setTitle(R.string.error_title)
+                    .setMessage("SOCKS inbound UDP is disabled")
+                    .setPositiveButton(android.R.string.ok) { _, _ -> }
+                    .runCatching { show() }
+            }
+            return
+        }
         binding.waitLayout.isVisible = true
         runOnDefaultDispatcher {
             val result = Libsagernetcore.probeCert(

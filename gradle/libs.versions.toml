@@ -1,6 +1,6 @@
 [versions]
 ksp = "2.3.6"
-aboutlibraries = "14.0.0-b03"
+aboutlibraries = "14.0.1"
 protobuf = "0.9.6"
 android-gradle-plugin = "9.1.0"
 kotlin-gradle-plugin = "2.3.20"

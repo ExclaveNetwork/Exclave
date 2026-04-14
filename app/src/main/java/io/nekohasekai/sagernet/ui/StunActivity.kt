@@ -122,6 +122,16 @@ class StunActivity : ThemedActivity() {
             }
             return
         }
+        if (SagerNet.started && DataStore.startedProfile > 0 && DataStore.requireSocks && !DataStore.socksUDP) {
+            runOnMainDispatcher {
+                AlertDialog.Builder(this@StunActivity)
+                    .setTitle(R.string.error_title)
+                    .setMessage("SOCKS inbound UDP is disabled")
+                    .setPositiveButton(android.R.string.ok) { _, _ -> }
+                    .runCatching { show() }
+            }
+            return
+        }
         if (SagerNet.started && DataStore.startedProfile > 0 && DataStore.tunImplementation == TunImplementation.GVISOR && !DataStore.requireDnsInbound) {
             runOnMainDispatcher {
                 AlertDialog.Builder(this@StunActivity)
@@ -174,6 +184,16 @@ class StunActivity : ThemedActivity() {
                 AlertDialog.Builder(this@StunActivity)
                     .setTitle(R.string.error_title)
                     .setMessage("SOCKS inbound is disabled")
+                    .setPositiveButton(android.R.string.ok) { _, _ -> }
+                    .runCatching { show() }
+            }
+            return
+        }
+        if (SagerNet.started && DataStore.startedProfile > 0 && DataStore.requireSocks && !DataStore.socksUDP) {
+            runOnMainDispatcher {
+                AlertDialog.Builder(this@StunActivity)
+                    .setTitle(R.string.error_title)
+                    .setMessage("SOCKS inbound UDP is disabled")
                     .setPositiveButton(android.R.string.ok) { _, _ -> }
                     .runCatching { show() }
             }

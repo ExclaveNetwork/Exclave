@@ -422,7 +422,7 @@ fun buildV2RayConfig(
                             pass = DataStore.socksPassword
                         })
                     }
-                    udp = true
+                    udp = DataStore.socksUDP
                 })
             }
             if (trafficSniffing || useFakeDns) {
@@ -2876,7 +2876,7 @@ fun buildCustomConfig(proxy: ProxyEntity, forTest: Boolean = false, forExport: B
                                 pass = DataStore.socksPassword
                             })
                         }
-                        udp = true
+                        udp = DataStore.socksUDP
                     })
                 }
                 if (DataStore.trafficSniffing || isConfigWithSniffing || useFakeDns) {

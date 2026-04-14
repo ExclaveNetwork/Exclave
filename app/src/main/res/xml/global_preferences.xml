@@ -353,6 +353,11 @@
             app:title="@string/password"
             app:useSimpleSummaryProvider="true" />
         <SwitchPreference
+            app:defaultValue="true"
+            app:icon="@drawable/ic_file_cloud_queue"
+            app:key="socksUDP"
+            app:title="@string/udp" />
+        <SwitchPreference
             app:icon="@drawable/ic_baseline_http_24"
             app:key="requireHttp"
             app:title="@string/require_http" />
