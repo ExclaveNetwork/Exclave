@@ -14,7 +14,7 @@
     <string name="night_mode">Mode nuit</string>
     <plurals name="lines">
         <item quantity="one">%d ligne</item>
-        <item quantity="many"></item>
+        <item quantity="many"/>
         <item quantity="other">%d lignes</item>
     </plurals>
     <string name="random">Aléatoire</string>
@@ -26,7 +26,7 @@
     <string name="confirm">Confirmer</string>
     <plurals name="apps_message">
         <item quantity="one">%d application</item>
-        <item quantity="many"></item>
+        <item quantity="many"/>
         <item quantity="other">%d applications</item>
     </plurals>
     <string name="select_apps">Sélectionnez les applications</string>
@@ -35,7 +35,7 @@
     <string name="profile_import_message">Confirmez-vous que vous voulez importer le profil %s \?</string>
     <string name="general_settings">Paramètres de l\'appli</string>
     <string name="cag_route">Paramètres d\'itinéraire</string>
-    <string name="service_mode">Mode \"Service\"</string>
+    <string name="service_mode">Mode Service</string>
     <string name="group_delete_confirm_prompt">Vous voulez supprimer ce groupe ?</string>
     <string name="group_diff">Diff (%s)</string>
     <plurals name="group_updated">
@@ -190,12 +190,12 @@
     <string name="traffic_stats">Statistiques</string>
     <plurals name="tcp_connections">
         <item quantity="one">%d connexion TCP</item>
-        <item quantity="many"></item>
+        <item quantity="many"/>
         <item quantity="other">%d connexions TCP</item>
     </plurals>
     <plurals name="udp_connections">
         <item quantity="one">%d connexion UDP</item>
-        <item quantity="many"></item>
+        <item quantity="many"/>
         <item quantity="other">%d connexions UDP</item>
     </plurals>
     <string name="copy_package_name">Copier le nom du paquet</string>

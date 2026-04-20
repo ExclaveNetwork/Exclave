@@ -415,6 +415,9 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                         opts.getString("sc-max-each-post-bytes")?.also {
                             addProperty("scMaxEachPostBytes", it)
                         }
+                        opts.getString("sc-min-posts-interval-ms")?.also {
+                            addProperty("scMinPostsIntervalMs", it)
+                        }
                         opts.getObject("reuse-settings")?.also { xmux ->
                             JsonObject().apply {
                                 xmux.getString("max-connections")?.also {
@@ -435,6 +438,48 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                             }.takeIf { !it.isEmpty }?.also {
                                 add("xmux", it)
                             }
+                        }
+                        opts.getString("x-padding-bytes")?.also {
+                            addProperty("xPaddingBytes", it)
+                        }
+                        opts.getBoolean("x-padding-obfs-mode")?.also {
+                            addProperty("xPaddingObfsMode", it)
+                        }
+                        opts.getString("x-padding-key")?.also {
+                            addProperty("xPaddingKey", it)
+                        }
+                        opts.getString("x-padding-header")?.also {
+                            addProperty("xPaddingHeader", it)
+                        }
+                        opts.getString("x-padding-placement")?.also {
+                            addProperty("xPaddingPlacement", it)
+                        }
+                        opts.getString("x-padding-method")?.also {
+                            addProperty("xPaddingMethod", it)
+                        }
+                        opts.getString("uplink-http-method")?.also {
+                            addProperty("uplinkHTTPMethod", it)
+                        }
+                        opts.getString("session-placement")?.also {
+                            addProperty("sessionPlacement", it)
+                        }
+                        opts.getString("session-key")?.also {
+                            addProperty("sessionKey", it)
+                        }
+                        opts.getString("seq-placement")?.also {
+                            addProperty("seqPlacement", it)
+                        }
+                        opts.getString("seq-key")?.also {
+                            addProperty("seqKey", it)
+                        }
+                        opts.getString("uplink-data-placement")?.also {
+                            addProperty("uplinkDataPlacement", it)
+                        }
+                        opts.getString("uplink-data-key")?.also {
+                            addProperty("uplinkDataKey", it)
+                        }
+                        opts.getString("uplink-chunk-size")?.also {
+                            addProperty("uplinkChunkSize", it)
                         }
                     }.takeIf { !it.isEmpty }?.also {
                         bean.splithttpExtra = GsonBuilder().setPrettyPrinting().create().toJson(it)

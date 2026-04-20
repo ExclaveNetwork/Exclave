@@ -45,13 +45,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import libsagernetcore.*
-import java.io.IOException
-import kotlin.concurrent.atomics.AtomicBoolean
-import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import android.net.VpnService as BaseVpnService
 
 @SuppressLint("VpnServicePolicy")
-@OptIn(ExperimentalAtomicApi::class)
 class VpnService : BaseVpnService(),
     BaseService.Interface,
     TrafficListener,
@@ -93,14 +89,14 @@ class VpnService : BaseVpnService(),
     lateinit var conn: ParcelFileDescriptor
     var tun: Tun2ray? = null
 
-    private var active = AtomicBoolean(false)
+    private var active = false
     private var metered = false
 
     @Volatile
     override var underlyingNetwork: Network? = null
         set(value) {
             field = value
-            if (active.load() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            if (active && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
                 setUnderlyingNetworks(underlyingNetworks)
             }
         }
@@ -133,7 +129,7 @@ class VpnService : BaseVpnService(),
         if (::conn.isInitialized) conn.close()
         super.killProcesses()
         persistAppStats()
-        active.store(false)
+        active = false
         tun?.apply {
             tun = null
         }
@@ -288,7 +284,7 @@ class VpnService : BaseVpnService(),
         }
 
         conn = builder.establish() ?: throw NullConnectionException()
-        active.store(true) // possible race condition here?
+        active = true   // possible race condition here?
 
         data.proxy!!.v2rayPoint.withLocalResolver(this)
 
@@ -369,11 +365,6 @@ class VpnService : BaseVpnService(),
     override fun onDestroy() {
         super.onDestroy()
         data.binder.close()
-        if (active.load() && ::conn.isInitialized) {
-            try {
-                conn.close()
-            } catch (_: IOException) {}
-        }
     }
 
 }

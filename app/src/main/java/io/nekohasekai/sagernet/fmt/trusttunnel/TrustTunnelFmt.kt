@@ -26,6 +26,7 @@ import kotlin.io.encoding.Base64
 
 // https://github.com/TrustTunnel/TrustTunnel/blob/8856e7ba83ae0c9faace78aaf9a95b1b291cd3ed/DEEP_LINK.md
 // https://github.com/TrustTunnel/TrustTunnel/blob/8ba8f34da84b54ff49c248ec8c940c38010b511e/DEEP_LINK.md
+// https://github.com/TrustTunnel/TrustTunnel/blob/9e144fe4bcd0c2cf8f6690a97ba9b4df571a8ec0/DEEP_LINK.md
 
 private enum class Tag(val code: Long) {
     Version(0x00),
@@ -39,11 +40,14 @@ private enum class Tag(val code: Long) {
     Certificate(0x08),
     UpstreamProtocol(0x09),
     AntiDPI(0x0A),
-    ClientRandomPrefix(0x0B);
+    ClientRandomPrefix(0x0B),
+    Name(0x0C),
+    DNSUptreams(0x0D),
 }
 
 private enum class Version(val code: Byte) {
-    Version0(0x00)
+    Version0(0x00),
+    Version1(0x01),
 }
 
 private enum class HasIPv6(val code: Byte) {
@@ -100,6 +104,10 @@ fun TrustTunnelBean.toUri(): String {
             require(der.isNotEmpty())
             writeTLV(Tag.Certificate.code, der)
         }
+        if (name.isNotEmpty()) {
+            writeTLV(Tag.Name.code, name.toByteArray())
+        }
+        writeTLV(Tag.Version.code, byteArrayOf(Version.Version1.code))
     }
     return "tt://?" + Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).encode(byteArrayBuilder.toByteArray())
 }
@@ -177,6 +185,12 @@ fun parseTrustTunnel(url: String): List<TrustTunnelBean> {
                     // ignored
                 }
                 Tag.ClientRandomPrefix.code -> {
+                    // ignored
+                }
+                Tag.Name.code -> {
+                    bean.name = String(value)
+                }
+                Tag.DNSUptreams.code -> {
                     // ignored
                 }
                 else -> {
