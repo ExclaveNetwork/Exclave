@@ -78,6 +78,7 @@ class BalancerSettingsActivity : ProfileSettingsActivity<BalancerBean>(R.layout.
         DataStore.balancerNameFilter = nameFilter
         DataStore.balancerNameFilter1 = nameFilter1
         DataStore.balancerUseLandingProxy = useLandingProxy
+        DataStore.balancerUseFrontProxy = useFrontProxy
     }
 
     override fun BalancerBean.serialize() {
@@ -91,6 +92,7 @@ class BalancerSettingsActivity : ProfileSettingsActivity<BalancerBean>(R.layout.
         nameFilter = DataStore.balancerNameFilter
         nameFilter1 = DataStore.balancerNameFilter1
         useLandingProxy = DataStore.balancerUseLandingProxy
+        useFrontProxy = DataStore.balancerUseFrontProxy
     }
 
     lateinit var balancerType: SimpleMenuPreference
@@ -98,6 +100,7 @@ class BalancerSettingsActivity : ProfileSettingsActivity<BalancerBean>(R.layout.
     lateinit var balancerNameFilter: EditTextPreference
     lateinit var balancerNameFilter1: EditTextPreference
     lateinit var balancerUseLandingProxy: SwitchPreference
+    lateinit var balancerUseFrontProxy: SwitchPreference
     lateinit var probeInterval: EditTextPreference
 
     override fun PreferenceFragmentCompat.createPreferences(
@@ -111,6 +114,7 @@ class BalancerSettingsActivity : ProfileSettingsActivity<BalancerBean>(R.layout.
         balancerNameFilter = findPreference(Key.BALANCER_NAME_FILTER)!!
         balancerNameFilter1 = findPreference(Key.BALANCER_NAME_FILTER1)!!
         balancerUseLandingProxy = findPreference(Key.BALANCER_USE_LANDING_PROXY)!!
+        balancerUseFrontProxy = findPreference(Key.BALANCER_USE_FRONT_PROXY)!!
         probeInterval = findPreference(Key.PROBE_INTERVAL)!!
         probeInterval.onBindEditTextListener = EditTextPreferenceModifiers.Number
 
@@ -129,6 +133,7 @@ class BalancerSettingsActivity : ProfileSettingsActivity<BalancerBean>(R.layout.
                 balancerNameFilter.isVisible = false
                 balancerNameFilter1.isVisible = false
                 balancerUseLandingProxy.isVisible = false
+                balancerUseFrontProxy.isVisible = false
                 configurationList.isVisible = true
                 itemView.isVisible = true
             }
@@ -137,6 +142,7 @@ class BalancerSettingsActivity : ProfileSettingsActivity<BalancerBean>(R.layout.
                 balancerNameFilter.isVisible = true
                 balancerNameFilter1.isVisible = true
                 balancerUseLandingProxy.isVisible = true
+                balancerUseFrontProxy.isVisible = true
                 configurationList.isVisible = false
                 itemView.isVisible = false
             }

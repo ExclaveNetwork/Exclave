@@ -217,6 +217,8 @@
     <string name="balancer">Балансировщик</string>
     <string name="balancer_use_landing_proxy">Использовать конечный прокси группы</string>
     <string name="balancer_use_landing_proxy_summary">Направлять трафик через конечный прокси группы</string>
+    <string name="balancer_use_front_proxy">Использовать начальный прокси группы</string>
+    <string name="balancer_use_front_proxy_summary">Направлять трафик через начальный прокси группы</string>
     <string name="custom_config">Пользовательская конфигурация</string>
     <string name="proxy_chain">Прокси-цепочка</string>
     <string name="select_profile">Выбрать профиль</string>

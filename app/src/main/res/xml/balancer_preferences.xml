@@ -31,6 +31,13 @@
 
     <SwitchPreference
         app:defaultValue="false"
+        app:icon="@drawable/ic_hardware_router"
+        app:key="balancerUseFrontProxy"
+        app:title="@string/balancer_use_front_proxy"
+        app:summary="@string/balancer_use_front_proxy_summary" />
+
+    <SwitchPreference
+        app:defaultValue="false"
         app:icon="@drawable/baseline_public_24"
         app:key="balancerUseLandingProxy"
         app:title="@string/balancer_use_landing_proxy"

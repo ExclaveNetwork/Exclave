@@ -394,6 +394,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var balancerNameFilter by profileCacheStore.string(Key.BALANCER_NAME_FILTER)
     var balancerNameFilter1 by profileCacheStore.string(Key.BALANCER_NAME_FILTER1)
     var balancerUseLandingProxy by profileCacheStore.boolean(Key.BALANCER_USE_LANDING_PROXY)
+    var balancerUseFrontProxy by profileCacheStore.boolean(Key.BALANCER_USE_FRONT_PROXY)
 
 
     var routeName by profileCacheStore.string(Key.ROUTE_NAME)

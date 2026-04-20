@@ -2091,6 +2091,59 @@ fun buildV2RayConfig(
                     }
                 }
 
+                // Check if we need to apply front proxy for TYPE_GROUP balancer
+                val shouldUseFrontProxy = balancerBean.type == BalancerBean.TYPE_GROUP &&
+                                            balancerBean.useFrontProxy == true
+
+                if (shouldUseFrontProxy) {
+                    // Get the group and front proxy
+                    val group = SagerDatabase.groupDao.getById(balancerBean.groupId)
+                    val frontProxyEntity = if (group != null && group.frontProxy > 0L) {
+                        SagerDatabase.proxyDao.getById(group.frontProxy)
+                    } else null
+
+                    if (frontProxyEntity != null) {
+                        // Validate front proxy
+                        when (frontProxyEntity.type) {
+                            ProxyEntity.TYPE_BALANCER -> error("balancer can not be the front proxy")
+                            ProxyEntity.TYPE_CONFIG -> if (frontProxyEntity.configBean!!.type == "v2ray")
+                                error("custom config can not be the front proxy")
+                        }
+
+                        // Get front proxy chain
+                        val frontProxyList = when (frontProxyEntity.type) {
+                            ProxyEntity.TYPE_CHAIN -> frontProxyEntity.resolveChainRecursively()
+                            else -> mutableListOf(frontProxyEntity)
+                        }
+
+                        // For each proxy in profileList, we need to create a chain with front proxy
+                        // We'll rebuild chainOutbounds with chains
+                        val originalProxies = profileList.toList()
+                        chainOutbounds.clear()
+
+                        for (mainProxy in originalProxies) {
+                            // Create a chain: mainProxy + frontProxyList
+                            // Main proxy goes first, then front proxy
+                            val chainList = mutableListOf(mainProxy)
+                            chainList.addAll(frontProxyList)
+
+                            // Build this chain as a sub-chain
+                            val chainTag = buildChain(
+                                "$tagOutbound-chain-${mainProxy.id}",
+                                chainList,
+                                false, // not a balancer
+                                { null }
+                            )
+
+                            // Find the first outbound of this chain and add it to chainOutbounds
+                            val chainFirstOutbound = outbounds.findLast { it.tag == chainTag }
+                            if (chainFirstOutbound != null) {
+                                chainOutbounds.add(chainFirstOutbound)
+                            }
+                        }
+                    }
+                }
+
                 val observatory = ObservatoryObject().apply {
                     probeURL = balancerBean.probeUrl.ifEmpty {
                         DataStore.connectionTestURL
