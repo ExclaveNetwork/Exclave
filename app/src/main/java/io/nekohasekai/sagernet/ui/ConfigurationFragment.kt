@@ -1025,6 +1025,9 @@ class ConfigurationFragment @JvmOverloads constructor(
             if (::proxyGroup.isInitialized) {
                 outState.putParcelable("proxyGroup", proxyGroup)
             }
+            if (::layoutManager.isInitialized) {
+                outState.putInt("scrollPosition", layoutManager.findFirstVisibleItemPosition())
+            }
         }
 
         override fun onViewStateRestored(savedInstanceState: Bundle?) {
@@ -1033,6 +1036,10 @@ class ConfigurationFragment @JvmOverloads constructor(
             savedInstanceState?.getParcelable<ProxyGroup>("proxyGroup")?.also {
                 proxyGroup = it
                 onViewCreated(requireView(), null)
+            }
+            savedInstanceState?.getInt("scrollPosition", -1)?.takeIf { it >= 0 }?.let { pos ->
+                scrolled = true
+                configurationListView.scrollToPosition(pos)
             }
         }
 
@@ -1056,12 +1063,11 @@ class ConfigurationFragment @JvmOverloads constructor(
         override fun onResume() {
             super.onResume()
 
-            if (::configurationListView.isInitialized && configurationListView.size == 0) {
-                configurationListView.adapter = adapter
-                runOnDefaultDispatcher {
-                    adapter.reloadProfiles()
+            if (::adapter.isInitialized) {
+                if (adapter.itemCount == 0) {
+                    runOnDefaultDispatcher { adapter.reloadProfiles() }
                 }
-            } else if (!::configurationListView.isInitialized) {
+            } else {
                 onViewCreated(requireView(), null)
             }
             checkOrderMenu()
@@ -1071,7 +1077,9 @@ class ConfigurationFragment @JvmOverloads constructor(
                     ?.toolbar?.menu?.findItem(R.id.action_new_shadowquic)?.isVisible  = false
             }
 
-            configurationListView.requestFocus()
+            if (::configurationListView.isInitialized) {
+                configurationListView.requestFocus()
+            }
         }
 
         fun checkOrderMenu() {
@@ -1305,15 +1313,30 @@ class ConfigurationFragment @JvmOverloads constructor(
             override fun undo(actions: List<Pair<Int, ProxyEntity>>) {
                 for ((index, item) in actions) {
                     configurationListView.post {
-                        configurationList[item.id] = item
-                        configurationIdList.add(index, item.id)
-                        notifyItemInserted(index)
+                        if (!configurationIdList.contains(item.id)) {
+                            configurationList[item.id] = item
+                            val safeIndex = index.coerceIn(0, configurationIdList.size)
+                            configurationIdList.add(safeIndex, item.id)
+                            notifyItemInserted(safeIndex)
+                        }
                     }
                 }
             }
 
             override fun commit(actions: List<Pair<Int, ProxyEntity>>) {
                 val profiles = actions.map { it.second }
+
+                configurationListView.post {
+                    for (entity in profiles) {
+                        val existingProfileIndex = configurationIdList.indexOf(entity.id)
+                        if (existingProfileIndex >= 0) {
+                            configurationIdList.removeAt(existingProfileIndex)
+                            configurationList.remove(entity.id)
+                            notifyItemRemoved(existingProfileIndex)
+                        }
+                    }
+                }
+
                 runOnDefaultDispatcher {
                     for (entity in profiles) {
                         ProfileManager.deleteProfile(entity.groupId, entity.id)
@@ -1426,10 +1449,12 @@ class ConfigurationFragment @JvmOverloads constructor(
                     configurationIdList.addAll(newProfileIds)
                     notifyDataSetChanged()
 
-                    if (selectedProfileIndex != -1) {
+                    if (selectedProfileIndex != -1 && !scrolled) {
                         configurationListView.scrollTo(selectedProfileIndex, true)
-                    } else if (newProfiles.isNotEmpty()) {
+                        scrolled = true
+                    } else if (newProfiles.isNotEmpty() && !scrolled) {
                         configurationListView.scrollTo(0, true)
+                        scrolled = true
                     }
 
                 }
