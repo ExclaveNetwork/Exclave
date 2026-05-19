@@ -1389,13 +1389,14 @@ class ConfigurationFragment @JvmOverloads constructor(
 
             override suspend fun onRemoved(groupId: Long, profileId: Long) {
                 if (groupId != proxyGroup.id) return
-                val index = configurationIdList.indexOf(profileId)
-                if (index < 0) return
 
                 configurationListView.post {
-                    configurationIdList.removeAt(index)
-                    configurationList.remove(profileId)
-                    notifyItemRemoved(index)
+                    val index = configurationIdList.indexOf(profileId)
+                    if (index >= 0) {
+                        configurationIdList.removeAt(index)
+                        configurationList.remove(profileId)
+                        notifyItemRemoved(index)
+                    }
                 }
             }
 
