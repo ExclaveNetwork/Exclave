@@ -1221,6 +1221,7 @@ class ConfigurationFragment @JvmOverloads constructor(
 
             var configurationIdList: MutableList<Long> = mutableListOf()
             val configurationList = HashMap<Long, ProxyEntity>()
+            val pendingDeletedIds = java.util.concurrent.ConcurrentHashMap.newKeySet<Long>()
 
             private fun getItem(profileId: Long): ProxyEntity? {
                 var profile = configurationList[profileId]
@@ -1312,6 +1313,7 @@ class ConfigurationFragment @JvmOverloads constructor(
 
             override fun undo(actions: List<Pair<Int, ProxyEntity>>) {
                 for ((index, item) in actions) {
+                    pendingDeletedIds.remove(item.id)
                     configurationListView.post {
                         if (!configurationIdList.contains(item.id)) {
                             configurationList[item.id] = item
@@ -1325,18 +1327,6 @@ class ConfigurationFragment @JvmOverloads constructor(
 
             override fun commit(actions: List<Pair<Int, ProxyEntity>>) {
                 val profiles = actions.map { it.second }
-
-                configurationListView.post {
-                    for (entity in profiles) {
-                        val existingProfileIndex = configurationIdList.indexOf(entity.id)
-                        if (existingProfileIndex >= 0) {
-                            configurationIdList.removeAt(existingProfileIndex)
-                            configurationList.remove(entity.id)
-                            notifyItemRemoved(existingProfileIndex)
-                        }
-                    }
-                }
-
                 runOnDefaultDispatcher {
                     for (entity in profiles) {
                         ProfileManager.deleteProfile(entity.groupId, entity.id)
@@ -1390,6 +1380,7 @@ class ConfigurationFragment @JvmOverloads constructor(
             override suspend fun onRemoved(groupId: Long, profileId: Long) {
                 if (groupId != proxyGroup.id) return
 
+                pendingDeletedIds.remove(profileId)
                 configurationListView.post {
                     val index = configurationIdList.indexOf(profileId)
                     if (index >= 0) {
@@ -1424,6 +1415,7 @@ class ConfigurationFragment @JvmOverloads constructor(
 
 
                 var newProfiles = SagerDatabase.proxyDao.getByGroup(proxyGroup.id)
+                newProfiles = newProfiles.filter { it.id !in pendingDeletedIds }
                 when (proxyGroup.order) {
                     GroupOrder.BY_NAME -> {
                         newProfiles = newProfiles.sortedBy { it.displayName() }
@@ -1596,6 +1588,7 @@ class ConfigurationFragment @JvmOverloads constructor(
                         val index = it.configurationIdList.indexOf(proxyEntity.id)
                         if (index >= 0) {
                             it.remove(index)
+                            it.pendingDeletedIds.add(proxyEntity.id)
                             undoManager.remove(index to proxyEntity)
                         }
                     }
