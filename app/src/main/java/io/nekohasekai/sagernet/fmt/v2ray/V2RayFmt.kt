@@ -245,6 +245,9 @@ fun parseV2Ray(link: String): StandardV2RayBean {
             url.queryParameterNotBlank("pqv")?.let {
                 bean.realityMldsa65Verify = it
             }
+            url.queryParameterNotBlank("fp")?.let {
+                bean.realityFingerprint = it
+            }
             if (bean is VLESSBean) {
                 url.queryParameterNotBlank("flow")?.let {
                     when (it) {
@@ -890,7 +893,7 @@ fun StandardV2RayBean.toUri(): String? {
             if (realityMldsa65Verify.isNotEmpty()) {
                 builder.addQueryParameter("pqv", realityMldsa65Verify)
             }
-            builder.addQueryParameter("fp", "chrome") // "若使用 REALITY，此项不可省略。"
+            builder.addQueryParameter("fp", realityFingerprint.ifEmpty { "chrome" })
             if (this is VLESSBean && flow.isNotEmpty()) {
                 builder.addQueryParameter("flow", flow.removeSuffix("-udp443"))
             }
