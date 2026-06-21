@@ -1646,13 +1646,15 @@ class ConfigurationFragment @JvmOverloads constructor(
                     }
                 }
 
-                deleteButton.setOnClickListener {
-                    adapter.let {
-                        val index = it.configurationIdList.indexOf(proxyEntity.id)
-                        if (index >= 0) {
-                            it.remove(index)
-                            it.pendingDeletedIds.add(proxyEntity.id)
-                            undoManager.remove(index to proxyEntity)
+                deleteButton.setOnClickListener { view ->
+                    view.post {
+                        adapter.let {
+                            val index = it.configurationIdList.indexOf(proxyEntity.id)
+                            if (index >= 0) {
+                                it.remove(index)
+                                it.pendingDeletedIds.add(proxyEntity.id)
+                                undoManager.remove(index to proxyEntity)
+                            }
                         }
                     }
                 }
