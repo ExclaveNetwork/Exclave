@@ -81,6 +81,17 @@ import io.nekohasekai.sagernet.fmt.internal.BalancerBean
 import io.nekohasekai.sagernet.fmt.internal.ChainBean
 import io.nekohasekai.sagernet.utils.FormatFileSizeCompat
 
+@android.annotation.SuppressLint("ClickableViewAccessibility")
+fun android.view.View.suppressDragWhilePressed(setPressed: (Boolean) -> Unit) {
+    setOnTouchListener { _, event ->
+        when (event.actionMasked) {
+            android.view.MotionEvent.ACTION_DOWN -> setPressed(true)
+            android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> setPressed(false)
+        }
+        false
+    }
+}
+
 class ConfigurationFragment @JvmOverloads constructor(
     val select: Boolean = false, val selectedItem: ProxyEntity? = null, val titleRes: Int = 0
 ) : ToolbarFragment(R.layout.layout_group_list),
@@ -1074,6 +1085,8 @@ class ConfigurationFragment @JvmOverloads constructor(
                     ?: return false).state.let { it.canStop || it == BaseService.State.Stopped }
             }
 
+        private var actionButtonPressed = false
+
         private fun isProfileEditable(id: Long): Boolean {
             return ((activity as? MainActivity)
                 ?: return false).state == BaseService.State.Stopped || id != DataStore.selectedProxy
@@ -1200,7 +1213,9 @@ class ConfigurationFragment @JvmOverloads constructor(
                     override fun getDragDirs(
                         recyclerView: RecyclerView,
                         viewHolder: RecyclerView.ViewHolder,
-                    ) = if (isEnabled) super.getDragDirs(recyclerView, viewHolder) else 0
+                    ) = if (isEnabled && !actionButtonPressed) super.getDragDirs(
+                        recyclerView, viewHolder
+                    ) else 0
 
                     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                     }
@@ -1643,16 +1658,23 @@ class ConfigurationFragment @JvmOverloads constructor(
                     }
                 }
 
-                deleteButton.setOnClickListener {
-                    adapter.let {
-                        val index = it.configurationIdList.indexOf(proxyEntity.id)
-                        if (index >= 0) {
-                            it.remove(index)
-                            it.pendingDeletedIds.add(proxyEntity.id)
-                            undoManager.remove(index to proxyEntity)
+                deleteButton.setOnClickListener { view ->
+                    view.post {
+                        adapter.let {
+                            val index = it.configurationIdList.indexOf(proxyEntity.id)
+                            if (index >= 0) {
+                                it.remove(index)
+                                it.pendingDeletedIds.add(proxyEntity.id)
+                                undoManager.remove(index to proxyEntity)
+                            }
                         }
                     }
                 }
+
+                // suppress ItemTouchHelper drag while a row button is held, to avoid conflict with parent item's long-press
+                deleteButton.suppressDragWhilePressed { actionButtonPressed = it }
+                editButton.suppressDragWhilePressed { actionButtonPressed = it }
+                shareLayout.suppressDragWhilePressed { actionButtonPressed = it }
 
                 editButton.isGone = parent.select
                 deleteButton.isGone = parent.select
@@ -1841,5 +1863,4 @@ class ConfigurationFragment @JvmOverloads constructor(
             }
         }
     }
-
 }
