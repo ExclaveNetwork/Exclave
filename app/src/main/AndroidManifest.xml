@@ -26,6 +26,11 @@
     <uses-permission
         android:name="android.permission.NEARBY_WIFI_DEVICES"
         android:minSdkVersion="36" />
+    <!-- INTERACT_ACROSS_USERS needs to be granted via ADB -->
+    <uses-permission
+        android:name="android.permission.INTERACT_ACROSS_USERS"
+        android:minSdkVersion="37"
+        tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
