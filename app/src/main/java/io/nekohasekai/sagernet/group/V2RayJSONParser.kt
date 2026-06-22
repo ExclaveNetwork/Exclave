@@ -204,6 +204,12 @@ fun parseV2RayOutbound(outbound: JsonObject): List<AbstractBean> {
                     when (network) {
                         "tcp", "raw" -> {
                             v2rayBean.type = "tcp"
+                            streamSettings.getObject("finalmask")?.also { finalmask ->
+                                // ban Xray TCP finalmask
+                                finalmask.getArray("tcp")?.takeIf { it.isNotEmpty() }?.also {
+                                    return listOf()
+                                }
+                            }
                             (streamSettings.getObject("tcpSettings") ?: streamSettings.getObject("rawSettings"))?.also { tcpSettings ->
                                 tcpSettings.getObject("header")?.also { header ->
                                     header.getString("type")?.lowercase()?.also { type ->
@@ -618,7 +624,7 @@ fun parseV2RayOutbound(outbound: JsonObject): List<AbstractBean> {
                         else -> return listOf()
                     }
                     when (v2rayBean.type) {
-                        "tcp", "ws", "grpc", "httpupgrade" -> {
+                        "ws", "grpc", "httpupgrade" -> {
                             streamSettings.getObject("finalmask")?.also { finalmask ->
                                 // ban Xray TCP finalmask
                                 finalmask.getArray("tcp")?.takeIf { it.isNotEmpty() }?.also {

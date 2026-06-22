@@ -258,7 +258,8 @@ fun parseV2Ray(link: String): StandardV2RayBean {
 
     bean.type = url.queryParameter("type")
     when (bean.type) {
-        "tcp", null -> {
+        "tcp", "raw", null -> {
+            bean.type = "tcp"
             url.queryParameter("headerType")?.let { headerType ->
                 // invented by v2rayN(G)
                 when (headerType) {
@@ -489,7 +490,9 @@ fun parseV2Ray(link: String): StandardV2RayBean {
                     }
                 }
             }
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            throw e
+        }
     }
 
     return bean
@@ -727,29 +730,39 @@ fun StandardV2RayBean.toUri(): String? {
             if (headerType != "none") {
                 builder.addQueryParameter("headerType", headerType)
             }
-            if (mKcpSeed.isEmpty()) {
-                builder.addQueryParameter("fm", JsonObject().apply {
-                    // fuck rprx finalmask
-                    add("udp", JsonArray().apply {
+            if (mKcpSeed.isNotEmpty()) {
+                builder.addQueryParameter("seed", mKcpSeed)
+            }
+            // fuck rprx finalmask
+            builder.addQueryParameter("fm", JsonObject().apply {
+                add("udp", JsonArray().apply {
+                    when (headerType) {
+                        "none" -> {}
+                        "srtp", "utp", "dtls", "wireguard" -> {
+                            add(JsonObject().apply {
+                                addProperty("type", "header-${headerType}")
+                            })
+                        }
+                        "wechat-video" -> {
+                            add(JsonObject().apply {
+                                addProperty("type", "header-wechat")
+                            })
+                        }
+                    }
+                    if (mKcpSeed.isEmpty()) {
                         add(JsonObject().apply {
                             addProperty("type", "mkcp-original")
                         })
-                    })
-                }.toString())
-            } else {
-                builder.addQueryParameter("seed", mKcpSeed)
-                builder.addQueryParameter("fm", JsonObject().apply {
-                    // fuck rprx finalmask
-                    add("udp", JsonArray().apply {
+                    } else {
                         add(JsonObject().apply {
                             addProperty("type", "mkcp-aes128gcm")
                             add("settings", JsonObject().apply {
                                 addProperty("password", mKcpSeed)
                             })
                         })
-                    })
-                }.toString())
-            }
+                    }
+                })
+            }.toString())
         }
         "ws" -> {
             if (host.isNotEmpty()) {
