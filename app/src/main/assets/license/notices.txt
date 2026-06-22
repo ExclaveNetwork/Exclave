@@ -1384,8 +1384,8 @@ Go standard library
 
 androidx.activity:activity
 androidx.activity:activity-ktx
-androidx.annotation:annotation
 androidx.annotation:annotation-experimental
+androidx.annotation:annotation-jvm
 androidx.appcompat:appcompat
 androidx.appcompat:appcompat-resources
 androidx.arch.core:core-common
@@ -1396,7 +1396,7 @@ androidx.camera:camera-lifecycle
 androidx.camera:camera-video
 androidx.camera:camera-view
 androidx.cardview:cardview
-androidx.collection:collection
+androidx.collection:collection-jvm
 androidx.collection:collection-ktx
 androidx.concurrent:concurrent-futures
 androidx.concurrent:concurrent-futures-ktx
@@ -1416,7 +1416,7 @@ androidx.emoji2:emoji2-views-helper
 androidx.exifinterface:exifinterface
 androidx.fragment:fragment
 androidx.fragment:fragment-ktx
-androidx.graphics:graphics-shapes
+androidx.graphics:graphics-shapes-android
 androidx.interpolator:interpolator
 androidx.lifecycle:lifecycle-common
 androidx.lifecycle:lifecycle-livedata
@@ -1434,14 +1434,14 @@ androidx.preference:preference
 androidx.profileinstaller:profileinstaller
 androidx.recyclerview:recyclerview
 androidx.resourceinspection:resourceinspection-annotation
-androidx.room:room-common
+androidx.room:room-common-jvm
 androidx.room:room-ktx
-androidx.room:room-runtime
+androidx.room:room-runtime-android
 androidx.savedstate:savedstate
 androidx.savedstate:savedstate-ktx
 androidx.slidingpanelayout:slidingpanelayout
-androidx.sqlite:sqlite
-androidx.sqlite:sqlite-framework
+androidx.sqlite:sqlite-android
+androidx.sqlite:sqlite-framework-android
 androidx.startup:startup-runtime
 androidx.swiperefreshlayout:swiperefreshlayout
 androidx.tracing:tracing
@@ -1855,7 +1855,7 @@ org.jetbrains.kotlin:kotlin-stdlib-jdk7
 
 org.jetbrains.kotlinx:kotlinx-coroutines-android
 org.jetbrains.kotlinx:kotlinx-coroutines-bom
-org.jetbrains.kotlinx:kotlinx-coroutines-core
+org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm
 
       Copyright 2016-2025 JetBrains s.r.o and contributors
 
