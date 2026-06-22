@@ -614,6 +614,15 @@ private fun parseV2RayN(json: JsonObject): VMessBean {
             json.getInt("insecure")?.takeIf { it == 1 }?.let {
                 bean.allowInsecure = true
             }
+            json.getString("pcs")?.takeIf { it.isNotEmpty() }?.let { pcs ->
+                bean.pinnedPeerCertificateSha256 =
+                    pcs.split(if (pcs.contains("~")) "~" else ",")
+                        .mapNotNull { it.trim().ifEmpty { null }?.replace(":", "") }
+                        .joinToString("\n")
+                if (!bean.pinnedPeerCertificateSha256.isNullOrEmpty()) {
+                    bean.allowInsecure = true
+                }
+            }
         }
         "reality" -> {
             error("v2rayN(G) style link lacks REALITY public key support and does not work at all.")
