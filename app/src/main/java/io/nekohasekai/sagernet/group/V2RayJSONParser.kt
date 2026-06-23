@@ -1839,6 +1839,21 @@ fun parseV2RayOutbound(outbound: JsonObject): List<AbstractBean> {
                             }
                             udphop.getLong("interval")?.also {
                                 hysteria2Bean.hopInterval = it.takeIf { it > 0 }
+                            } ?: udphop.getString("interval")?.also {
+                                val intervalLong = it.toLongOrNull()
+                                if (intervalLong != null && intervalLong > 0) {
+                                    hysteria2Bean.hopInterval = intervalLong
+                                } else {
+                                    val intervalStringList = it.split("-")
+                                    if (intervalStringList.size == 2) {
+                                        val intervalLong0 = intervalStringList[0].toLongOrNull()
+                                        val intervalLong1 = intervalStringList[1].toLongOrNull()
+                                        if (intervalLong0 != null && intervalLong0 > 0 && intervalLong1 != null && intervalLong1 > 0) {
+                                            hysteria2Bean.hopIntervalMin = minOf(intervalLong0, intervalLong1)
+                                            hysteria2Bean.hopIntervalMax = maxOf(intervalLong0, intervalLong1)
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
