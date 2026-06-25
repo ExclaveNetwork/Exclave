@@ -11,6 +11,7 @@
     <locale android:name="ko"/>
     <locale android:name="nb"/>
     <locale android:name="ru"/>
+    <locale android:name="ta"/>
     <locale android:name="tr"/>
     <locale android:name="zh-Hans"/>
     <locale android:name="zh-Hant"/>

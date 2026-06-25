@@ -11,6 +11,7 @@
     <string name="language_ko_display_name" translatable="false">한국어</string>
     <string name="language_nb_NO_display_name" translatable="false">Norsk bokmål</string>
     <string name="language_ru_display_name" translatable="false">Русский</string>
+    <string name="language_ta_display_name" translatable="false">தமிழ்</string>
     <string name="language_tr_display_name" translatable="false">Türkçe</string>
     <string name="language_zh_Hans_CN_display_name" translatable="false">简体中文（中国）</string>
     <string name="language_zh_Hant_TW_display_name" translatable="false">正體中文（台灣）</string>

@@ -124,6 +124,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 "ko" -> getString(R.string.language_ko_display_name)
                 "nb-NO" -> getString(R.string.language_nb_NO_display_name)
                 "ru" -> getString(R.string.language_ru_display_name)
+                "ta" -> getString(R.string.language_ta_display_name)
                 "tr" -> getString(R.string.language_tr_display_name)
                 "zh-Hans-CN" -> getString(R.string.language_zh_Hans_CN_display_name)
                 "zh-Hant-TW" -> getString(R.string.language_zh_Hant_TW_display_name)
