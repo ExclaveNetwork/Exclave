@@ -120,7 +120,7 @@ Exclave is licensed under the GNU General Public License as published by the Fre
 
 - Windows (x64):
 
-  - Build libexclavecore: `./library/core/build.bat`
+  - Build libexclavecore: `./run.bat lib core` or `./library/core/build.bat`
   - Download assets: `./gradlew.bat :app:downloadAssets`, or update assets to the latest version: `./gradlew.bat :app:updateAssets`
   - Build Exclave: `./gradlew.bat :app:assembleOssRelease`
 
