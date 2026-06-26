@@ -26,7 +26,7 @@ jobs:
         run: git submodule status 'plugin/naive/*' > naive_status
       - name: Native Cache
         id: cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             plugin/naive/src/main/jniLibs/${{ matrix.arch }}
@@ -51,31 +51,31 @@ jobs:
       - name: Fetch Status
         run: git submodule status 'plugin/naive/*' > naive_status
       - name: Native Cache (armeabi-v7a)
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             plugin/naive/src/main/jniLibs/armeabi-v7a
           key: naive-armeabi-v7a-${{ hashFiles('bin/plugin/naive/*', 'naive_status') }}
       - name: Native Cache (arm64-v8a)
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             plugin/naive/src/main/jniLibs/arm64-v8a
           key: naive-arm64-v8a-${{ hashFiles('bin/plugin/naive/*', 'naive_status') }}
       - name: Native Cache (x86)
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             plugin/naive/src/main/jniLibs/x86
           key: naive-x86-${{ hashFiles('bin/plugin/naive/*', 'naive_status') }}
       - name: Native Cache (x86_64)
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: |
             plugin/naive/src/main/jniLibs/x86_64
           key: naive-x86_64-${{ hashFiles('bin/plugin/naive/*', 'naive_status') }}
       - name: Gradle cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.gradle
           key: native-${{ hashFiles('**/*.gradle.kts') }}
