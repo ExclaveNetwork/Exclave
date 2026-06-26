@@ -71,7 +71,11 @@ class ProxyInstance(profile: ProxyEntity, val service: BaseService.Interface) : 
     fun sendInitStatuses() {
         val time = (System.currentTimeMillis() / 1000) - 300
         for (observatoryTag in config.observatoryTags) {
-            val profileId = observatoryTag.substringAfter("global-")
+            val profileId = if (observatoryTag.contains("global-")) {
+                observatoryTag.substringAfter("global-")
+            } else {
+                observatoryTag.substringAfter("chain-")
+            }
             val id = profileId.toLongOrNull()
             if (id == null) {
                 continue
@@ -106,7 +110,11 @@ class ProxyInstance(profile: ProxyEntity, val service: BaseService.Interface) : 
             return
         }
         val status = OutboundStatus.parseFrom(statusPb)
-        val profileId = status.outboundTag.substringAfter("global-")
+        val profileId = if (status.outboundTag.contains("global-")) {
+            status.outboundTag.substringAfter("global-")
+        } else {
+            status.outboundTag.substringAfter("chain-")
+        }
         val id = profileId.toLongOrNull()
         if (id != null) {
             val profile = when {
