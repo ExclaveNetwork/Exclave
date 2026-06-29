@@ -36,7 +36,7 @@ import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.ktx.dp2px
 
 
-class SimpleListPopupPreference @JvmOverloads constructor(
+open class SimpleListPopupPreference @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
 ) : ListPreference(context, attrs) {
