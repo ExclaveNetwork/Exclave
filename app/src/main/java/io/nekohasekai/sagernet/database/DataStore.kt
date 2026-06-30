@@ -24,6 +24,7 @@ package io.nekohasekai.sagernet.database
 import android.content.Intent
 import android.os.Binder
 import android.os.Build
+import android.os.LocaleList
 import androidx.preference.PreferenceDataStore
 import io.nekohasekai.sagernet.*
 import io.nekohasekai.sagernet.SagerNet.Companion.application
@@ -147,7 +148,20 @@ object DataStore : OnPreferenceDataStoreChangeListener {
 
     var remoteDns by configurationStore.stringNotBlack(Key.REMOTE_DNS) { "tcp://1.1.1.1" }
     var directDns by configurationStore.stringNotBlack(Key.DIRECT_DNS) {
-        when (Locale.getDefault().country) {
+        val locale = when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
+                SagerNet.locale.systemLocales[0]!!
+            }
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> {
+                // NOT Resources.getSystem().configuration.locales[0]
+                LocaleList.getDefault().get(0)
+            }
+            else -> {
+                // NOT Resources.getSystem().configuration.locale
+                Locale.getDefault()
+            }
+        }
+        when (locale.country) {
             "CN" -> "tcp://223.5.5.5"
             "IR" -> "tcp://178.22.122.100"
             "RU" -> "tcp://77.88.8.8"

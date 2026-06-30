@@ -217,6 +217,7 @@ class SagerNet : Application(),
         val power by lazy { application.getSystemService<PowerManager>()!! }
         val wifi by lazy { application.getSystemService<WifiManager>()!! }
         val location by lazy { application.getSystemService<LocationManager>()!! }
+        val locale by lazy { application.getSystemService<LocaleManager>()!! }
 
         val currentProfile get() = SagerDatabase.proxyDao.getById(DataStore.selectedProxy)
 
