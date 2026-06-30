@@ -222,8 +222,8 @@ object ProfileManager {
             // the empty string, an uppercase ISO 3166 2-letter code, or a UN M.49 3-digit code.
             val country = locale.country
             val displayCountry = locale.displayCountry
-            when {
-                country == "CN" -> {
+            when (country) {
+                "CN" -> {
                     createRule(
                         RuleEntity(
                             name = app.getString(R.string.route_play_store, displayCountry),
@@ -238,7 +238,7 @@ object ProfileManager {
                         ), false
                     )
                 }
-                country == "IR" -> {
+                "IR" -> {
                     createRule(
                         RuleEntity(
                             name = app.getString(R.string.route_bypass_domain, displayCountry),
@@ -247,7 +247,7 @@ object ProfileManager {
                         ), false
                     )
                 }
-                country == "RU" -> {
+                "RU" -> {
                     createRule(
                         // https://habr.com/ru/articles/1020080/
                         // Added because of the request from users. Do not rely on it.
@@ -265,15 +265,15 @@ object ProfileManager {
                         ), false
                     )
                 }
-                country.length == 2 -> {
-                    createRule(
-                        RuleEntity(
-                            name = app.getString(R.string.route_bypass_ip, displayCountry),
-                            ip = "geoip:${country.lowercase()}",
-                            outbound = -1
-                        ), false
-                    )
-                }
+            }
+            if (country.length == 2) {
+                createRule(
+                    RuleEntity(
+                        name = app.getString(R.string.route_bypass_ip, displayCountry),
+                        ip = "geoip:${country.lowercase()}",
+                        outbound = -1
+                    ), false
+                )
             }
             createRule(
                 RuleEntity(
