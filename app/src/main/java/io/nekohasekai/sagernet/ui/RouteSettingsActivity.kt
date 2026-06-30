@@ -233,8 +233,6 @@ class RouteSettingsActivity(
             outbound.setSummary(outboundEntries[DataStore.routeOutbound.toString().toInt()])
         }
         outbound.apply {
-            setEntries(R.array.outbound_entry)
-            setEntryValues(R.array.outbound_value)
             setOnPreferenceChangeListener { _, newValue ->
                 if (newValue.toString() == "3") {
                     updateReverse(true)

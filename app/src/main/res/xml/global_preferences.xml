@@ -19,7 +19,7 @@
             app:key="nightTheme"
             app:title="@string/night_mode"
             app:useSimpleSummaryProvider="true" />
-        <io.nekohasekai.sagernet.widget.SimpleMenuPreference
+        <ListPreference
             app:defaultValue=""
             app:entries="@array/language_entry"
             app:entryValues="@array/language_value"

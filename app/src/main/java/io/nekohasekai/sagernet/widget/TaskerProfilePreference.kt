@@ -21,19 +21,14 @@ package io.nekohasekai.sagernet.widget
 
 import android.content.Context
 import android.util.AttributeSet
-import io.nekohasekai.sagernet.R
+import androidx.preference.ListPreference
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.ProfileManager
 
-class TaskerProfilePreference : SimpleListPopupPreference {
+class TaskerProfilePreference : ListPreference {
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
-
-    init {
-        setEntries(R.array.tasker_outbound_entry)
-        setEntryValues(R.array.int_array_2)
-    }
 
     override fun getSummary(): CharSequence? {
         if (value == "1") {

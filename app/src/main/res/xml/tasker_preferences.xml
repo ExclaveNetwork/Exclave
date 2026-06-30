@@ -11,6 +11,8 @@
 
     <io.nekohasekai.sagernet.widget.TaskerProfilePreference
         app:icon="@drawable/ic_hardware_router"
+        app:entries="@array/tasker_outbound_entry"
+        app:entryValues="@array/int_array_2"
         app:key="taskerProfile"
         app:title="@string/menu_configuration"
         app:useSimpleSummaryProvider="true" />
