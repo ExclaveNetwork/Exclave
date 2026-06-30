@@ -19,6 +19,7 @@
 
 package io.nekohasekai.sagernet.database
 
+import android.content.res.Resources
 import android.database.sqlite.SQLiteCantOpenDatabaseException
 import android.os.Build
 import android.os.LocaleList
@@ -205,23 +206,24 @@ object ProfileManager {
         var rules = SagerDatabase.rulesDao.allRules()
         if (rules.isEmpty() && !DataStore.rulesFirstCreate) {
             DataStore.rulesFirstCreate = true
-            val locale = when {
+            val systemLocale = when {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
                     SagerNet.locale.systemLocales[0]!!
                 }
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> {
-                    // NOT Resources.getSystem().configuration.locales[0]
                     LocaleList.getDefault().get(0)
                 }
                 else -> {
-                    // NOT Resources.getSystem().configuration.locale
                     Locale.getDefault()
                 }
             }
-            // getCountry() returns the country/region code for this locale, which should either be
-            // the empty string, an uppercase ISO 3166 2-letter code, or a UN M.49 3-digit code.
-            val country = locale.country
-            val displayCountry = locale.displayCountry
+            val appLocale = when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> SagerNet.locale.applicationLocales[0]!!
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> Resources.getSystem().configuration.locales[0]
+                else -> @Suppress("DEPRECATION") Resources.getSystem().configuration.locale
+            }
+            val country = systemLocale.country
+            val displayCountry = appLocale.displayCountry
             when (country) {
                 "CN" -> {
                     createRule(

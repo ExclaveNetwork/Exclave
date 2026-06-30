@@ -149,17 +149,9 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var remoteDns by configurationStore.stringNotBlack(Key.REMOTE_DNS) { "tcp://1.1.1.1" }
     var directDns by configurationStore.stringNotBlack(Key.DIRECT_DNS) {
         val locale = when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
-                SagerNet.locale.systemLocales[0]!!
-            }
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> {
-                // NOT Resources.getSystem().configuration.locales[0]
-                LocaleList.getDefault().get(0)
-            }
-            else -> {
-                // NOT Resources.getSystem().configuration.locale
-                Locale.getDefault()
-            }
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> SagerNet.locale.systemLocales[0]!!
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> LocaleList.getDefault().get(0)
+            else -> Locale.getDefault()
         }
         when (locale.country) {
             "CN" -> "tcp://223.5.5.5"
