@@ -3,7 +3,7 @@
     <string name="github">소스 코드</string>
     <string name="app_version">버전</string>
     <string name="project">프로젝트</string>
-    <string name="version_x">버전 (1%s)</string>
+    <string name="version_x">버전 (%s)</string>
     <string name="logcat">디버그 정보 내보내기</string>
     <string name="menu_configuration">구성</string>
     <string name="menu_group">그룹</string>
@@ -60,8 +60,8 @@
     <string name="allow_insecure_sum">다른 보안 조치를 배포하지 않고 이 옵션을 활성화하면 중간자 공격이 성공할 수 있습니다. 모른다면 활성화하지 마십시오.</string>
     <string name="speed_detail">프록시: %1$s↑ %2$s↓\n직접: %3$s↑ %4$s↓</string>
     <string name="connection_test_testing">테스트중…</string>
-    <string name="connection_test_available">성공: HTTPS 핸드셰이크 % ms</string>
-    <string name="connection_test_available_http">성공: HTTP 핸드셰이크 % d ms</string>
+    <string name="connection_test_available">성공: HTTPS 핸드셰이크 %d ms</string>
+    <string name="connection_test_available_http">성공: HTTP 핸드셰이크 %d ms</string>
     <string name="connection_test_error">실패: %s</string>
     <string name="cag_dns">DNS 설정</string>
     <string name="remote_dns">원격 DNS</string>
@@ -115,9 +115,9 @@
     <string name="route_profile">프로필 선택…</string>
     <string name="empty_route">빈 경로</string>
     <string name="empty_route_notice">저장하기 전에 몇 가지 규칙을 구성하세요.</string>
-    <string name="route_bypass_domain">1%s에 대한 도메인 규칙</string>
-    <string name="route_play_store">1%s에 대한 Play 스토어 규칙</string>
-    <string name="route_bypass_ip">1%에 대한 IP 규칙</string>
+    <string name="route_bypass_domain">%s에 대한 도메인 규칙</string>
+    <string name="route_play_store">%s에 대한 Play 스토어 규칙</string>
+    <string name="route_bypass_ip">%s에 대한 IP 규칙</string>
     <string name="route_reset">초기화</string>
     <string name="route_reverse">역방향 프록시</string>
     <string name="speed">%s/s</string>
