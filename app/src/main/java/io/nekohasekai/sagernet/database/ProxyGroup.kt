@@ -39,7 +39,8 @@ data class ProxyGroup(
     var subscription: SubscriptionBean? = null,
     var order: Int = GroupOrder.ORIGIN,
     @ColumnInfo(defaultValue = (-1L).toString()) var frontProxy: Long = -1L,
-    @ColumnInfo(defaultValue = (-1L).toString()) var landingProxy: Long = -1L
+    @ColumnInfo(defaultValue = (-1L).toString()) var landingProxy: Long = -1L,
+    @ColumnInfo(defaultValue = "") var groupUtlsFingerprint: String = ""
 ) : Serializable() {
 
     @Transient
@@ -69,6 +70,7 @@ data class ProxyGroup(
             output.writeInt(order)
             output.writeLong(frontProxy)
             output.writeLong(landingProxy)
+            output.writeString(groupUtlsFingerprint)
         }
     }
 
@@ -96,6 +98,13 @@ data class ProxyGroup(
             if (version >= 1) {
                 frontProxy = input.readLong()
                 landingProxy = input.readLong()
+            }
+            if (version >= 1) {
+                try {
+                    groupUtlsFingerprint = input.readString()
+                } catch (e: Exception) {
+                    groupUtlsFingerprint = ""
+                }
             }
         }
     }

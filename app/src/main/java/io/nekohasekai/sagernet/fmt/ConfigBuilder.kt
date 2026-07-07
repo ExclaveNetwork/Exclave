@@ -602,6 +602,10 @@ fun buildV2RayConfig(
                 val bean = proxyEntity.requireBean()
                 currentOutbound = OutboundObject()
 
+                // Получаем группу для применения группового uTLS
+                val proxyGroup = SagerDatabase.groupDao.getById(proxyEntity.groupId)
+                val groupUtls = proxyGroup?.groupUtlsFingerprint?.takeIf { it.isNotEmpty() }
+
                 val tagIn: String
                 var needGlobal: Boolean
 
@@ -888,6 +892,8 @@ fun buildV2RayConfig(
                                                 val overrideFingerprint = DataStore.experimentalFlagsProperties.getProperty("overrideUTLSFingerprintForTLS")
                                                 if (!overrideFingerprint.isNullOrEmpty()) {
                                                     fingerprint = overrideFingerprint
+                                                } else if (groupUtls != null) {
+                                                    fingerprint = groupUtls
                                                 } else if (bean.utlsFingerprint.isNotEmpty()) {
                                                     fingerprint = bean.utlsFingerprint
                                                 }
@@ -918,6 +924,8 @@ fun buildV2RayConfig(
                                                 val overrideFingerprint = DataStore.experimentalFlagsProperties.getProperty("overrideUTLSFingerprintForREALITY")
                                                 if (!overrideFingerprint.isNullOrEmpty()) {
                                                     fingerprint = overrideFingerprint
+                                                } else if (groupUtls != null) {
+                                                    fingerprint = groupUtls
                                                 } else if (bean.realityFingerprint.isNotEmpty()) {
                                                     fingerprint = bean.realityFingerprint
                                                 }
@@ -1616,6 +1624,8 @@ fun buildV2RayConfig(
                                                 val overrideFingerprint = DataStore.experimentalFlagsProperties.getProperty("overrideUTLSFingerprintForTLS")
                                                 if (!overrideFingerprint.isNullOrEmpty()) {
                                                     fingerprint = overrideFingerprint
+                                                } else if (groupUtls != null) {
+                                                    fingerprint = groupUtls
                                                 } else if (bean.utlsFingerprint.isNotEmpty()) {
                                                     fingerprint = bean.utlsFingerprint
                                                 }
@@ -1643,6 +1653,8 @@ fun buildV2RayConfig(
                                                 val overrideFingerprint = DataStore.experimentalFlagsProperties.getProperty("overrideUTLSFingerprintForREALITY")
                                                 if (!overrideFingerprint.isNullOrEmpty()) {
                                                     fingerprint = overrideFingerprint
+                                                } else if (groupUtls != null) {
+                                                    fingerprint = groupUtls
                                                 } else if (bean.realityFingerprint.isNotEmpty()) {
                                                     fingerprint = bean.realityFingerprint
                                                 }
@@ -1833,6 +1845,8 @@ fun buildV2RayConfig(
                                             val overrideFingerprint = DataStore.experimentalFlagsProperties.getProperty("overrideUTLSFingerprintForTLS")
                                             if (!overrideFingerprint.isNullOrEmpty()) {
                                                 fingerprint = overrideFingerprint
+                                            } else if (groupUtls != null) {
+                                                fingerprint = groupUtls
                                             } else if (bean.utlsFingerprint.isNotEmpty()) {
                                                 fingerprint = bean.utlsFingerprint
                                             }

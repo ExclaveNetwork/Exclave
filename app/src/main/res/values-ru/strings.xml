@@ -441,7 +441,7 @@
     <string name="connection_test_url_test">URL test</string>
     <string name="alter_id">Изменить ID</string>
     <string name="url">URL</string>
-    <string name="utls_fingerprint">uTLS-отпечаток</string>
+    <string name="utls_fingerprint">Принудительный uTLS</string>
     <string name="route_need_location_enabled">Правило маршрутизации `%s` требует доступа к вашему **Wi-Fi SSID**, но для этого требуется **включенное местоположение**</string>
     <string name="route_need_fine_location">Правило маршрутизации `%s` требует доступа к вашему **Wi-Fi SSID**, но для этого требуется **разрешение на точное определение местоположения**</string>
     <string name="bootstrap_dns">Загрузочный DNS</string>

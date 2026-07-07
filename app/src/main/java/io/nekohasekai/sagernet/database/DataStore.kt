@@ -436,6 +436,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var landingProxyOutbound by profileCacheStore.long(Key.GROUP_LANDING_PROXY_OUTBOUND)
     var frontProxy by profileCacheStore.stringToInt(Key.GROUP_FRONT_PROXY)
     var landingProxy by profileCacheStore.stringToInt(Key.GROUP_LANDING_PROXY)
+    var groupUtlsFingerprint by profileCacheStore.string(Key.GROUP_UTLS_FINGERPRINT)
 
     var serverConfig by profileCacheStore.string(Key.SERVER_CONFIG)
 

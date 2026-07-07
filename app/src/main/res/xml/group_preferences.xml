@@ -37,6 +37,14 @@
         app:key="groupLandingProxy"
         app:title="@string/landing_proxy" />
 
+    <ListPreference
+        app:icon="@drawable/ic_baseline_fingerprint_24"
+        app:entries="@array/utls_entry"
+        app:entryValues="@array/utls_value"
+        app:key="groupUtlsFingerprint"
+        app:title="@string/utls_fingerprint"
+        app:useSimpleSummaryProvider="true" />
+
     <PreferenceCategory
         app:key="groupSubscription"
         app:title="@string/subscription_settings">
