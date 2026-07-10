@@ -56,6 +56,9 @@
                         android:id="@+id/action_new_juicity"
                         android:title="@string/action_juicity" />
                     <item
+                        android:id="@+id/action_new_snell"
+                        android:title="@string/protocol_snell" />
+                    <item
                         android:id="@+id/action_new_config"
                         android:title="@string/custom_config" />
                     <item

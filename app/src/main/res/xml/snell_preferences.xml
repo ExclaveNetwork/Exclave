@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <EditTextPreference
+        app:icon="@drawable/ic_social_emoji_symbols"
+        app:key="profileName"
+        app:title="@string/profile_name"
+        app:useSimpleSummaryProvider="true" />
+
+    <PreferenceCategory app:title="@string/proxy_cat">
+
+        <EditTextPreference
+            app:icon="@drawable/ic_hardware_router"
+            app:key="serverAddress"
+            app:title="@string/server_address"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:icon="@drawable/ic_maps_directions_boat"
+            app:key="serverPort"
+            app:title="@string/server_port"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:dialogLayout="@layout/layout_password_dialog"
+            app:icon="@drawable/ic_settings_password"
+            app:key="serverPassword"
+            app:title="@string/password"
+            app:useSimpleSummaryProvider="true" />
+        <io.nekohasekai.sagernet.widget.SimpleMenuPreference
+            app:defaultValue="4"
+            app:entries="@array/snell_version_entry"
+            app:entryValues="@array/snell_version_value"
+            app:icon="@drawable/ic_baseline_compare_arrows_24"
+            app:key="serverProtocol"
+            app:title="@string/snell_version"
+            app:useSimpleSummaryProvider="true" />
+        <io.nekohasekai.sagernet.widget.SimpleMenuPreference
+            app:defaultValue="off"
+            app:entries="@array/snell_obfs_entry"
+            app:entryValues="@array/snell_obfs_value"
+            app:icon="@drawable/ic_baseline_texture_24"
+            app:key="serverObfs"
+            app:title="@string/obfs"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:icon="@drawable/ic_hardware_router"
+            app:key="serverHost"
+            app:title="@string/snell_obfs_host"
+            app:useSimpleSummaryProvider="true" />
+        <io.nekohasekai.sagernet.widget.SimpleMenuPreference
+            app:defaultValue="default"
+            app:entries="@array/snell_mode_entry"
+            app:entryValues="@array/snell_mode_value"
+            app:icon="@drawable/ic_baseline_compare_arrows_24"
+            app:key="serverProtocolParam"
+            app:title="@string/snell_mode"
+            app:useSimpleSummaryProvider="true" />
+        <SwitchPreference
+            app:defaultValue="true"
+            app:icon="@drawable/ic_baseline_compare_arrows_24"
+            app:key="serverMux"
+            app:title="@string/snell_reuse"
+            app:summary="@string/snell_reuse_summary" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

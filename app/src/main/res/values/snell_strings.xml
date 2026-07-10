@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="snell_version">Snell version</string>
+    <string name="snell_reuse">Connection reuse</string>
+    <string name="snell_reuse_summary">Reuse the TCP connection (ConnectV2 / v6 reuse)</string>
+    <string name="protocol_snell">Snell</string>
+    <string name="snell_obfs_host">Obfs host</string>
+    <string name="snell_mode">Snell v6 mode</string>
+</resources>

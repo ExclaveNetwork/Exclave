@@ -38,6 +38,7 @@ import io.nekohasekai.sagernet.fmt.socks.SOCKSBean
 import io.nekohasekai.sagernet.fmt.ssh.SSHBean
 import io.nekohasekai.sagernet.fmt.trojan.TrojanBean
 import io.nekohasekai.sagernet.fmt.trusttunnel.TrustTunnelBean
+import io.nekohasekai.sagernet.fmt.snell.SnellBean
 import io.nekohasekai.sagernet.fmt.tuic5.Tuic5Bean
 import io.nekohasekai.sagernet.fmt.tuic5.supportedTuic5CongestionControl
 import io.nekohasekai.sagernet.fmt.tuic5.supportedTuic5RelayMode
@@ -769,6 +770,21 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                     // How to validate its validity?
                     trafficPattern = it
                 }*/
+                name = proxy.getString("name")
+            })
+        }
+                "snell" -> {
+            return listOf(SnellBean().apply {
+                serverAddress = proxy.getString("server") ?: return listOf()
+                serverPort = proxy.getInt("port")?.takeIf { it > 0 } ?: return listOf()
+                psk = proxy.getString("psk") ?: return listOf()
+                proxy.getInt("version")?.also { version = it }
+                proxy.getString("obfs")?.also { obfs = it }
+                proxy.getObject("obfs-opts")?.also { opts ->
+                    opts.getString("mode")?.also { obfs = it }
+                    opts.getString("host")?.also { obfsHost = it }
+                }
+                proxy.getString("mode")?.also { mode = it }
                 name = proxy.getString("name")
             })
         }
