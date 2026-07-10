@@ -1,12 +1,12 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 36,
-    "identityHash": "2ad66cce1d4ba5df1fd06814cfaae7e9",
+    "version": 37,
+    "identityHash": "286ab111b45c46a16635823c2396e034",
     "entities": [
       {
         "tableName": "proxy_groups",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `userOrder` INTEGER NOT NULL, `ungrouped` INTEGER NOT NULL, `name` TEXT, `type` INTEGER NOT NULL, `subscription` BLOB, `order` INTEGER NOT NULL, `frontProxy` INTEGER NOT NULL DEFAULT -1, `landingProxy` INTEGER NOT NULL DEFAULT -1)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `userOrder` INTEGER NOT NULL, `ungrouped` INTEGER NOT NULL, `name` TEXT, `type` INTEGER NOT NULL, `subscription` BLOB, `order` INTEGER NOT NULL, `frontProxy` INTEGER NOT NULL DEFAULT -1, `landingProxy` INTEGER NOT NULL DEFAULT -1, `utlsFingerprintForTLS` TEXT NOT NULL DEFAULT '', `utlsFingerprintForReality` TEXT NOT NULL DEFAULT '')",
         "fields": [
           {
             "fieldPath": "id",
@@ -61,6 +61,20 @@
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "-1"
+          },
+          {
+            "fieldPath": "utlsFingerprintForTLS",
+            "columnName": "utlsFingerprintForTLS",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "utlsFingerprintForReality",
+            "columnName": "utlsFingerprintForReality",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
           }
         ],
         "primaryKey": {
@@ -455,7 +469,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2ad66cce1d4ba5df1fd06814cfaae7e9')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '286ab111b45c46a16635823c2396e034')"
     ]
   }
 }

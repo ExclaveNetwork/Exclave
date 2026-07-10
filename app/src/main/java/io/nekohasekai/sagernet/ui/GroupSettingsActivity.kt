@@ -102,7 +102,8 @@ class GroupSettingsActivity(
         DataStore.landingProxyOutbound = landingProxy
         DataStore.frontProxy = if (frontProxy >= 0) 1 else 0
         DataStore.landingProxy = if (landingProxy >= 0) 1 else 0
-        DataStore.groupUtlsFingerprint = groupUtlsFingerprint ?: ""
+        DataStore.groupUTLSFingerprintForTLS = utlsFingerprintForTLS
+        DataStore.groupUTLSFingerprintForReality = utlsFingerprintForReality
     }
 
     fun ProxyGroup.serialize() {
@@ -117,7 +118,8 @@ class GroupSettingsActivity(
 
         frontProxy = if (DataStore.frontProxy == 1) DataStore.frontProxyOutbound else -1
         landingProxy = if (DataStore.landingProxy == 1) DataStore.landingProxyOutbound else -1
-        groupUtlsFingerprint = DataStore.groupUtlsFingerprint
+        utlsFingerprintForTLS = DataStore.groupUTLSFingerprintForTLS
+        utlsFingerprintForReality = DataStore.groupUTLSFingerprintForReality
         if (type == GroupType.SUBSCRIPTION) {
             subscription = SubscriptionBean().applyDefaultValues().apply {
                 type = DataStore.subscriptionType

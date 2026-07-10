@@ -40,7 +40,8 @@ data class ProxyGroup(
     var order: Int = GroupOrder.ORIGIN,
     @ColumnInfo(defaultValue = (-1L).toString()) var frontProxy: Long = -1L,
     @ColumnInfo(defaultValue = (-1L).toString()) var landingProxy: Long = -1L,
-    @ColumnInfo(defaultValue = "") var groupUtlsFingerprint: String = ""
+    @ColumnInfo(defaultValue = "") var utlsFingerprintForTLS: String = "",
+    @ColumnInfo(defaultValue = "") var utlsFingerprintForReality: String = "",
 ) : Serializable() {
 
     @Transient
@@ -58,7 +59,7 @@ data class ProxyGroup(
             val subscription = subscription!!
             subscription.serializeForShare(output)
         } else {
-            output.writeInt(1)
+            output.writeInt(2)
             output.writeLong(id)
             output.writeLong(userOrder)
             output.writeBoolean(ungrouped)
@@ -70,7 +71,8 @@ data class ProxyGroup(
             output.writeInt(order)
             output.writeLong(frontProxy)
             output.writeLong(landingProxy)
-            output.writeString(groupUtlsFingerprint)
+            output.writeString(utlsFingerprintForTLS)
+            output.writeString(utlsFingerprintForReality)
         }
     }
 
@@ -99,12 +101,9 @@ data class ProxyGroup(
                 frontProxy = input.readLong()
                 landingProxy = input.readLong()
             }
-            if (version >= 1) {
-                try {
-                    groupUtlsFingerprint = input.readString()
-                } catch (e: Exception) {
-                    groupUtlsFingerprint = ""
-                }
+            if (version >= 2) {
+                utlsFingerprintForTLS = input.readString()
+                utlsFingerprintForReality = input.readString()
             }
         }
     }

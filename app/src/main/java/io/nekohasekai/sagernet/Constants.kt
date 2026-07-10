@@ -295,7 +295,8 @@ object Key {
     const val GROUP_LANDING_PROXY_OUTBOUND = "groupLandingOutbound"
     const val GROUP_FRONT_PROXY = "groupFrontProxy"
     const val GROUP_LANDING_PROXY = "groupLandingProxy"
-    const val GROUP_UTLS_FINGERPRINT = "groupUtlsFingerprint"
+    const val GROUP_UTLS_FINGERPRINT_FOR_TLS = "groupUTLSFingerprintForTLS"
+    const val GROUP_UTLS_FINGERPRINT_FOR_REALITY = "groupUTLSFingerprintForReality"
 
     const val GROUP_SUBSCRIPTION = "groupSubscription"
     const val SUBSCRIPTION_TYPE = "subscriptionType"
