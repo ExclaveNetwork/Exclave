@@ -37,7 +37,7 @@
         app:key="groupLandingProxy"
         app:title="@string/landing_proxy" />
 
-    <ListPreference
+    <io.nekohasekai.sagernet.widget.SimpleMenuPreference
         app:icon="@drawable/ic_baseline_fingerprint_24"
         app:entries="@array/utls_entry"
         app:entryValues="@array/utls_value"
@@ -45,7 +45,7 @@
         app:title="@string/utls_fingerprint"
         app:useSimpleSummaryProvider="true" />
 
-    <ListPreference
+    <io.nekohasekai.sagernet.widget.SimpleMenuPreference
         app:icon="@drawable/ic_baseline_fingerprint_24"
         app:entries="@array/reality_fingerprint_value"
         app:entryValues="@array/reality_fingerprint_value"
