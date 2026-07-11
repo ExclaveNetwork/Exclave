@@ -1747,12 +1747,20 @@ fun buildV2RayConfig(
                                     address = bean.serverAddress
                                     port = bean.serverPort
                                     psk = bean.psk
-                                    userPSK = bean.userPSK
-                                    obfsMode = bean.obfsMode
-                                    obfsHost = bean.obfsHost
                                     version = bean.version
                                     reuse = bean.reuse
-                                    mode = bean.mode
+                                    if (version == SnellBean.VERSION_4) {
+                                        obfsMode = bean.obfsMode
+                                        if (bean.obfsMode != SnellBean.OBFS_NONE && bean.obfsHost.isNotEmpty()) {
+                                            obfsHost = bean.obfsHost
+                                        }
+                                    }
+                                    if (version == SnellBean.VERSION_6) {
+                                        mode = bean.mode
+                                    }
+                                    if (bean.userKey.isNotEmpty()) {
+                                        userKey = bean.userKey
+                                    }
                                 })
                             } else if (bean is MieruBean) {
                                 protocol = "mieru"

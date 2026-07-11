@@ -773,26 +773,34 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                 name = proxy.getString("name")
             })
         }
-                "snell" -> {
+        "snell" -> {
             return listOf(SnellBean().apply {
                 serverAddress = proxy.getString("server") ?: return listOf()
                 serverPort = proxy.getInt("port")?.takeIf { it > 0 } ?: return listOf()
-                psk = proxy.getString("psk") ?: ""
-                proxy.getString("user-psk")?.also { userPSK = it }
-                proxy.getInt("version")?.also {
-                    if (it != 4 && it != 6) return listOf()
-                    version = it
-                }
-                proxy.getString("obfs")?.also {
-                    obfsMode = if (it == "off") SnellBean.OBFS_NONE else it
-                }
+                psk = proxy.getString("psk")
+                version = proxy.getInt("version")
+                if (version != 4) return listOf()
                 proxy.getObject("obfs-opts")?.also { opts ->
-                    opts.getString("mode")?.also {
-                        obfsMode = if (it == "off") SnellBean.OBFS_NONE else it
+                     when (opts.getString("mode")) {
+                        "tls" -> {
+                            obfsMode = SnellBean.OBFS_TLS
+                            obfsHost = when (val host = opts.getString("host")) {
+                                // null -> "bing.com"
+                                else ->  host
+                            }
+                        }
+                         "http" -> {
+                             obfsMode = SnellBean.OBFS_HTTP
+                             obfsHost = when (val host = opts.getString("host")) {
+                                 null -> "bing.com" // https://github.com/MetaCubeX/mihomo/blob/75eeba429292d915691f61d89fc5e57a612c8844/adapter/outbound/snell.go#L158
+                                 else ->  host
+                             }
+                         }
+                        "shadow-tls" -> return listOf()
+                        else -> SnellBean.OBFS_NONE
                     }
-                    opts.getString("host")?.also { obfsHost = it }
                 }
-                proxy.getString("mode")?.also { mode = it }
+                reuse = proxy.getBoolean("reuse")
                 name = proxy.getString("name")
             })
         }

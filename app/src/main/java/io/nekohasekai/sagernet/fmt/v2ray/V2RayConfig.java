@@ -988,12 +988,12 @@ public class V2RayConfig {
     }
 
     
-        public static class SnellOutboundConfigurationObject implements OutboundConfigurationObject {
+    public static class SnellOutboundConfigurationObject implements OutboundConfigurationObject {
 
         public String address;
         public Integer port;
         public String psk;
-        public String userPSK;
+        public String userKey;
         public String obfsMode;
         public String obfsHost;
         public Integer version;
@@ -1002,7 +1002,7 @@ public class V2RayConfig {
 
     }
 
-public static class MieruOutboundConfigurationObject implements OutboundConfigurationObject {
+    public static class MieruOutboundConfigurationObject implements OutboundConfigurationObject {
 
         public String address;
         public Integer port;

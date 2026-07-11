@@ -252,7 +252,7 @@ data class ProxyEntity(
         TYPE_ANYTLS -> "AnyTLS"
         TYPE_SHADOWQUIC -> "ShadowQUIC"
         TYPE_TRUSTTUNNEL -> "TrustTunnel"
-        TYPE_SNELL -> "Snell"
+        TYPE_SNELL -> snellBean!!.protocolName()
 
         TYPE_CHAIN -> chainName
         TYPE_CONFIG -> configName

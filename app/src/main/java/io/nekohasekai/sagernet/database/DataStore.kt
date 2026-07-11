@@ -357,6 +357,14 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var serverHysteria2GeckoMinPacketSize by profileCacheStore.stringToInt(Key.SERVER_HYSTERIA2_GECKO_MIN_PACKET_SIZE)
     var serverHysteria2GeckoMaxPacketSize by profileCacheStore.stringToInt(Key.SERVER_HYSTERIA2_GECKO_MAX_PACKET_SIZE)
 
+    var serverSnellVersion by profileCacheStore.stringToInt(Key.SERVER_SNELL_VERSION)
+    var serverSnellReuse by profileCacheStore.boolean(Key.SERVER_SNELL_REUSE)
+    var serverSnellPSK by profileCacheStore.string(Key.SERVER_SNELL_PSK)
+    var serverSnellUserKey by profileCacheStore.string(Key.SERVER_SNELL_USER_KEY)
+    var serverSnellObfsMode by profileCacheStore.string(Key.SERVER_SNELL_OBFS_MODE)
+    var serverSnellObfsHost by profileCacheStore.string(Key.SERVER_SNELL_OBFS_HOST)
+    var serverSnellMode by profileCacheStore.string(Key.SERVER_SNELL_MODE)
+
     var serverVMessExperimentalAuthenticatedLength by profileCacheStore.boolean(Key.SERVER_VMESS_EXPERIMENTAL_AUTHENTICATED_LENGTH)
     var serverVMessExperimentalNoTerminationSignal by profileCacheStore.boolean(Key.SERVER_VMESS_EXPERIMENTAL_NO_TERMINATION_SIGNAL)
 

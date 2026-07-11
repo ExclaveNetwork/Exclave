@@ -170,24 +170,3 @@ class SagerDatabase_Migration_33_34 : AutoMigrationSpec
     ),
 )
 class SagerDatabase_Migration_35_36 : AutoMigrationSpec
-/**
- * Reintroduce Snell support. The snellBean column may already exist from
- * SagerNet-era migration 3_4 and was never dropped.
- */
-object SagerDatabase_Migration_36_37 : Migration(36, 37) {
-    override fun migrate(database: SupportSQLiteDatabase) {
-        val cursor = database.query("PRAGMA table_info(`proxy_entities`)")
-        var hasSnell = false
-        while (cursor.moveToNext()) {
-            val name = cursor.getString(cursor.getColumnIndex("name"))
-            if (name == "snellBean") {
-                hasSnell = true
-                break
-            }
-        }
-        cursor.close()
-        if (!hasSnell) {
-            database.execSQL("""ALTER TABLE `proxy_entities` ADD `snellBean` BLOB DEFAULT NULL""")
-        }
-    }
-}

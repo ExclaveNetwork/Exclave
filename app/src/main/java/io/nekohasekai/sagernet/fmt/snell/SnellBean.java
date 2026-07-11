@@ -7,6 +7,14 @@
  * the Free Software Foundation, either version 3 of the License, or          *
  *  (at your option) any later version.                                       *
  *                                                                            *
+ * This program is distributed in the hope that it will be useful,            *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of             *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
+ * GNU General Public License for more details.                               *
+ *                                                                            *
+ * You should have received a copy of the GNU General Public License          *
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.       *
+ *                                                                            *
  ******************************************************************************/
 
 package io.nekohasekai.sagernet.fmt.snell;
@@ -20,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 
 import io.nekohasekai.sagernet.fmt.AbstractBean;
 import io.nekohasekai.sagernet.fmt.KryoConverters;
+import io.nekohasekai.sagernet.fmt.tuic5.Tuic5Bean;
 
 public class SnellBean extends AbstractBean {
 
@@ -35,40 +44,38 @@ public class SnellBean extends AbstractBean {
     public static final String MODE_UNSAFE_RAW = "unsafe-raw";
 
     public String psk;
-    /** sing-box private extension; only compatible with sing-box Snell server. */
-    public String userPSK;
-    public String obfsMode;
-    /** v4-only */
-    public String obfsHost;
+
     public Integer version;
+
     public Boolean reuse;
-    /** v6-only */
+    public String obfsMode;
+    public String obfsHost;
     public String mode;
+    public String userKey;
 
     @Override
     public void initializeDefaultValues() {
         super.initializeDefaultValues();
         if (psk == null) psk = "";
-        if (userPSK == null) userPSK = "";
-        if (obfsMode == null || obfsMode.isEmpty()) obfsMode = OBFS_NONE;
-        if (obfsHost == null) obfsHost = "";
-        if (version == null || version == 0) version = VERSION_4;
+        if (version == null) version = VERSION_4;
         if (reuse == null) reuse = true;
-        if (mode == null || mode.isEmpty()) mode = MODE_DEFAULT;
+        if (obfsMode == null) obfsMode = OBFS_NONE;
+        if (obfsHost == null) obfsHost = "";
+        if (mode == null) mode = MODE_DEFAULT;
+        if (userKey == null) userKey = "";
     }
 
     @Override
     public void serialize(ByteBufferOutput output) {
-        // v3: rename obfs->obfsMode, add userPSK; version 4/6 only
-        output.writeInt(3);
+        output.writeInt(0);
         super.serialize(output);
         output.writeString(psk);
-        output.writeString(obfsMode);
         output.writeInt(version);
         output.writeBoolean(reuse);
+        output.writeString(obfsMode);
         output.writeString(obfsHost);
         output.writeString(mode);
-        output.writeString(userPSK);
+        output.writeString(userKey);
     }
 
     @Override
@@ -76,31 +83,22 @@ public class SnellBean extends AbstractBean {
         int ver = input.readInt();
         super.deserialize(input);
         psk = input.readString();
-        obfsMode = input.readString();
-        // migrate legacy "off" -> "none" for old profiles only
-        if ("off".equals(obfsMode)) {
-            obfsMode = OBFS_NONE;
-        }
         version = input.readInt();
-        // migrate legacy 3/5 to 4
-        if (version != null && version != VERSION_4 && version != VERSION_6) {
-            version = VERSION_4;
-        }
-        if (ver >= 1) {
-            reuse = input.readBoolean();
-        }
-        if (ver >= 2) {
-            obfsHost = input.readString();
-            mode = input.readString();
-        }
-        if (ver >= 3) {
-            userPSK = input.readString();
-        }
+        reuse = input.readBoolean();
+        obfsMode = input.readString();
+        obfsHost = input.readString();
+        mode = input.readString();
+        userKey = input.readString();
+    }
+
+    public String protocolName() {
+        return "Snell v" + version.toString();
     }
 
     @Override
-    public String network() {
-        return "tcp,udp";
+    public void applyFeatureSettings(AbstractBean other) {
+        if (!(other instanceof SnellBean bean)) return;
+        bean.reuse = reuse;
     }
 
     @NotNull

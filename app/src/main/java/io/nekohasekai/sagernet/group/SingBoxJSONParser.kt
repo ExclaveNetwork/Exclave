@@ -34,6 +34,7 @@ import io.nekohasekai.sagernet.fmt.shadowsocksr.ShadowsocksRBean
 import io.nekohasekai.sagernet.fmt.shadowsocksr.supportedShadowsocksRMethod
 import io.nekohasekai.sagernet.fmt.shadowsocksr.supportedShadowsocksRObfs
 import io.nekohasekai.sagernet.fmt.shadowsocksr.supportedShadowsocksRProtocol
+import io.nekohasekai.sagernet.fmt.snell.SnellBean
 import io.nekohasekai.sagernet.fmt.socks.SOCKSBean
 import io.nekohasekai.sagernet.fmt.ssh.SSHBean
 import io.nekohasekai.sagernet.fmt.trojan.TrojanBean
@@ -834,6 +835,53 @@ fun parseSingBoxOutbound(outbound: JsonObject): List<AbstractBean> {
                 }
             }
             return listOf(naiveBean)
+        }
+        "snell" -> {
+            val snellBean = SnellBean().apply {
+                outbound.getString("tag", ignoreCase = false)?.also {
+                    name = it
+                }
+                outbound.getString("server")?.also {
+                    serverAddress = it
+                } ?: return listOf()
+                outbound.getInt("server_port")?.also {
+                    serverPort = it
+                } ?: return listOf()
+                version = outbound.getInt("version")
+                if (version != 4 && version != 6) return listOf()
+                outbound.getString("psk")?.also {
+                    psk = it
+                }
+                outbound.getString("userkey")?.also {
+                    userKey = it
+                }
+                outbound.getBoolean("reuse")?.also {
+                    reuse = it
+                }
+                when (version) {
+                    4 -> when (outbound.getString("obfs_mode")?.lowercase()) {
+                        null, "", "none" -> {
+                            obfsMode = SnellBean.OBFS_NONE
+                        }
+                        "http" -> {
+                            obfsMode = SnellBean.OBFS_HTTP
+                            obfsHost = outbound.getString("obfs_host")
+                        }
+                        "tls" -> {
+                            obfsMode = SnellBean.OBFS_TLS
+                            obfsHost = outbound.getString("obfs_host")
+                        }
+                        else -> return listOf()
+                    }
+                    6 -> mode = when (outbound.getString("mode")) {
+                        null, "", "default" -> SnellBean.MODE_DEFAULT
+                        "unshaped" -> SnellBean.MODE_UNSHAPED
+                        "unsafe-raw" -> SnellBean.MODE_UNSAFE_RAW
+                        else -> return listOf()
+                    }
+                }
+            }
+            return listOf(snellBean)
         }
         "wireguard" -> {
             if (outbound.contains("address")) {

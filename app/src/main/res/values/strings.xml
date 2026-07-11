@@ -613,4 +613,10 @@
     <string name="hysteria2_gecko_max_packet_size">Maximum packet size</string>
     <string name="hysteria2_gecko_min_packet_size">Minimum packet size</string>
     <string name="nearby_devices_permission_notice">This requires the \"nearby devices\" permission to work, but the permission has not been granted.</string>
+    <string name="action_snell" translatable="false">Snell</string>
+    <string name="snell_reuse">Connection reuse</string>
+    <string name="pre_shared_key">Pre-shared key</string>
+    <string name="snell_obfs_mode">Obfuscation mode</string>
+    <string name="snell_obfs_host">Obfuscation host</string>
+    <string name="snell_mode">Mode</string>
 </resources>

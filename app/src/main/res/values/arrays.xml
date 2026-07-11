@@ -897,4 +897,21 @@
         <item>gecko</item>
     </string-array>
 
+    <string-array name="snell_version_value">
+        <item>4</item>
+        <item>6</item>
+    </string-array>
+
+    <string-array name="snell_obfs_value">
+        <item>none</item>
+        <item>http</item>
+        <item>tls</item>
+    </string-array>
+
+    <string-array name="snell_mode_value">
+        <item>default</item>
+        <item>unshaped</item>
+        <item>unsafe-raw</item>
+    </string-array>
+
 </resources>

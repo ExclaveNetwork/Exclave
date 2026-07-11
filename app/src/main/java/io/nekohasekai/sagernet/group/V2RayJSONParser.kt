@@ -35,6 +35,7 @@ import io.nekohasekai.sagernet.fmt.mieru.MieruBean
 import io.nekohasekai.sagernet.fmt.shadowsocks.ShadowsocksBean
 import io.nekohasekai.sagernet.fmt.shadowsocks.supportedShadowsocks2022Method
 import io.nekohasekai.sagernet.fmt.shadowsocks.supportedShadowsocksMethod
+import io.nekohasekai.sagernet.fmt.snell.SnellBean
 import io.nekohasekai.sagernet.fmt.socks.SOCKSBean
 import io.nekohasekai.sagernet.fmt.ssh.SSHBean
 import io.nekohasekai.sagernet.fmt.trojan.TrojanBean
@@ -1691,6 +1692,56 @@ fun parseV2RayOutbound(outbound: JsonObject): List<AbstractBean> {
                 }
             }
             return listOf(mieruBean)
+        }
+        "snell" -> {
+            val snellBean = SnellBean()
+            outbound.getObject("settings")?.also { settings ->
+                outbound.getString("tag")?.also {
+                    snellBean.name = it
+                }
+                settings.getString("address")?.also {
+                    snellBean.serverAddress = it
+                } ?: return listOf()
+                settings.getPort("port")?.also {
+                    snellBean.serverPort = it
+                } ?: return listOf()
+                snellBean.version = settings.getInt("version")
+                if (snellBean.version != 4 && snellBean.version != 6) {
+                    return listOf()
+                }
+                settings.getString("psk")?.also {
+                    snellBean.psk = it
+                }
+                settings.getString("userKey")?.also {
+                    snellBean.userKey = it
+                }
+                settings.getBoolean("reuse")?.also {
+                    snellBean.reuse = it
+                }
+                when (snellBean.version) {
+                    4 -> when (settings.getString("obfsMode")) {
+                        null, "", "none" -> {
+                            snellBean.obfsMode = SnellBean.OBFS_NONE
+                        }
+                        "http" -> {
+                            snellBean.obfsMode = SnellBean.OBFS_HTTP
+                            snellBean.obfsHost = settings.getString("obfsHost")
+                        }
+                        "tls" -> {
+                            snellBean.obfsMode = SnellBean.OBFS_TLS
+                            snellBean.obfsHost = settings.getString("obfsHost")
+                        }
+                        else -> return listOf()
+                    }
+                    6 -> snellBean.mode = when (settings.getString("mode")) {
+                        null, "", "default" -> SnellBean.MODE_DEFAULT
+                        "unshaped" -> SnellBean.MODE_UNSHAPED
+                        "unsafe-raw" -> SnellBean.MODE_UNSAFE_RAW
+                        else -> return listOf()
+                    }
+                }
+            }
+            return listOf(snellBean)
         }
         "wireguard" -> {
             val beanList = mutableListOf<WireGuardBean>()

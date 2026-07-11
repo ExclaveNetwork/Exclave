@@ -247,6 +247,15 @@ object Key {
     const val SERVER_HYSTERIA2_GECKO_MIN_PACKET_SIZE = "serverHysteria2GeckoMinPacketSize"
     const val SERVER_HYSTERIA2_GECKO_MAX_PACKET_SIZE = "serverHysteria2GeckoMaxPacketSize"
 
+    const val SERVER_SNELL_VERSION = "serverSnellVersion"
+    const val SERVER_SNELL_REUSE = "serverSnellReuse"
+    const val SERVER_SNELL_PSK = "serverSnellPSK"
+    const val SERVER_SNELL_USER_KEY = "serverSnellUserKey"
+
+    const val SERVER_SNELL_OBFS_MODE = "serverSnellObfsMode"
+    const val SERVER_SNELL_OBFS_HOST = "serverSnellObfsHost"
+    const val SERVER_SNELL_MODE = "serverSnellMode"
+
     const val SERVER_NAIVE_NO_POST_QUANTUM = "serverNaiveNoPostQuantum"
     const val SERVER_SHADOWQUIC_DISABLE_ALPN = "serverShadowQUICDisableALPN"
     const val SERVER_SHADOWQUIC_USE_SUNNYQUIC = "serverShadowQUICUseSunnyQUIC"

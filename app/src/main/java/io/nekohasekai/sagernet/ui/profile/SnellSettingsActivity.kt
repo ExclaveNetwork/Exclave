@@ -19,26 +19,38 @@ class SnellSettingsActivity : ProfileSettingsActivity<SnellBean>() {
         DataStore.profileName = name
         DataStore.serverAddress = serverAddress
         DataStore.serverPort = serverPort
-        DataStore.serverPassword = psk
-        DataStore.serverPassword1 = userPSK
-        DataStore.serverObfs = obfsMode
-        DataStore.serverHost = obfsHost
-        DataStore.serverProtocolVersion = version ?: SnellBean.VERSION_4
-        DataStore.serverMux = reuse == true
-        DataStore.serverProtocolParam = mode
+        DataStore.serverSnellPSK = psk
+        DataStore.serverSnellUserKey = userKey
+        DataStore.serverSnellReuse = reuse
+        DataStore.serverSnellVersion = version
+        when (version) {
+            4 -> {
+                DataStore.serverSnellObfsMode = obfsMode
+                DataStore.serverSnellObfsHost = obfsHost
+            }
+            6 -> {
+                DataStore.serverSnellMode = mode
+            }
+        }
     }
 
     override fun SnellBean.serialize() {
         name = DataStore.profileName
         serverAddress = DataStore.serverAddress.unwrapIDN()
         serverPort = DataStore.serverPort
-        psk = DataStore.serverPassword
-        userPSK = DataStore.serverPassword1
-        obfsMode = DataStore.serverObfs?.ifEmpty { SnellBean.OBFS_NONE } ?: SnellBean.OBFS_NONE
-        obfsHost = DataStore.serverHost
-        version = DataStore.serverProtocolVersion.takeIf { it == 4 || it == 6 } ?: SnellBean.VERSION_4
-        reuse = DataStore.serverMux
-        mode = DataStore.serverProtocolParam?.ifEmpty { SnellBean.MODE_DEFAULT } ?: SnellBean.MODE_DEFAULT
+        psk = DataStore.serverSnellPSK
+        userKey = DataStore.serverSnellUserKey
+        reuse = DataStore.serverSnellReuse
+        version = DataStore.serverSnellVersion
+        when (version) {
+            4 -> {
+                obfsMode = DataStore.serverSnellObfsMode
+                obfsHost = DataStore.serverSnellObfsHost
+            }
+            6 -> {
+                mode = DataStore.serverSnellMode
+            }
+        }
     }
 
     override fun PreferenceFragmentCompat.createPreferences(
@@ -49,27 +61,26 @@ class SnellSettingsActivity : ProfileSettingsActivity<SnellBean>() {
         findPreference<EditTextPreference>(Key.SERVER_PORT)!!.apply {
             setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
         }
-        findPreference<EditTextPreference>(Key.SERVER_PASSWORD)!!.apply {
+        findPreference<EditTextPreference>(Key.SERVER_SNELL_PSK)!!.apply {
             summaryProvider = PasswordSummaryProvider
         }
-        findPreference<EditTextPreference>(Key.SERVER_PASSWORD1)!!.apply {
+        findPreference<EditTextPreference>(Key.SERVER_SNELL_USER_KEY)!!.apply {
             summaryProvider = PasswordSummaryProvider
         }
-        val versionPref = findPreference<SimpleMenuPreference>(Key.SERVER_PROTOCOL)!!
-        val modePref = findPreference<SimpleMenuPreference>(Key.SERVER_PROTOCOL_PARAM)!!
-        val obfsPref = findPreference<SimpleMenuPreference>(Key.SERVER_OBFS)!!
-        val obfsHostPref = findPreference<EditTextPreference>(Key.SERVER_HOST)!!
+        val versionPref = findPreference<SimpleMenuPreference>(Key.SERVER_SNELL_VERSION)!!
+        val modePref = findPreference<SimpleMenuPreference>(Key.SERVER_SNELL_MODE)!!
+        val obfsPref = findPreference<SimpleMenuPreference>(Key.SERVER_SNELL_OBFS_MODE)!!
+        val obfsHostPref = findPreference<EditTextPreference>(Key.SERVER_SNELL_OBFS_HOST)!!
         fun updateVisibility(v: Int) {
-            val isV6 = v >= 6
+            val isV6 = v == 6
             modePref.isVisible = isV6
-            // v4-only: obfs mode/host
             obfsPref.isVisible = !isV6
             obfsHostPref.isVisible = !isV6
         }
-        val cur = versionPref.value?.toIntOrNull() ?: DataStore.serverProtocolVersion
+        val cur = versionPref.value.toInt()
         updateVisibility(cur)
         versionPref.setOnPreferenceChangeListener { _, newValue ->
-            updateVisibility((newValue as? String)?.toIntOrNull() ?: 4)
+            updateVisibility((newValue as String).toInt())
             true
         }
     }
