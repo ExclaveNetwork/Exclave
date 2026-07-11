@@ -25,6 +25,12 @@
             app:key="serverPassword"
             app:title="@string/password"
             app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:dialogLayout="@layout/layout_password_dialog"
+            app:icon="@drawable/ic_settings_password"
+            app:key="serverPassword1"
+            app:title="@string/snell_user_psk"
+            app:useSimpleSummaryProvider="true" />
         <io.nekohasekai.sagernet.widget.SimpleMenuPreference
             app:defaultValue="4"
             app:entries="@array/snell_version_entry"
@@ -34,12 +40,12 @@
             app:title="@string/snell_version"
             app:useSimpleSummaryProvider="true" />
         <io.nekohasekai.sagernet.widget.SimpleMenuPreference
-            app:defaultValue="off"
+            app:defaultValue="none"
             app:entries="@array/snell_obfs_entry"
             app:entryValues="@array/snell_obfs_value"
             app:icon="@drawable/ic_baseline_texture_24"
             app:key="serverObfs"
-            app:title="@string/obfs"
+            app:title="@string/snell_obfs_mode"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
             app:icon="@drawable/ic_hardware_router"

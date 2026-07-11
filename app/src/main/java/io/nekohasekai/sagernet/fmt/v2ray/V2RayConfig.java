@@ -988,12 +988,13 @@ public class V2RayConfig {
     }
 
     
-    public static class SnellOutboundConfigurationObject implements OutboundConfigurationObject {
+        public static class SnellOutboundConfigurationObject implements OutboundConfigurationObject {
 
         public String address;
         public Integer port;
         public String psk;
-        public String obfs;
+        public String userPSK;
+        public String obfsMode;
         public String obfsHost;
         public Integer version;
         public Boolean reuse;

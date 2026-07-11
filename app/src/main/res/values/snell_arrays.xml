@@ -1,24 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="snell_version_entry">
-        <item>3</item>
         <item>4</item>
-        <item>5</item>
-        <item>6</item>
+        <item>6 (beta)</item>
     </string-array>
     <string-array name="snell_version_value">
-        <item>3</item>
         <item>4</item>
-        <item>5</item>
         <item>6</item>
     </string-array>
     <string-array name="snell_obfs_entry">
-        <item>off</item>
+        <item>none</item>
         <item>http</item>
         <item>tls</item>
     </string-array>
     <string-array name="snell_obfs_value">
-        <item>off</item>
+        <item>none</item>
         <item>http</item>
         <item>tls</item>
     </string-array>

@@ -20,7 +20,8 @@ class SnellSettingsActivity : ProfileSettingsActivity<SnellBean>() {
         DataStore.serverAddress = serverAddress
         DataStore.serverPort = serverPort
         DataStore.serverPassword = psk
-        DataStore.serverObfs = obfs
+        DataStore.serverPassword1 = userPSK
+        DataStore.serverObfs = obfsMode
         DataStore.serverHost = obfsHost
         DataStore.serverProtocolVersion = version ?: SnellBean.VERSION_4
         DataStore.serverMux = reuse == true
@@ -32,9 +33,10 @@ class SnellSettingsActivity : ProfileSettingsActivity<SnellBean>() {
         serverAddress = DataStore.serverAddress.unwrapIDN()
         serverPort = DataStore.serverPort
         psk = DataStore.serverPassword
-        obfs = DataStore.serverObfs?.ifEmpty { SnellBean.OBFS_OFF } ?: SnellBean.OBFS_OFF
+        userPSK = DataStore.serverPassword1
+        obfsMode = DataStore.serverObfs?.ifEmpty { SnellBean.OBFS_NONE } ?: SnellBean.OBFS_NONE
         obfsHost = DataStore.serverHost
-        version = DataStore.serverProtocolVersion.takeIf { it in 3..6 } ?: SnellBean.VERSION_4
+        version = DataStore.serverProtocolVersion.takeIf { it == 4 || it == 6 } ?: SnellBean.VERSION_4
         reuse = DataStore.serverMux
         mode = DataStore.serverProtocolParam?.ifEmpty { SnellBean.MODE_DEFAULT } ?: SnellBean.MODE_DEFAULT
     }
@@ -50,15 +52,24 @@ class SnellSettingsActivity : ProfileSettingsActivity<SnellBean>() {
         findPreference<EditTextPreference>(Key.SERVER_PASSWORD)!!.apply {
             summaryProvider = PasswordSummaryProvider
         }
+        findPreference<EditTextPreference>(Key.SERVER_PASSWORD1)!!.apply {
+            summaryProvider = PasswordSummaryProvider
+        }
         val versionPref = findPreference<SimpleMenuPreference>(Key.SERVER_PROTOCOL)!!
         val modePref = findPreference<SimpleMenuPreference>(Key.SERVER_PROTOCOL_PARAM)!!
-        fun updateModeVisibility() {
-            val v = versionPref.value?.toIntOrNull() ?: DataStore.serverProtocolVersion
-            modePref.isVisible = v >= 6
+        val obfsPref = findPreference<SimpleMenuPreference>(Key.SERVER_OBFS)!!
+        val obfsHostPref = findPreference<EditTextPreference>(Key.SERVER_HOST)!!
+        fun updateVisibility(v: Int) {
+            val isV6 = v >= 6
+            modePref.isVisible = isV6
+            // v4-only: obfs mode/host
+            obfsPref.isVisible = !isV6
+            obfsHostPref.isVisible = !isV6
         }
-        updateModeVisibility()
+        val cur = versionPref.value?.toIntOrNull() ?: DataStore.serverProtocolVersion
+        updateVisibility(cur)
         versionPref.setOnPreferenceChangeListener { _, newValue ->
-            modePref.isVisible = (newValue as? String)?.toIntOrNull()?.let { it >= 6 } == true
+            updateVisibility((newValue as? String)?.toIntOrNull() ?: 4)
             true
         }
     }

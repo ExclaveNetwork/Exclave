@@ -23,32 +23,34 @@ import io.nekohasekai.sagernet.fmt.KryoConverters;
 
 public class SnellBean extends AbstractBean {
 
-    public static final int VERSION_3 = 3;
     public static final int VERSION_4 = 4;
-    public static final int VERSION_5 = 5;
     public static final int VERSION_6 = 6;
 
-    public static final String OBFS_OFF = "off";
+    public static final String OBFS_NONE = "none";
     public static final String OBFS_HTTP = "http";
     public static final String OBFS_TLS = "tls";
 
-    /** v6 modes: default | unshaped | unsafe-raw */
     public static final String MODE_DEFAULT = "default";
     public static final String MODE_UNSHAPED = "unshaped";
     public static final String MODE_UNSAFE_RAW = "unsafe-raw";
 
     public String psk;
-    public String obfs;
+    /** sing-box private extension; only compatible with sing-box Snell server. */
+    public String userPSK;
+    public String obfsMode;
+    /** v4-only */
     public String obfsHost;
     public Integer version;
     public Boolean reuse;
+    /** v6-only */
     public String mode;
 
     @Override
     public void initializeDefaultValues() {
         super.initializeDefaultValues();
         if (psk == null) psk = "";
-        if (obfs == null || obfs.isEmpty()) obfs = OBFS_OFF;
+        if (userPSK == null) userPSK = "";
+        if (obfsMode == null || obfsMode.isEmpty()) obfsMode = OBFS_NONE;
         if (obfsHost == null) obfsHost = "";
         if (version == null || version == 0) version = VERSION_4;
         if (reuse == null) reuse = true;
@@ -57,15 +59,16 @@ public class SnellBean extends AbstractBean {
 
     @Override
     public void serialize(ByteBufferOutput output) {
-        // v2: +obfsHost +mode
-        output.writeInt(2);
+        // v3: rename obfs->obfsMode, add userPSK; version 4/6 only
+        output.writeInt(3);
         super.serialize(output);
         output.writeString(psk);
-        output.writeString(obfs);
+        output.writeString(obfsMode);
         output.writeInt(version);
         output.writeBoolean(reuse);
         output.writeString(obfsHost);
         output.writeString(mode);
+        output.writeString(userPSK);
     }
 
     @Override
@@ -73,14 +76,25 @@ public class SnellBean extends AbstractBean {
         int ver = input.readInt();
         super.deserialize(input);
         psk = input.readString();
-        obfs = input.readString();
+        obfsMode = input.readString();
+        // migrate legacy "off" -> "none" for old profiles only
+        if ("off".equals(obfsMode)) {
+            obfsMode = OBFS_NONE;
+        }
         version = input.readInt();
+        // migrate legacy 3/5 to 4
+        if (version != null && version != VERSION_4 && version != VERSION_6) {
+            version = VERSION_4;
+        }
         if (ver >= 1) {
             reuse = input.readBoolean();
         }
         if (ver >= 2) {
             obfsHost = input.readString();
             mode = input.readString();
+        }
+        if (ver >= 3) {
+            userPSK = input.readString();
         }
     }
 

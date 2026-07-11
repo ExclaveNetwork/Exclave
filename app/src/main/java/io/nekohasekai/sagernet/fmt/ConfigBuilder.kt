@@ -1747,7 +1747,8 @@ fun buildV2RayConfig(
                                     address = bean.serverAddress
                                     port = bean.serverPort
                                     psk = bean.psk
-                                    obfs = bean.obfs
+                                    userPSK = bean.userPSK
+                                    obfsMode = bean.obfsMode
                                     obfsHost = bean.obfsHost
                                     version = bean.version
                                     reuse = bean.reuse

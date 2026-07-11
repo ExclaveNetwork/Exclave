@@ -777,11 +777,19 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
             return listOf(SnellBean().apply {
                 serverAddress = proxy.getString("server") ?: return listOf()
                 serverPort = proxy.getInt("port")?.takeIf { it > 0 } ?: return listOf()
-                psk = proxy.getString("psk") ?: return listOf()
-                proxy.getInt("version")?.also { version = it }
-                proxy.getString("obfs")?.also { obfs = it }
+                psk = proxy.getString("psk") ?: ""
+                proxy.getString("user-psk")?.also { userPSK = it }
+                proxy.getInt("version")?.also {
+                    if (it != 4 && it != 6) return listOf()
+                    version = it
+                }
+                proxy.getString("obfs")?.also {
+                    obfsMode = if (it == "off") SnellBean.OBFS_NONE else it
+                }
                 proxy.getObject("obfs-opts")?.also { opts ->
-                    opts.getString("mode")?.also { obfs = it }
+                    opts.getString("mode")?.also {
+                        obfsMode = if (it == "off") SnellBean.OBFS_NONE else it
+                    }
                     opts.getString("host")?.also { obfsHost = it }
                 }
                 proxy.getString("mode")?.also { mode = it }
