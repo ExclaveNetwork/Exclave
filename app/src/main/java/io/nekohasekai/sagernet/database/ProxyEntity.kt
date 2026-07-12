@@ -62,7 +62,6 @@ import io.nekohasekai.sagernet.fmt.trojan.TrojanBean
 import io.nekohasekai.sagernet.fmt.trojan.toUri
 import io.nekohasekai.sagernet.fmt.trusttunnel.TrustTunnelBean
 import io.nekohasekai.sagernet.fmt.snell.SnellBean
-import io.nekohasekai.sagernet.fmt.snell.toUri
 import io.nekohasekai.sagernet.ui.profile.SnellSettingsActivity
 import io.nekohasekai.sagernet.fmt.trusttunnel.toUri
 import io.nekohasekai.sagernet.fmt.tuic5.Tuic5Bean
@@ -302,7 +301,7 @@ data class ProxyEntity(
 
     fun hasShareLink(): Boolean {
         return when (type) {
-            TYPE_SSH, TYPE_WG -> false
+            TYPE_SSH, TYPE_WG, TYPE_SNELL -> false
             TYPE_CONFIG, TYPE_CHAIN, TYPE_BALANCER -> false
             else -> true
         }
@@ -325,7 +324,6 @@ data class ProxyEntity(
             is Http3Bean -> toUri()
             is AnyTLSBean -> toUri()
             is TrustTunnelBean -> toUri()
-            is SnellBean -> toUri()
             is ShadowQUICBean -> toUri()
             else -> null
         }
