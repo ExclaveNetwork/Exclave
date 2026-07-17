@@ -945,7 +945,7 @@ fun StandardV2RayBean.toUri(): String? {
             if (realityMldsa65Verify.isNotEmpty()) {
                 builder.addQueryParameter("pqv", realityMldsa65Verify)
             }
-            builder.addQueryParameter("fp", "chrome") // "若使用 REALITY，此项不可省略。"
+            builder.addQueryParameter("fp", realityFingerprint)
             if (this is VLESSBean && flow.isNotEmpty()) {
                 builder.addQueryParameter("flow", flow.removeSuffix("-udp443"))
             }
