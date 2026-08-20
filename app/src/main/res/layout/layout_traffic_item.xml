@@ -100,16 +100,19 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="?android:attr/textColorSecondary" />
+                android:textColor="?android:attr/textColorSecondary"
+                android:textDirection="locale"
+                tools:text="1 TCP connection" />
 
             <TextView
                 android:id="@+id/traffic_uplink"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:text="@string/traffic_uplink"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="?android:attr/textColorSecondary" />
+                android:textColor="?android:attr/textColorSecondary"
+                android:textDirection="locale"
+                tools:text="@string/traffic_uplink" />
 
         </LinearLayout>
 
@@ -127,16 +130,19 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="?android:attr/textColorSecondary" />
+                android:textColor="?android:attr/textColorSecondary"
+                android:textDirection="locale"
+                tools:text="1 UDP connection" />
 
             <TextView
                 android:id="@+id/traffic_downlink"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:text="@string/traffic_downlink"
                 android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="?android:attr/textColorSecondary" />
+                android:textColor="?android:attr/textColorSecondary"
+                android:textDirection="locale"
+                tools:text="@string/traffic_downlink" />
 
         </LinearLayout>
 

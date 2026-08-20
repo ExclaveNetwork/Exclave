@@ -58,7 +58,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/server_address"
-                        android:textAppearance="?attr/textAppearanceSubtitle2" />
+                        android:textAppearance="?attr/textAppearanceSubtitle2"
+                        android:textDirection="locale" />
 
                     <EditText
                         android:id="@+id/probe_cert_server"
@@ -71,7 +72,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/server_port"
-                        android:textAppearance="?attr/textAppearanceSubtitle2" />
+                        android:textAppearance="?attr/textAppearanceSubtitle2"
+                        android:textDirection="locale" />
 
                     <EditText
                         android:id="@+id/probe_cert_server_port"
@@ -84,7 +86,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/sni"
-                        android:textAppearance="?attr/textAppearanceSubtitle2" />
+                        android:textAppearance="?attr/textAppearanceSubtitle2"
+                        android:textDirection="locale" />
 
                     <EditText
                         android:id="@+id/probe_cert_server_name"
@@ -110,11 +113,14 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/protocol"
-                        android:textAppearance="?attr/textAppearanceSubtitle2" />
+                        android:textAppearance="?attr/textAppearanceSubtitle2"
+                        android:textDirection="locale" />
 
                     <Spinner
                         android:id="@+id/probe_cert_protocol"
                         android:layout_width="match_parent"
+                        android:paddingBottom="8dp"
+                        android:paddingTop="8dp"
                         android:entries="@array/probe_cert_protocol"
                         android:layout_height="wrap_content" />
 
@@ -163,7 +169,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/certificates"
-                        android:textAppearance="?attr/textAppearanceSubtitle2" />
+                        android:textAppearance="?attr/textAppearanceSubtitle2"
+                        android:textDirection="locale" />
 
                     <EditText
                         android:id="@+id/certificate"
@@ -193,7 +200,8 @@
                         android:typeface="monospace"
                         android:textIsSelectable="true"
                         android:textAppearance="?attr/textAppearanceBody2"
-                        android:textColor="?android:textColorSecondary" />
+                        android:textColor="?android:textColorSecondary"
+                        android:textDirection="locale" />
 
                     <LinearLayout
                         android:layout_width="match_parent"

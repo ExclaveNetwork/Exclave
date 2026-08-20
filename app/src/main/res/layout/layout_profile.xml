@@ -123,18 +123,20 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/server_address"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="?android:attr/textColorSecondary" />
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textDirection="locale"
+                    tools:text="@string/server_address" />
 
                 <TextView
                     android:id="@+id/traffic_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="@string/traffic"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="?android:attr/textColorSecondary" />
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textDirection="locale"
+                    tools:text="@string/traffic" />
 
             </LinearLayout>
 
@@ -152,7 +154,9 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="?colorAccent" />
+                    android:textColor="?colorAccent"
+                    android:textDirection="locale"
+                    tools:text="Protocol" />
 
                 <TextView
                     android:id="@+id/profile_status"
@@ -160,7 +164,10 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="?colorAccent" />
+                    android:textColor="?colorAccent"
+                    android:textDirection="locale"
+                    tools:text="1 ms"
+                    tools:textColor="@color/material_green_500"/>
 
             </LinearLayout>
 
