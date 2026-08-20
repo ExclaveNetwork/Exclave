@@ -170,6 +170,7 @@ class ProbeCertActivity : ThemedActivity() {
                 AlertDialog.Builder(this)
                     .setTitle(R.string.certificates)
                     .setView(NestedScrollView(this).apply {
+                        layoutDirection = View.LAYOUT_DIRECTION_LTR
                         setPadding(dp2px(16), dp2px(16), dp2px(16), 0)
                         addView( HorizontalScrollView(this@ProbeCertActivity).apply {
                             addView(TextView(this@ProbeCertActivity).apply {
