@@ -3,7 +3,6 @@
 source "bin/init/env.sh"
 source "bin/plugin/naive/init.sh"
 
-rm -rf out/Release
 mv -f out/ReleaseArm out/Release || true
 export EXTRA_FLAGS='target_os="android" target_cpu="arm"'
 ./get-clang.sh
