@@ -29,16 +29,17 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import io.nekohasekai.sagernet.BuildConfig
 import io.nekohasekai.sagernet.R
-import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.databinding.LayoutLogcatBinding
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.utils.ColorUtils
 import io.nekohasekai.sagernet.utils.CrashHandler
+import kotlinx.coroutines.delay
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStreamReader
+import kotlin.time.Duration.Companion.milliseconds
 
 class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
     Toolbar.OnMenuItemClickListener {
@@ -75,37 +76,48 @@ class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
     }
 
     private suspend fun streamingLog() = onIoDispatcher {
-        val process = try {
-            ProcessBuilder(
-                listOf("logcat",
-                    "-T", "2048",
-                    "-v", if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) "tag,color" else "tag",
-                    "-s", arrayOf(
-                        "AndroidRuntime:D",
-                        "ProxyInstance:D",
-                        "GuardedProcessPool:D",
-                        "VpnService:D",
-                        "Go:D",
-                        "exclave-core:D",
-                        "libexclavecore:D",
-                        "libnaive:D",
-                        "libshadowquic:D",
-                        "Exclave:D",
-                        "*:S",
-                    ).joinToString(",")
-                )
-            ).start()
-        } catch (_: Exception) {
-            return@onIoDispatcher
-        }
-        val stdout = BufferedReader(InputStreamReader(process.inputStream))
+        var process: Process? = null
+        var stdout: BufferedReader? = null
         val bufferedLogLines = arrayListOf<String>()
         var timeLastNotify = System.nanoTime()
         // The timeout is initially small so that the view gets populated immediately.
         var timeout = 1000000000L / 2
         try {
             while (true) {
-                val line = stdout.readLine() ?: break
+                if (process == null) {
+                    try {
+                        process = ProcessBuilder(
+                            listOf("logcat",
+                                "-T", "2048",
+                                "-v", if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) "tag,color" else "tag",
+                                "-s", arrayOf(
+                                    "AndroidRuntime:D",
+                                    "ProxyInstance:D",
+                                    "GuardedProcessPool:D",
+                                    "VpnService:D",
+                                    "Go:D",
+                                    "exclave-core:D",
+                                    "libexclavecore:D",
+                                    "libnaive:D",
+                                    "libshadowquic:D",
+                                    "Exclave:D",
+                                    "*:S",
+                                ).joinToString(",")
+                            )
+                        ).start()
+                        stdout = BufferedReader(InputStreamReader(process.inputStream))
+                    } catch (_: Exception) {
+                        return@onIoDispatcher
+                    }
+                }
+                val line = stdout!!.readLine()
+                if (line == null) {
+                    process.destroy()
+                    stdout.close()
+                    process = null
+                    delay(5000.milliseconds)
+                    continue
+                }
                 bufferedLogLines.add(line)
                 val timeNow = System.nanoTime()
                 if (
@@ -141,6 +153,7 @@ class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
             }
         } finally {
             process?.destroy()
+            stdout?.close()
         }
     }
 
