@@ -19,7 +19,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v7
         with:
-          go-version: 1.27.0
+          go-version: 1.27.1
           cache-dependency-path: "library/core/go.sum"
       - name: Setup Go Mobile
         # https://github.com/golang/mobile/blob/c31d5b91ecc32c0d598b8fe8457d244ca0b4e815/cmd/gomobile/init.go#L83
