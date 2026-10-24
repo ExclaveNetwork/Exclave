@@ -129,6 +129,7 @@ data class ProxyGroup(
     fun healthCheckStatusLabel(): String {
         val history = parsedHealthCheckHistory()
         val percent = history.successPercent() ?: return "-"
+        if (percent == 0) return "$percent% (${history.consecutiveFailures})"
         return "$percent%" + if (history.isComplete) " (+)" else ""
     }
 

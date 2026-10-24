@@ -5,6 +5,7 @@ import kotlin.math.roundToInt
 /** Fixed-size health-check history with exponentially weighted recent results. */
 class GroupHealthCheckHistory private constructor(
     private val checks: List<Boolean>,
+    val consecutiveFailures: Long,
 ) {
 
     val size: Int
@@ -14,7 +15,14 @@ class GroupHealthCheckHistory private constructor(
         get() = checks.size == MAX_CHECKS
 
     fun append(success: Boolean): GroupHealthCheckHistory {
-        return GroupHealthCheckHistory((checks + success).takeLast(MAX_CHECKS))
+        val nextFailureCount = if (success) {
+            0L
+        } else if (consecutiveFailures >= Long.MAX_VALUE) {
+            Long.MAX_VALUE
+        } else {
+            consecutiveFailures.coerceAtLeast(0L) + 1L
+        }
+        return GroupHealthCheckHistory((checks + success).takeLast(MAX_CHECKS), nextFailureCount)
     }
 
     fun successPercent(): Int? {
@@ -33,15 +41,20 @@ class GroupHealthCheckHistory private constructor(
             .coerceIn(0, 100)
     }
 
-    fun encode(): String = checks.joinToString(",") { if (it) "1" else "0" }
+    fun encode(): String = "$ENCODING_PREFIX:${checks.joinToString(",") { if (it) "1" else "0" }}:$consecutiveFailures"
 
     companion object {
         const val MAX_CHECKS = 10
+        private const val ENCODING_PREFIX = "v2"
         private const val ALPHA = 0.2
         private const val DECAY = 1.0 - ALPHA
 
         fun decode(encoded: String?): GroupHealthCheckHistory {
-            val checks = encoded.orEmpty()
+            val value = encoded.orEmpty()
+            val parts = value.split(':', limit = 3)
+            val isNewFormat = parts.size == 3 && parts[0] == ENCODING_PREFIX
+            val checksSource = if (isNewFormat) parts[1] else value
+            val checks = checksSource
                 .split(',')
                 .mapNotNull {
                     when (it.trim()) {
@@ -51,7 +64,13 @@ class GroupHealthCheckHistory private constructor(
                     }
                 }
                 .takeLast(MAX_CHECKS)
-            return GroupHealthCheckHistory(checks)
+            val trailingFailures = checks.asReversed().takeWhile { !it }.size.toLong()
+            val consecutiveFailures = if (isNewFormat) {
+                (parts[2].toLongOrNull() ?: trailingFailures).coerceAtLeast(trailingFailures)
+            } else {
+                trailingFailures
+            }
+            return GroupHealthCheckHistory(checks, consecutiveFailures)
         }
     }
 }
