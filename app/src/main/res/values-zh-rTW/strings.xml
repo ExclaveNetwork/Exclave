@@ -200,6 +200,8 @@
     <string name="route_bypass_domain">%s 網域規則</string>
     <string name="route_bypass_ip">%s IP 規則</string>
     <string name="route_reset">重設</string>
+    <string name="route_reverse_redirect">反向位址</string>
+    <string name="route_reverse">反向代理</string>
     <string name="route_manage_assets">管理路由資源</string>
     <string name="route_assets">資源</string>
     <string name="route_rules_provider">規則資源提供者</string>

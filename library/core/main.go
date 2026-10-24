@@ -17,12 +17,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package libexclavecore
+package libsagernetcore
 
 import (
 	// Binding a local module (`gomobile bind .`) always contains local path
 	// and is not reproducible. See https://github.com/golang/go/issues/40254
 	// and https://github.com/golang/go/issues/73097. As a workaround, bind
 	// a remote module (`gomobile bind "example.com/module"`) instead.
-	_ "github.com/exclavenetwork/libexclavecore"
+	_ "github.com/dyhkwong/libsagernetcore"
 )

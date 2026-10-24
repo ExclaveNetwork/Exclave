@@ -20,30 +20,26 @@
 package io.nekohasekai.sagernet.fmt.anytls
 
 import io.nekohasekai.sagernet.ktx.*
-import libexclavecore.Libexclavecore
+import libsagernetcore.Libsagernetcore
 
 fun parseAnyTLS(url: String): AnyTLSBean {
-    val link = Libexclavecore.parseURL(url)
-    if (link.queryParameter("security") == "reality") {
-        // We don't parse parameters which do not exist in the specification. v2rayN (?) and others
-        // invented `security=reality` without changing the scheme. Ignoring `security=reality` and
-        // parsing the link as normal AnyTLS will make users unable to connect to the server.
-        // Explicitly ban `security=reality` from importing.
-        error("anytls must use tls")
-    }
+    val link = Libsagernetcore.parseURL(url)
     return AnyTLSBean().apply {
         name = link.fragment
-        serverAddress = link.host
-        serverPort = when {
-            !link.hasPort() -> 443
-            else -> link.port
-        }
+        serverAddress = link.host.ifEmpty { error("empty host") }
+        serverPort = link.port.takeIf { it > 0 } ?: 443
         password = link.username
         security = "tls"
-        link.queryParameter("sni")?.also {
+        link.queryParameterNotBlank("sni")?.also {
             sni = it
         }
-        link.queryParameter("insecure")?.takeIf { it == "1" }?.also {
+        link.queryParameter("insecure")?.takeIf { it == "1" || it == "true" }?.also {
+            allowInsecure = true
+        }
+        link.queryParameter("allow_insecure")?.takeIf { it == "1" || it == "true" }?.also {
+            allowInsecure = true
+        }
+        link.queryParameter("allowInsecure")?.takeIf { it == "1" || it == "true" }?.also {
             allowInsecure = true
         }
     }
@@ -53,8 +49,8 @@ fun AnyTLSBean.toUri(): String? {
     if (security != "tls") {
         error("anytls must use tls")
     }
-    val builder = Libexclavecore.newURL("anytls")
-    builder.setHostPort(serverAddress, serverPort)
+    val builder = Libsagernetcore.newURL("anytls")
+    builder.setHostPort(serverAddress.ifEmpty { error("empty server address") }, serverPort)
     if (password.isNotEmpty()) {
         builder.username = password
     }
@@ -64,7 +60,7 @@ fun AnyTLSBean.toUri(): String? {
     }
     // as pinned certificate is not exportable, only add `insecure=1` if pinned certificate is not used
     if (pinnedPeerCertificateChainSha256.isEmpty() && pinnedPeerCertificatePublicKeySha256.isEmpty() &&
-        pinnedPeerCertificateSha256.isEmpty() && serverNameToVerify.listByLineOrComma().isEmpty() && allowInsecure) {
+        pinnedPeerCertificateSha256.isEmpty() && allowInsecure) {
         builder.addQueryParameter("insecure", "1")
     }
     if (name.isNotEmpty()) {

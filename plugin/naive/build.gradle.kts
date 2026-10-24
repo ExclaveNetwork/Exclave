@@ -9,8 +9,4 @@ android {
     namespace = "io.nekohasekai.sagernet.plugin.naive"
 }
 
-dependencies {
-    implementation(project(":plugin:api"))
-}
-
 setupPlugin("naive")

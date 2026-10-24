@@ -90,7 +90,7 @@
     <string name="cag_ws">Paramètres WebSocket</string>
     <string name="security_settings">Paramètres de sécurité</string>
     <string name="menu_tools">Outils</string>
-    <string name="allow_insecure">Sauter la vérification du certificat</string>
+    <string name="allow_insecure">Autoriser non sécurisé</string>
     <string name="menu_log">Journaux</string>
     <string name="experimental_settings">Expérimental</string>
     <string name="error_title">Erreur</string>
@@ -180,7 +180,7 @@
     <string name="share">Partager</string>
     <plurals name="removed">
         <item quantity="one">%d élément supprimé</item>
-        <item quantity="many">%d éléments supprimés</item>
+        <item quantity="many"/>
         <item quantity="other">%d éléments supprimés</item>
     </plurals>
     <string name="subscription_update_message">Mise à jour de %s…</string>
@@ -289,7 +289,7 @@
     <string name="stun_attest_loading">Cela peut prendre quelques minutes…</string>
     <string name="network_wifi">Wifi</string>
     <string name="network_bt">Bluetooth</string>
-    <string name="network_data">Données mobiles</string>
+    <string name="network_data">Données mobile</string>
     <string name="route_ssid">SSID Wifi</string>
     <string name="missing_permission">Permission manquante</string>
     <string name="location_disabled">Position désactivée</string>
@@ -314,15 +314,4 @@
     <string name="fileSize_pebibyte">Pio</string>
     <string name="translation_platform">Plateforme de traduction</string>
     <string name="require_socks">Activer SOCKS5 Entrant</string>
-    <string name="enable_fakedns">Activer un faux DNS</string>
-    <string name="fakedns_message">Peut causer à d\'autres applications le besoin d\'être redémarrées pour se reconnecter au réseau après que le proxy soit déconnecté</string>
-    <string name="protocol_param">Paramètres du protocole</string>
-    <string name="alter_id">Alter ID</string>
-    <string name="quic_security">Sécurité QUIC</string>
-    <string name="quic_key">clé QUIC</string>
-    <string name="url">URL</string>
-    <string name="chrome_parrot_omit_max_datagram_frame_size_datagram_warning">Cette option est désactivée pour assortir avec le comportement de Chrome.</string>
-    <string name="snell_mode">Mode</string>
-    <string name="pre_shared_key">Clé pré-partagée</string>
-    <string name="nearby_devices_permission_notice">Ceci nécessite la permission \"appareils proches\" pour fonctionner, mais la permission n\'a pas été donnée.</string>
 </resources>

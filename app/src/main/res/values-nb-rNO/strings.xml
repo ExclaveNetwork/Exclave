@@ -203,6 +203,8 @@
     <string name="route_rules_provider">Leverandør av regelaktiver</string>
     <string name="route_assets">Eiendeler</string>
     <string name="route_manage_assets">Administrer ruteelementer</string>
+    <string name="route_reverse_redirect">Omvendt viderekobling</string>
+    <string name="route_reverse">Omvendt fullmakt</string>
     <string name="route_bypass_ip">IP -regel for %s</string>
     <string name="route_bypass_domain">Domeneregel for %s</string>
     <string name="empty_route_notice">Sett noen regler før du lagrer</string>

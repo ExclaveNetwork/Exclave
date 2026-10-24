@@ -54,7 +54,7 @@ import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.ktx.dp2px
 import io.nekohasekai.sagernet.ktx.dp2pxf
 import io.nekohasekai.sagernet.ktx.snackbar
-import libexclavecore.Libexclavecore
+import libsagernetcore.Libsagernetcore
 
 class AboutFragment : ToolbarFragment(R.layout.layout_about) {
 
@@ -107,7 +107,6 @@ class AboutFragment : ToolbarFragment(R.layout.layout_about) {
                             .setOnLongClickAction {
                                 AlertDialog.Builder(activityContext).apply {
                                     setView(NestedScrollView(activityContext).apply {
-                                        layoutDirection = View.LAYOUT_DIRECTION_LTR
                                         setPadding(dp2px(16), dp2px(16), dp2px(16), 0)
                                         addView( HorizontalScrollView(activityContext).apply {
                                             addView(TextView(activityContext).apply {
@@ -131,7 +130,7 @@ class AboutFragment : ToolbarFragment(R.layout.layout_about) {
                             .setOnClickAction {
                                 startActivity(Intent(
                                     Intent.ACTION_VIEW,
-                                    "https://github.com/ExclaveNetwork/Exclave/releases".toUri()
+                                    "https://github.com/dyhkwong/Exclave/releases".toUri()
                                 ))
                             }
                             .setOnLongClickAction {
@@ -141,27 +140,26 @@ class AboutFragment : ToolbarFragment(R.layout.layout_about) {
                             .build())
                         .addItem(MaterialAboutActionItem.Builder()
                             .icon(R.drawable.ic_baseline_airplanemode_active_24)
-                            .text(getString(R.string.version_x, "exclave-core"))
-                            .subText(Libexclavecore.getV2RayVersion())
+                            .text(getString(R.string.version_x, "v2ray-core"))
+                            .subText(Libsagernetcore.getV2RayVersion() + "-fork")
                             .setOnClickAction {
                                 startActivity(Intent(
                                     Intent.ACTION_VIEW,
-                                    "https://github.com/ExclaveNetwork/exclave-core".toUri()
+                                    "https://github.com/dyhkwong/v2ray-core/tree/dev-sagernet".toUri()
                                 ))
                             }
                             .build())
                         .addItem(MaterialAboutActionItem.Builder()
                             .icon(R.drawable.ic_baseline_info_24)
                             .text(getString(R.string.version_x, "Go"))
-                            .subText(Libexclavecore.getGoVersion())
+                            .subText(Libsagernetcore.getGoVersion())
                             .setOnLongClickAction {
                                 AlertDialog.Builder(activityContext).apply {
                                     setView(NestedScrollView(activityContext).apply {
-                                        layoutDirection = View.LAYOUT_DIRECTION_LTR
                                         setPadding(dp2px(16), dp2px(16), dp2px(16), 0)
                                         addView( HorizontalScrollView(activityContext).apply {
                                             addView(TextView(activityContext).apply {
-                                                text = Libexclavecore.getDepInfo()
+                                                text = Libsagernetcore.getDepInfo()
                                                 textSize = dp2pxf(4)
                                                 typeface = Typeface.MONOSPACE
                                                 isSingleLine = false
@@ -203,7 +201,7 @@ class AboutFragment : ToolbarFragment(R.layout.layout_about) {
                             .setOnClickAction {
                                 startActivity(Intent(
                                     Intent.ACTION_VIEW,
-                                    "https://github.com/ExclaveNetwork/Exclave".toUri()
+                                    "https://github.com/dyhkwong/Exclave".toUri()
                                 ))
                             }
                             .build())
@@ -226,7 +224,7 @@ class AboutFragment : ToolbarFragment(R.layout.layout_about) {
                                         TextView(activityContext).apply {
                                             setPadding(dp2px(16))
                                             text = getString(
-                                                if (Libexclavecore.buildWithClash()) {
+                                                if (Libsagernetcore.buildWithClash()) {
                                                     R.string.license_gpl_v3_only
                                                 } else {
                                                     R.string.license_gpl_v3_or_later
@@ -260,7 +258,8 @@ class AboutFragment : ToolbarFragment(R.layout.layout_about) {
                                                 "BSD 2-Clause License",
                                                 "GNU GENERAL PUBLIC LICENSE Version 3",
                                                 "Mozilla Public License Version 2.0",
-                                                "Creative Commons Attribution 4.0 International Public License"
+                                                "Creative Commons Attribution 4.0 International Public License",
+                                                "Community Data License Agreement - Permissive - Version 2.0"
                                             )
                                         )
                                         setOnItemClickListener { _, _, position, _ ->
@@ -273,6 +272,7 @@ class AboutFragment : ToolbarFragment(R.layout.layout_about) {
                                                 5 -> "license/GPL-3.0.txt"
                                                 6 -> "license/MPL-2.0.txt"
                                                 7 -> "license/CC-BY-4.0.txt"
+                                                8 -> "license/CDLA-Permissive-2.0.txt"
                                                 else -> error("index out of bound")
                                             })
                                         }
@@ -291,7 +291,6 @@ class AboutFragment : ToolbarFragment(R.layout.layout_about) {
         private fun showLicenseAlertDialogFromAssets(context: Context, asset: String) {
             AlertDialog.Builder(context).apply {
                 setView(NestedScrollView(context).apply {
-                    layoutDirection = View.LAYOUT_DIRECTION_LTR
                     setPadding(dp2px(16), dp2px(16), dp2px(16), 0)
                     addView( HorizontalScrollView(context).apply {
                         addView(TextView(context).apply {

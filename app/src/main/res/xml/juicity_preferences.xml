@@ -79,18 +79,7 @@
         <EditTextPreference
             app:icon="@drawable/ic_baseline_security_24"
             app:key="serverEchConfig"
-            app:title="@string/ech_config_list"
-            app:useSimpleSummaryProvider="true" />
-        <EditTextPreference
-            app:icon="@drawable/ic_baseline_manage_search_24"
-            app:key="serverEchQueryName"
-            app:title="@string/ech_query_name"
-            app:useSimpleSummaryProvider="true" />
-        <EditTextPreference
-            app:dialogMessage="@string/one_per_line"
-            app:icon="@drawable/ic_action_copyright"
-            app:key="serverServerNameToVerify"
-            app:title="@string/server_name_to_verify"
+            app:title="@string/ech_config"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 

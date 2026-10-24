@@ -34,6 +34,7 @@ import io.nekohasekai.sagernet.databinding.LayoutLogcatBinding
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.utils.ColorUtils
 import io.nekohasekai.sagernet.utils.CrashHandler
+import io.nekohasekai.sagernet.utils.DiagnosticLog
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
@@ -86,8 +87,8 @@ class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
                         "GuardedProcessPool:D",
                         "VpnService:D",
                         "Go:D",
-                        "exclave-core:D",
-                        "libexclavecore:D",
+                        "v2ray-core:D",
+                        "libsagernetcore:D",
                         "libnaive:D",
                         "libshadowquic:D",
                         "Exclave:D",
@@ -191,6 +192,26 @@ class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
                                 ), context.getString(androidx.appcompat.R.string.abc_shareactionprovider_share_with)
                         )
                     )
+                }
+            }
+            R.id.action_send_diagnostic_log -> {
+                runOnDefaultDispatcher {
+                    val logFile = DiagnosticLog.createShareFile()
+                    onMainDispatcher {
+                        if (!isAdded) return@onMainDispatcher
+                        val context = requireContext()
+                        context.startActivity(
+                            Intent.createChooser(
+                                Intent(Intent.ACTION_SEND).setType("text/plain")
+                                    .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                    .putExtra(
+                                        Intent.EXTRA_STREAM, FileProvider.getUriForFile(
+                                            context, BuildConfig.APPLICATION_ID + ".cache", logFile
+                                        )
+                                    ), context.getString(androidx.appcompat.R.string.abc_shareactionprovider_share_with)
+                            )
+                        )
+                    }
                 }
             }
         }

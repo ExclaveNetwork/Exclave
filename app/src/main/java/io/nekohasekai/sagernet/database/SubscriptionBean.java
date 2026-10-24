@@ -38,14 +38,17 @@ public class SubscriptionBean extends Serializable {
     public Boolean autoUpdate;
     public Integer autoUpdateDelay;
     public Long lastUpdated;
+    public Long lastSuccess;
+    public Long lastFailure;
+    public Long cooldownUntil;
+    public Integer failureCount;
+    public Long lastAttempt;
     public Long bytesUsed;
     public Long bytesRemaining;
     public Long expiryDate;
 
     public String nameFilter;
     public String nameFilter1;
-    public String httpHeaders;
-    public String agePrivateKey;
 
     public SubscriptionBean() {
     }
@@ -60,18 +63,21 @@ public class SubscriptionBean extends Serializable {
         output.writeString(customUserAgent);
         output.writeBoolean(autoUpdate);
         output.writeInt(autoUpdateDelay);
-        output.writeLong(lastUpdated);
-        output.writeLong(bytesUsed);
-        output.writeLong(bytesRemaining);
-        output.writeLong(expiryDate);
+        output.writeLong(lastUpdated == null ? 0L : lastUpdated);
+        output.writeLong(bytesUsed == null ? 0L : bytesUsed);
+        output.writeLong(bytesRemaining == null ? 0L : bytesRemaining);
+        output.writeLong(expiryDate == null ? 0L : expiryDate);
         output.writeString(nameFilter);
         output.writeString(nameFilter1);
-        output.writeString(httpHeaders);
-        output.writeString(agePrivateKey);
+        output.writeLong(lastSuccess == null ? 0L : lastSuccess);
+        output.writeLong(lastFailure == null ? 0L : lastFailure);
+        output.writeLong(cooldownUntil == null ? 0L : cooldownUntil);
+        output.writeInt(failureCount == null ? 0 : failureCount);
+        output.writeLong(lastAttempt == null ? 0L : lastAttempt);
     }
 
     public void serializeForShare(ByteBufferOutput output) {
-        output.writeInt(8);
+        output.writeInt(7);
         output.writeInt(type);
         output.writeString(link);
         output.writeBoolean(deduplication);
@@ -82,8 +88,6 @@ public class SubscriptionBean extends Serializable {
         output.writeLong(expiryDate);
         output.writeString(nameFilter);
         output.writeString(nameFilter1);
-        output.writeString(httpHeaders);
-        output.writeString(agePrivateKey);
     }
 
     @Override
@@ -152,13 +156,11 @@ public class SubscriptionBean extends Serializable {
         }
 
         if (version >= 9) {
-            httpHeaders = input.readString();
-            String s = input.readString();
-            if (type == SubscriptionType.AGE) {
-                agePrivateKey = s;
-            } else {
-                agePrivateKey = "";
-            }
+            lastSuccess = input.readLong();
+            lastFailure = input.readLong();
+            cooldownUntil = input.readLong();
+            failureCount = input.readInt();
+            lastAttempt = input.readLong();
         }
     }
 
@@ -209,33 +211,23 @@ public class SubscriptionBean extends Serializable {
         if (version >= 7) {
             nameFilter1 = input.readString();
         }
-
-        if (version >= 8) {
-            String s = input.readString();
-            if (type == SubscriptionType.RAW || type == SubscriptionType.AGE) {
-                httpHeaders = s;
-            } else {
-                httpHeaders = "";
-            }
-            s = input.readString();
-            if (type == SubscriptionType.AGE) {
-                agePrivateKey = s;
-            } else {
-                agePrivateKey = "";
-            }
-        }
     }
 
     @Override
     public void initializeDefaultValues() {
         if (type == null) type = SubscriptionType.RAW;
         if (link == null) link = "";
-        if (deduplication == null) deduplication = false;
+        if (deduplication == null) deduplication = true;
         if (updateWhenConnectedOnly == null) updateWhenConnectedOnly = false;
         if (customUserAgent == null) customUserAgent = "";
-        if (autoUpdate == null) autoUpdate = false;
-        if (autoUpdateDelay == null) autoUpdateDelay = 1440;
+        if (autoUpdate == null) autoUpdate = true;
+        if (autoUpdateDelay == null) autoUpdateDelay = 200;
         if (lastUpdated == null) lastUpdated = 0L;
+        if (lastSuccess == null) lastSuccess = lastUpdated;
+        if (lastFailure == null) lastFailure = 0L;
+        if (cooldownUntil == null) cooldownUntil = 0L;
+        if (failureCount == null) failureCount = 0;
+        if (lastAttempt == null) lastAttempt = 0L;
 
         if (bytesUsed == null) bytesUsed = 0L;
         if (bytesRemaining == null) bytesRemaining = 0L;
@@ -243,12 +235,9 @@ public class SubscriptionBean extends Serializable {
         if (nameFilter1 == null) nameFilter1 = "";
 
         if (expiryDate == null) expiryDate = 0L;
-
-        if (httpHeaders == null) httpHeaders = "";
-        if (agePrivateKey == null) agePrivateKey = "";
     }
 
-    public static final Creator<SubscriptionBean> CREATOR = new CREATOR<>() {
+    public static final Creator<SubscriptionBean> CREATOR = new CREATOR<SubscriptionBean>() {
         @NonNull
         @Override
         public SubscriptionBean newInstance() {

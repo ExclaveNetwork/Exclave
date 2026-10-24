@@ -40,6 +40,7 @@ object CrashHandler : Thread.UncaughtExceptionHandler {
     override fun uncaughtException(thread: Thread, throwable: Throwable) {
 
         Log.e("Exclave", "uncaughtException", throwable)
+        DiagnosticLog.crash(thread, throwable)
 
         val logFile = File.createTempFile("Exclave Crash Report ",
             ".log",
@@ -52,6 +53,10 @@ object CrashHandler : Thread.UncaughtExceptionHandler {
         report += "Thread: $thread\n\n"
 
         report += formatThrowable(throwable) + "\n\n"
+
+        report += "Persistent diagnostic journal: \n\n"
+        report += DiagnosticLog.readForCrashReport()
+        report += "\n\n"
 
         report += "Logcat: \n\n"
 

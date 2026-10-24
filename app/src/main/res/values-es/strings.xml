@@ -69,7 +69,7 @@
     <string name="group_name">Nombre del grupo</string>
     <string name="group_create">Crear grupo</string>
     <string name="group_edit">Editar grupo</string>
-    <string name="raw">Sin formato</string>
+    <string name="raw">Crudo</string>
     <string name="deduplication_sum">Elimina configuraciones duplicadas al actualizar</string>
     <string name="clipboard_empty">El portapapeles está vacío</string>
     <string name="connect">Conectar</string>
@@ -80,6 +80,8 @@
     <string name="require_http">Activar HTTP de entrada</string>
     <string name="general_settings">Ajustes de la aplicación</string>
     <string name="hysteria_obfs">Contraseña de ofuscación</string>
+    <string name="route_reverse_redirect">Dirección de proxy inverso</string>
+    <string name="route_reverse">Proxy inverso</string>
     <string name="route_bypass_ip">Regla de IP para %s</string>
     <string name="route_block">Bloquear</string>
     <string name="hysteria_download_mbps">Velocidad máxima de descarga (Mbps)</string>
@@ -111,7 +113,7 @@
     <string name="quic_key">Clave QUIC</string>
     <string name="uuid">ID de usuario</string>
     <string name="obfs_param">Parámetros de obfs</string>
-    <string name="obfs">Ofuscación</string>
+    <string name="obfs">Obfs</string>
     <string name="protocol_param">Parámetros de protocolo</string>
     <string name="protocol">Protocolo</string>
     <string name="dns_routing_message">Resuelve los dominios en rutas de omisión con el DNS directo</string>
@@ -120,8 +122,8 @@
     <string name="remote_dns">DNS remoto</string>
     <string name="cag_dns">Ajustes de DNS</string>
     <string name="connection_test_error">Error: %s</string>
-    <string name="connection_test_available_http">Éxito: La negociación HTTP tardó %d ms</string>
-    <string name="connection_test_available">Éxito: La negociación HTTPS tardó %d ms</string>
+    <string name="connection_test_available_http">Éxito: El protocolo de enlace HTTP tardó %d ms</string>
+    <string name="connection_test_available">Éxito: El protocolo de enlace HTTPS tardó %d ms</string>
     <string name="connection_test_testing">Probando…</string>
     <string name="allow_insecure_sum">Activar esta opción sin desplegar otras medidas de seguridad conduce al éxito de los ataques man-in-the-middle. NO la actives a menos que sepas lo que estás haciendo.</string>
     <string name="allow_insecure">Omitir verificación del certificado</string>
@@ -135,8 +137,8 @@
     <string name="off">Apagado</string>
     <string name="proxied_apps_summary">Excluir aplicaciones seleccionadas de la VPN o incluir aplicaciones seleccionadas en la VPN</string>
     <string name="proxied_apps">VPN por aplicación</string>
-    <string name="mux_concurrency">Máximo de conexiones simultáneas</string>
-    <string name="enable_mux">Activar Mux.Cool</string>
+    <string name="mux_concurrency">Conexiones simultáneas de Mux</string>
+    <string name="enable_mux">Activar Mux</string>
     <string name="traffic_sniffing">Activar escaneo</string>
     <string name="domain_strategy">Estrategia de dominio</string>
     <string name="route_not_asset">No es un archivo de recurso: Se esperaba .dat, pero se obtuvo %s</string>
@@ -245,7 +247,7 @@
     <string name="wireguard_local_address">Dirección local</string>
     <string name="wireguard_public_key">Clave pública del par</string>
     <string name="wireguard_psk">Clave precompartida del par</string>
-    <string name="copy_success">¡Copiado correcto!</string>
+    <string name="copy_success">¡Copiado exitosamente!</string>
     <string name="traffic_holder">Activa la VPN para registrar estadísticas de tráfico</string>
     <plurals name="udp_connections">
         <item quantity="one">%d conexión UDP</item>
@@ -396,11 +398,11 @@
     <string name="tuic_udp_relay_mode">Modo de retransmisión UDP</string>
     <string name="congestion_control">Control de congestión</string>
     <string name="tuic_disable_sni">Desactivar SNI</string>
-    <string name="flow">Flujo</string>
+    <string name="flow">Fluir</string>
     <string name="ws_max_early_data">Datos iniciales máximos</string>
     <string name="hijack_dns">Secuestrar DNS</string>
     <string name="reality_public_key">Clave pública REALITY</string>
-    <string name="tuic_zero_rtt_handshake">Negociación 0-RTT</string>
+    <string name="tuic_zero_rtt_handshake">Protocolo de enlace 0-RTT</string>
     <string name="alter_id">ID alternativo</string>
     <string name="url">URL</string>
     <string name="connection_test_url_test">Prueba de URL</string>
@@ -418,8 +420,9 @@
     <string name="action_flash_on">Encender flash</string>
     <string name="action_camera_switch">Cambiar cámara</string>
     <string name="hysteria_hop_interval">Intervalo de salto de puerto (s)</string>
-    <string name="mux_settings">Ajustes de Mux.Cool</string>
+    <string name="mux_settings">Ajustes de Mux</string>
     <string name="wireguard_reserved">Reservado</string>
+    <string name="shadowsocks_2022_implementation">Implementación Shadowsocks 2022</string>
     <string name="bootstrap_dns">DNS de arranque</string>
     <string name="brook_fragment">Fragmento</string>
     <string name="remote_dns_query_strategy">Estrategia de consulta de DNS remoto</string>
@@ -455,6 +458,8 @@
     <string name="resolve_destination_for_direct">Resolver destino (directo)</string>
     <string name="edns_client_ip">IP del cliente EDNS</string>
     <string name="allow_apps_bypass_vpn">Permitir que las apps omitan la VPN</string>
+    <string name="ech_config">Configuración ECH</string>
+    <string name="ech_doh_server">Servidor ECH DoH</string>
     <string name="backup_all_profiles">Respaldar todos los perfiles</string>
     <string name="acquire_wake_lock">Adquirir WakeLock</string>
     <string name="log_level">Nivel de registro</string>
@@ -501,7 +506,7 @@
     <string name="network_satellite">Satélite</string>
     <string name="network_invalid">Tipo de red no válido: Se requiere Android %s.</string>
     <string name="require_dns_inbound">Activar DNS de entrada</string>
-    <string name="reality_disable_x25519mlkem768">Desactivar X25519MLKEM768 de REALITY</string>
+    <string name="reality_disable_x25519mlkem768">Desactivar REALITY X25519MLKEM768</string>
     <string name="reality_breaking_change_summary">Compatible con servidores REALITY que no soportan este cambio importante. Esta es una opción temporal y será eliminada en el futuro.</string>
     <string name="anytls_idle_session_check_interval">Intervalo de comprobación de sesión inactiva (s)</string>
     <string name="anytls_idle_session_timeout">Tiempo de espera de sesión inactiva (s)</string>
@@ -532,7 +537,7 @@
     <string name="debug_log_sum">La configuración en ejecución se imprimirá en el registro del sistema, por lo que el registro contendrá las claves secretas utilizadas para conectarse a los servidores. Este nivel de registro es necesario para informar de problemas. Elimine la información confidencial antes de publicar los archivos de registro.</string>
     <string name="do_not_show_again">No volver a mostrar</string>
     <string name="format">Formato: %s</string>
-    <string name="mieru_handshake_mode">Modo de negociación</string>
+    <string name="mieru_handshake_mode">Modo de protocolo de enlace</string>
     <string name="fragment_method">Método de fragmentación</string>
     <string name="tls_record_fragmentation">Fragmentación de registros TLS</string>
     <string name="tcp_segmentation">Segmentación TCP</string>
@@ -564,6 +569,7 @@
     <string name="insecure_warn_sum">Muestra advertencias para perfiles con seguridad equivalente al texto sin cifrar.</string>
     <string name="ech">ECH</string>
     <string name="mieru_traffic_pattern">Patrón de tráfico</string>
+    <string name="server_name_to_verify">ServerNameToVerify</string>
     <string name="require_socks">Activar SOCKS5 de entrada</string>
     <string name="insecure_warning_detail">La seguridad de este perfil es equivalente a la del texto sin cifrar.\n\nEsta advertencia se muestra porque la opción \"Advertencias de seguridad\" está activada.</string>
     <string name="hysteria_hop_interval_min">Intervalo mínimo de salto de puerto (s)</string>
@@ -573,25 +579,4 @@
     <string name="balancer_use_landing_proxy">Usar proxy de aterrizaje de grupo</string>
     <string name="balancer_use_front_proxy">Usar proxy frontal de grupo</string>
     <string name="socks5_udp_authentication_warning">SOCKS5 UDP no está protegido por autenticación con nombre de usuario y contraseña. Si UDP está activado, la autenticación se puede eludir fácilmente.</string>
-    <string name="enable_hysteria2_omit_max_datagram_frame_size">Activar OmitMaxDatagramFrameSize de Hysteria 2</string>
-    <string name="hysteria2_omit_max_datagram_frame_size_sum">Si el servidor Hysteria 2 no es compatible con este cambio importante, UDP no se podrá utilizar. Esta es una opción temporal y puede eliminarse en el futuro.</string>
-    <string name="ssh_keepalive_interval">Intervalo(s) de Keepalive</string>
-    <string name="custom_outbound">Salida personalizada</string>
-    <string name="hysteria2_gecko_max_packet_size">Tamaño máximo de paquete</string>
-    <string name="hysteria2_gecko_min_packet_size">Tamaño mínimo de paquete</string>
-    <string name="nearby_devices_permission_notice">Para funcionar, se requiere el permiso \"dispositivos cercanos\", pero no se ha concedido.</string>
-    <string name="snell_reuse">Reutilizar conexión</string>
-    <string name="pre_shared_key">Clave pre-compartida</string>
-    <string name="snell_obfs_mode">Modo de ofuscación</string>
-    <string name="snell_obfs_host">Host de ofuscación</string>
-    <string name="snell_mode">Modo</string>
-    <string name="anytls_disable_reuse">Deshabilitar la reutilización de la conexión</string>
-    <string name="chrome_parrot_summary">Imita el QUIC Client Hello de Chrome</string>
-    <string name="chrome_parrot_omit_max_datagram_frame_size_datagram_warning">Esta opción está desactivada para que coincida con el comportamiento de Chrome.</string>
-    <string name="option_globally_enabled">Esta opción se ha activado globalmente y el valor se omitirá.</string>
-    <string name="snell_obfs_uri">URI de ofuscación</string>
-    <string name="ssh_host_key">Clave del host</string>
-    <string name="naiveproxy_tunnel_timeout">Tiempo de espera del túnel</string>
-    <string name="naiveproxy_idle_timeout">Tiempo de espera inactivo</string>
-    <string name="uri_template">Plantilla de URI</string>
 </resources>

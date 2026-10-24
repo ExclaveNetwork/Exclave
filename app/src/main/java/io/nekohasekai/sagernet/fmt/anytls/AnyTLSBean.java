@@ -28,8 +28,7 @@ import org.jetbrains.annotations.NotNull;
 
 import io.nekohasekai.sagernet.fmt.AbstractBean;
 import io.nekohasekai.sagernet.fmt.KryoConverters;
-import io.nekohasekai.sagernet.ktx.NetsKt;
-import libexclavecore.Libexclavecore;
+import libsagernetcore.Libsagernetcore;
 
 public class AnyTLSBean extends AbstractBean {
 
@@ -47,16 +46,13 @@ public class AnyTLSBean extends AbstractBean {
     public Boolean allowInsecure;
     public String utlsFingerprint;
     public Boolean echEnabled;
-    public String echConfigList;
-    public String echQueryName;
+    public String echConfig;
     public String realityPublicKey;
     public String realityShortId;
     public String realityFingerprint;
     public Boolean realityDisableX25519Mlkem768;
     public String mtlsCertificate;
     public String mtlsCertificatePrivateKey;
-    public String serverNameToVerify;
-    public Boolean disableReuse;
 
     @Override
     public void initializeDefaultValues() {
@@ -75,21 +71,18 @@ public class AnyTLSBean extends AbstractBean {
         if (allowInsecure == null) allowInsecure = false;
         if (utlsFingerprint == null) utlsFingerprint = "";
         if (echEnabled == null) echEnabled = false;
-        if (echConfigList == null) echConfigList = "";
-        if (echQueryName == null) echQueryName = "";
+        if (echConfig == null) echConfig = "";
         if (realityPublicKey == null) realityPublicKey = "";
         if (realityShortId == null) realityShortId = "";
-        if (realityFingerprint == null) realityFingerprint = "";
+        if (realityFingerprint == null) realityFingerprint = "chrome";
         if (realityDisableX25519Mlkem768 == null) realityDisableX25519Mlkem768 = false;
         if (mtlsCertificate == null) mtlsCertificate = "";
         if (mtlsCertificatePrivateKey == null) mtlsCertificatePrivateKey = "";
-        if (serverNameToVerify == null) serverNameToVerify = "";
-        if (disableReuse == null) disableReuse = false;
     }
 
     @Override
     public void serialize(ByteBufferOutput output) {
-        output.writeInt(8);
+        output.writeInt(5);
         super.serialize(output);
         output.writeString(password);
         output.writeInt(idleSessionCheckInterval);
@@ -104,7 +97,7 @@ public class AnyTLSBean extends AbstractBean {
         output.writeString(pinnedPeerCertificateSha256);
         output.writeBoolean(allowInsecure);
         output.writeString(utlsFingerprint);
-        output.writeString(echConfigList);
+        output.writeString(echConfig);
         output.writeString(realityPublicKey);
         output.writeString(realityShortId);
         output.writeString(realityFingerprint);
@@ -113,9 +106,6 @@ public class AnyTLSBean extends AbstractBean {
         output.writeString(mtlsCertificatePrivateKey);
 
         output.writeBoolean(echEnabled);
-        output.writeString(serverNameToVerify);
-        output.writeBoolean(disableReuse);
-        output.writeString(echQueryName);
     }
 
     @Override
@@ -139,8 +129,8 @@ public class AnyTLSBean extends AbstractBean {
         }
         allowInsecure = input.readBoolean();
         utlsFingerprint = input.readString();
-        echConfigList = input.readString();
-        if (version <= 4 && !echConfigList.isEmpty()) {
+        echConfig = input.readString();
+        if (version <= 4 && !echConfig.isEmpty()) {
             echEnabled = true;
         }
         if (version <= 2) {
@@ -161,15 +151,6 @@ public class AnyTLSBean extends AbstractBean {
         }
         if (version >= 5) {
             echEnabled = input.readBoolean();
-        }
-        if (version >= 6) {
-            serverNameToVerify = input.readString();
-        }
-        if (version >= 7) {
-            disableReuse = input.readBoolean();
-        }
-        if (version >= 8) {
-            echQueryName = input.readString();
         }
     }
 
@@ -196,11 +177,9 @@ public class AnyTLSBean extends AbstractBean {
         }
         bean.utlsFingerprint = utlsFingerprint;
         bean.echEnabled = echEnabled;
-        bean.echConfigList = echConfigList;
+        bean.echConfig = echConfig;
         bean.realityFingerprint = realityFingerprint;
         bean.realityDisableX25519Mlkem768 = realityDisableX25519Mlkem768;
-        bean.disableReuse = disableReuse;
-        bean.echQueryName = echQueryName;
     }
 
     @NotNull
@@ -224,7 +203,7 @@ public class AnyTLSBean extends AbstractBean {
 
     @Override
     public boolean isInsecure() {
-        if (Libexclavecore.isLoopbackIP(serverAddress) || serverAddress.equals("localhost")) {
+        if (Libsagernetcore.isLoopbackIP(serverAddress) || serverAddress.equals("localhost")) {
             return false;
         }
         switch(security) {
@@ -245,9 +224,6 @@ public class AnyTLSBean extends AbstractBean {
                     return false;
                 }
                 if (!pinnedPeerCertificateSha256.isEmpty()) {
-                    return false;
-                }
-                if (!NetsKt.listByLineOrComma(serverNameToVerify).isEmpty()) {
                     return false;
                 }
                 break;

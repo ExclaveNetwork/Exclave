@@ -360,14 +360,9 @@
         <item>quic</item>
     </string-array>
 
-    <string-array name="trusttunnel_protocol_entry">
-        <item>HTTP/2</item>
-        <item>HTTP/3</item>
-    </string-array>
-
     <string-array name="config_type_entry">
-        <item>@string/custom_config</item>
-        <item>@string/custom_outbound</item>
+        <item>V2Ray</item>
+        <item>V2Ray Outbound</item>
     </string-array>
     <string-array name="config_type_value">
         <item>v2ray</item>
@@ -425,6 +420,16 @@
         <item>2</item>
     </string-array>
 
+    <string-array name="shadowsocks_2022_implementation">
+        <item>SagerNet/sing-shadowsocks2</item>
+        <item>v2fly/v2ray-core</item>
+    </string-array>
+
+    <string-array name="shadowsocks_2022_implementation_value">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
     <string-array name="group_types">
         <item>@string/group_basic</item>
         <item>@string/subscription</item>
@@ -433,13 +438,11 @@
     <string-array name="subscription_types">
         <item>@string/raw</item>
         <item>SIP008</item>
-        <item>age</item>
     </string-array>
 
     <string-array name="subscription_types_value">
         <item>0</item>
         <item>2</item>
-        <item>3</item>
     </string-array>
 
     <string-array name="socks_versions">
@@ -548,59 +551,7 @@
         <item>hello360_11_0</item>
     </string-array>
 
-    <string-array name="reality_fingerprint_entry">
-        <item>@string/disable</item>
-        <item>chrome</item>
-        <item>firefox</item>
-        <item>safari</item>
-        <item>ios</item>
-        <item>edge</item>
-        <item>qq</item>
-        <item>random</item>
-        <item>randomized</item>
-        <item>randomizednoalpn</item>
-        <item>hellofirefox_120</item>
-        <item>hellofirefox_148</item>
-        <item>hellochrome_120</item>
-        <item>hellochrome_131</item>
-        <item>hellochrome_133</item>
-        <item>helloios_13</item>
-        <item>helloios_14</item>
-        <item>helloedge_106</item>
-        <item>hellosafari_26_3</item>
-        <item>hello360_11_0</item>
-        <item>helloqq_11_1</item>
-        <item>hellogolang</item>
-        <item>hellorandomized</item>
-        <item>hellorandomizedalpn</item>
-        <item>hellorandomizednoalpn</item>
-        <item>hellofirefox_auto</item>
-        <item>hellofirefox_63</item>
-        <item>hellofirefox_65</item>
-        <item>hellofirefox_99</item>
-        <item>hellofirefox_102</item>
-        <item>hellofirefox_105</item>
-        <item>hellochrome_auto</item>
-        <item>hellochrome_70</item>
-        <item>hellochrome_72</item>
-        <item>hellochrome_83</item>
-        <item>hellochrome_87</item>
-        <item>hellochrome_96</item>
-        <item>hellochrome_100</item>
-        <item>hellochrome_102</item>
-        <item>hellochrome_106_shuffle</item>
-        <item>helloios_auto</item>
-        <item>helloedge_85</item>
-        <item>helloedge_auto</item>
-        <item>hellosafari_16_0</item>
-        <item>hellosafari_auto</item>
-        <item>helloqq_auto</item>
-        <item>hellochrome_115_pq</item>
-        <item>hellochrome_120_pq</item>
-    </string-array>
-
     <string-array name="reality_fingerprint_value">
-        <item />
         <item>chrome</item>
         <item>firefox</item>
         <item>safari</item>
@@ -610,44 +561,44 @@
         <item>random</item>
         <item>randomized</item>
         <item>randomizednoalpn</item>
-        <item>hellofirefox_120</item>
-        <item>hellofirefox_148</item>
-        <item>hellochrome_120</item>
-        <item>hellochrome_131</item>
-        <item>hellochrome_133</item>
-        <item>helloios_13</item>
-        <item>helloios_14</item>
-        <item>helloedge_106</item>
-        <item>hellosafari_26_3</item>
-        <item>hello360_11_0</item>
-        <item>helloqq_11_1</item>
         <item>hellogolang</item>
-        <item>hellorandomized</item>
-        <item>hellorandomizedalpn</item>
-        <item>hellorandomizednoalpn</item>
-        <item>hellofirefox_auto</item>
-        <item>hellofirefox_63</item>
-        <item>hellofirefox_65</item>
         <item>hellofirefox_99</item>
         <item>hellofirefox_102</item>
         <item>hellofirefox_105</item>
-        <item>hellochrome_auto</item>
-        <item>hellochrome_70</item>
-        <item>hellochrome_72</item>
+        <item>hellofirefox_120</item>
+        <item>hellofirefox_148</item>
         <item>hellochrome_83</item>
         <item>hellochrome_87</item>
         <item>hellochrome_96</item>
         <item>hellochrome_100</item>
         <item>hellochrome_102</item>
         <item>hellochrome_106_shuffle</item>
-        <item>helloios_auto</item>
+        <item>hellochrome_115_pq</item>
+        <item>hellochrome_120</item>
+        <item>hellochrome_120_pq</item>
+        <item>hellochrome_131</item>
+        <item>hellochrome_133</item>
+        <item>helloios_13</item>
+        <item>helloios_14</item>
         <item>helloedge_85</item>
-        <item>helloedge_auto</item>
+        <item>helloedge_106</item>
         <item>hellosafari_16_0</item>
+        <item>hellosafari_26_3</item>
+        <item>hello360_11_0</item>
+        <item>helloqq_11_1</item>
+        <item>hellorandomized</item>
+        <item>hellorandomizedalpn</item>
+        <item>hellorandomizednoalpn</item>
+        <item>hellofirefox_auto</item>
+        <item>hellofirefox_63</item>
+        <item>hellofirefox_65</item>
+        <item>hellochrome_auto</item>
+        <item>hellochrome_70</item>
+        <item>hellochrome_72</item>
+        <item>helloios_auto</item>
+        <item>helloedge_auto</item>
         <item>hellosafari_auto</item>
         <item>helloqq_auto</item>
-        <item>hellochrome_115_pq</item>
-        <item>hellochrome_120_pq</item>
     </string-array>
 
     <string-array name="group_orders">
@@ -696,9 +647,9 @@
     </string-array>
 
     <string-array name="root_ca_provider_entry">
-        <item>Mozilla</item>
-        <item>Go</item>
-        <item>Android</item>
+        <item>@string/root_ca_mozilla</item>
+        <item>@string/root_ca_system</item>
+        <item>@string/root_ca_system_and_user</item>
         <item>@string/route_rules_custom</item>
     </string-array>
 
@@ -826,10 +777,14 @@
         <item>Shadowsocks</item>
     </string-array>
 
+    <string-array name="shadowtls_protocol_version_value">
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
     <string-array name="language_entry">
         <item>@string/language_system_default</item>
         <item>@string/language_ar_display_name</item>
-        <item>@string/language_cs_display_name</item>
         <item>@string/language_en_display_name</item>
         <item>@string/language_es_display_name</item>
         <item>@string/language_fa_display_name</item>
@@ -837,10 +792,8 @@
         <item>@string/language_id_display_name</item>
         <item>@string/language_it_display_name</item>
         <item>@string/language_ja_display_name</item>
-        <item>@string/language_ko_display_name</item>
         <item>@string/language_nb_NO_display_name</item>
         <item>@string/language_ru_display_name</item>
-        <item>@string/language_ta_display_name</item>
         <item>@string/language_tr_display_name</item>
         <item>@string/language_zh_Hans_CN_display_name</item>
         <item>@string/language_zh_Hant_TW_display_name</item>
@@ -849,7 +802,6 @@
     <string-array name="language_value">
         <item />
         <item>ar</item>
-        <item>cs</item>
         <item>en-US</item>
         <item>es</item>
         <item>fa</item>
@@ -857,10 +809,8 @@
         <item>id</item>
         <item>it</item>
         <item>ja</item>
-        <item>ko</item>
         <item>nb-NO</item>
         <item>ru</item>
-        <item>ta</item>
         <item>tr</item>
         <item>zh-Hans-CN</item>
         <item>zh-Hant-TW</item>
@@ -917,6 +867,8 @@
         <item>websocket-http</item>
         <item>websocket-tls</item>
         <item>quic-tls</item>
+        <item>grpc</item>
+        <item>grpc-tls</item>
     </string-array>
 
     <string-array name="v2ray_plugin_log_level">
@@ -941,42 +893,8 @@
     <string-array name="shadowquic_congestion_control_value">
         <item>bbr</item>
         <item>cubic</item>
-        <item>new_reno</item>
-    </string-array>
-
-    <string-array name="hysteria2_obfs_type">
-        <item />
-        <item>salamander</item>
-        <item>gecko</item>
-    </string-array>
-
-    <string-array name="snell_version_value">
-        <item>4</item>
-        <item>6</item>
-    </string-array>
-
-    <string-array name="snell_obfs_value">
-        <item>none</item>
-        <item>http</item>
-        <item>tls</item>
-    </string-array>
-
-    <string-array name="snell_mode_value">
-        <item>default</item>
-        <item>unshaped</item>
-        <item>unsafe-raw</item>
-    </string-array>
-
-    <string-array name="stun_test_type">
-        <item>@string/stun_test</item>
-        <item>@string/stun_legacy_test</item>
-        <item>@string/udp</item>
-        <item>@string/tcp</item>
-    </string-array>
-
-    <string-array name="masque_transport_layer_encryption_value">
-        <item/>
-        <item>tls</item>
+        <item>new-reno</item>
+        <item>brutal</item>
     </string-array>
 
 </resources>

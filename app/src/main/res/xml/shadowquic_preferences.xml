@@ -35,19 +35,27 @@
             app:title="@string/sni"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
-            app:defaultValue="h3"
             app:dialogMessage="@string/one_per_line"
             app:icon="@drawable/ic_baseline_legend_toggle_24"
             app:key="serverALPN"
             app:title="@string/alpn"
+            app:useSimpleSummaryProvider="true" />
+        <SwitchPreference
+            app:icon="@drawable/ic_baseline_fingerprint_24"
+            app:key="serverShadowQUICDisableALPN"
+            app:title="Disable ALPN"
             app:useSimpleSummaryProvider="true" />
         <io.nekohasekai.sagernet.widget.SimpleMenuPreference
             app:entries="@array/shadowquic_congestion_control_value"
             app:entryValues="@array/shadowquic_congestion_control_value"
             app:icon="@drawable/ic_baseline_compare_arrows_24"
             app:key="serverCongestionController"
-            app:singleLineTitle="false"
             app:title="@string/congestion_control"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:icon="@drawable/ic_file_file_upload"
+            app:key="serverUploadSpeed"
+            app:title="Upload bandwidth (Mbps)"
             app:useSimpleSummaryProvider="true" />
         <SwitchPreference
             app:icon="@drawable/baseline_flight_takeoff_24"
@@ -57,6 +65,16 @@
             app:icon="@drawable/baseline_wrap_text_24"
             app:key="serverBrookUdpOverStream"
             app:title="@string/brook_udp_over_stream"
+            app:useSimpleSummaryProvider="true" />
+        <SwitchPreference
+            app:icon="@drawable/ic_baseline_layers_24"
+            app:key="serverShadowQUICUseSunnyQUIC"
+            app:title="SunnyQUIC"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_vpn_key_24"
+            app:key="serverCertificates"
+            app:title="@string/certificates"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 

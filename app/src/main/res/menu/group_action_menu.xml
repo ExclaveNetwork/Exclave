@@ -23,8 +23,16 @@
                 </menu>
             </item>
             <item
+                android:id="@+id/action_export_backup"
+                android:title="@string/backup">
+                <menu>
+                    <item
+                        android:id="@+id/action_export_backup_clipboard"
+                        android:title="@string/action_export_clipboard" />
+                </menu>
+            </item>
+            <item
                 android:id="@+id/action_export_backup_of_all_profiles"
-                android:visible="false"
                 android:title="@string/backup_all_profiles">
                 <menu>
                     <item
@@ -37,6 +45,12 @@
             </item>
         </menu>
     </item>
+    <item
+        android:id="@+id/action_group_pin"
+        android:title="@string/group_pin" />
+    <item
+        android:id="@+id/action_reset_group_health_check"
+        android:title="@string/group_health_check_reset_group" />
     <item
         android:id="@+id/action_clear"
         android:title="@string/clear_profiles" />

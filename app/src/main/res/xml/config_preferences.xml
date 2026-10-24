@@ -12,7 +12,6 @@
         app:entryValues="@array/config_type_value"
         app:icon="@drawable/ic_baseline_nfc_24"
         app:key="serverProtocol"
-        app:singleLineTitle="false"
         app:title="@string/config_type"
         app:useSimpleSummaryProvider="true" />
 

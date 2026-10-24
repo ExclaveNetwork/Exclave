@@ -1,8 +1,8 @@
 #!/bin/bash
 
-CGO_LDFLAGS="-Wl,-z,max-page-size=16384" gomobile bind -v -androidapi 21 -tags="with_clash" "github.com/exclavenetwork/libexclavecore" || exit 1
+CGO_LDFLAGS="-Wl,-z,max-page-size=16384" gomobile bind -v -androidapi 21 -tags="with_clash" "github.com/dyhkwong/libsagernetcore" || exit 1
 
 proj=../../app/libs
 if [ -d $proj ]; then
-  cp -vf libexclavecore.aar $proj
+  cp -vf libsagernetcore.aar $proj
 fi

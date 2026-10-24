@@ -26,8 +26,7 @@ import io.nekohasekai.sagernet.fmt.AbstractBean;
 import io.nekohasekai.sagernet.fmt.shadowsocks.ShadowsocksBean;
 import io.nekohasekai.sagernet.fmt.socks.SOCKSBean;
 import io.nekohasekai.sagernet.fmt.trojan.TrojanBean;
-import io.nekohasekai.sagernet.ktx.NetsKt;
-import libexclavecore.Libexclavecore;
+import libsagernetcore.Libsagernetcore;
 
 public abstract class StandardV2RayBean extends AbstractBean {
 
@@ -61,9 +60,7 @@ public abstract class StandardV2RayBean extends AbstractBean {
     public String mtlsCertificatePrivateKey;
     public String utlsFingerprint;
     public Boolean echEnabled;
-    public String echConfigList;
-    public String echQueryName;
-    public String serverNameToVerify;
+    public String echConfig;
 
     public Boolean wsUseBrowserForwarder;
     public Boolean shUseBrowserForwarder;
@@ -79,7 +76,6 @@ public abstract class StandardV2RayBean extends AbstractBean {
     public Long hy2DownMbps;
     public Long hy2UpMbps;
     public String hy2Password;
-    public Boolean hy2ChromeParrot;
 
     public String mekyaKcpSeed;
     public String mekyaKcpHeaderType;
@@ -146,20 +142,17 @@ public abstract class StandardV2RayBean extends AbstractBean {
         if (packetEncoding == null) packetEncoding = "none";
         if (utlsFingerprint == null) utlsFingerprint = "";
         if (echEnabled == null) echEnabled = false;
-        if (echConfigList == null) echConfigList = "";
-        if (echQueryName == null) echQueryName = "";
-        if (serverNameToVerify == null) serverNameToVerify = "";
+        if (echConfig == null) echConfig = "";
 
         if (realityPublicKey == null) realityPublicKey = "";
         if (realityShortId == null) realityShortId = "";
         if (realityMldsa65Verify == null) realityMldsa65Verify = "";
-        if (realityFingerprint == null) realityFingerprint = "";
+        if (realityFingerprint == null) realityFingerprint = "chrome";
         if (realityDisableX25519Mlkem768 == null) realityDisableX25519Mlkem768 = false;
 
         if (hy2DownMbps == null) hy2DownMbps = 0L;
         if (hy2UpMbps == null) hy2UpMbps = 0L;
         if (hy2Password == null) hy2Password = "";
-        if (hy2ChromeParrot == null) hy2ChromeParrot = false;
 
         if (mekyaKcpSeed == null) mekyaKcpSeed = "";
         if (mekyaKcpHeaderType == null) mekyaKcpHeaderType = "none";
@@ -179,7 +172,7 @@ public abstract class StandardV2RayBean extends AbstractBean {
 
     @Override
     public void serialize(ByteBufferOutput output) {
-        output.writeInt(40);
+        output.writeInt(36);
         super.serialize(output);
 
         output.writeString(uuid);
@@ -268,7 +261,7 @@ public abstract class StandardV2RayBean extends AbstractBean {
                 output.writeString(pinnedPeerCertificateSha256);
                 output.writeBoolean(allowInsecure);
                 output.writeString(utlsFingerprint);
-                output.writeString(echConfigList);
+                output.writeString(echConfig);
                 output.writeString(mtlsCertificate);
                 output.writeString(mtlsCertificatePrivateKey);
                 break;
@@ -314,9 +307,6 @@ public abstract class StandardV2RayBean extends AbstractBean {
         output.writeBoolean(echEnabled);
 
         output.writeString(realityMldsa65Verify);
-        output.writeString(serverNameToVerify);
-        output.writeBoolean(hy2ChromeParrot);
-        output.writeString(echQueryName);
     }
 
     @Override
@@ -451,10 +441,6 @@ public abstract class StandardV2RayBean extends AbstractBean {
             case "tls": {
                 sni = input.readString();
                 alpn = input.readString();
-                if (version <= 39 && type.equals("quic") && (alpn == null || NetsKt.listByLineOrComma(alpn).isEmpty())) {
-                    // https://github.com/ExclaveNetwork/Exclave/issues/488
-                    alpn = "h2\nhttp/1.1";
-                }
                 if (version >= 1) {
                     certificates = input.readString();
                     pinnedPeerCertificateChainSha256 = input.readString();
@@ -470,8 +456,8 @@ public abstract class StandardV2RayBean extends AbstractBean {
                     utlsFingerprint = input.readString();
                 }
                 if (version >= 21) {
-                    echConfigList = input.readString();
-                    if (version <= 34 && !echConfigList.isEmpty()) {
+                    echConfig = input.readString();
+                    if (version <= 34 && !echConfig.isEmpty()) {
                         echEnabled = true;
                     }
                     if (version <= 28) {
@@ -574,15 +560,6 @@ public abstract class StandardV2RayBean extends AbstractBean {
         if (version >= 36) {
             realityMldsa65Verify = input.readString();
         }
-        if (version >= 37) {
-            serverNameToVerify = input.readString();
-        }
-        if (version >= 38) {
-            hy2ChromeParrot = input.readBoolean();
-        }
-        if (version >= 39) {
-            echQueryName = input.readString();
-        }
     }
 
     @Override
@@ -615,19 +592,15 @@ public abstract class StandardV2RayBean extends AbstractBean {
             bean.pinnedPeerCertificateSha256 = pinnedPeerCertificateSha256;
         }
         if (bean instanceof VLESSBean || bean instanceof VMessBean || bean instanceof TrojanBean) {
-            if ((bean.echEnabled == null || !bean.echEnabled) && echEnabled) {
+            if (bean.echEnabled == null || !bean.echEnabled && !echEnabled) {
                 bean.echEnabled = echEnabled;
             }
-            if ((bean.echConfigList == null || bean.echConfigList.isEmpty()) && !echConfigList.isEmpty()) {
-                bean.echConfigList = echConfigList;
-            }
-            if ((bean.echQueryName == null || bean.echQueryName.isEmpty()) && !echQueryName.isEmpty()) {
-                bean.echQueryName = echQueryName;
+            if (bean.echConfig == null || bean.echConfig.isEmpty() && !echConfig.isEmpty()) {
+                bean.echConfig = echConfig;
             }
         } else {
             bean.echEnabled = echEnabled;
-            bean.echConfigList = echConfigList;
-            bean.echQueryName = echQueryName;
+            bean.echConfig = echConfig;
         }
         if (bean.packetEncoding == null) {
             bean.packetEncoding = packetEncoding;
@@ -647,12 +620,11 @@ public abstract class StandardV2RayBean extends AbstractBean {
         bean.singMuxMinStreams = singMuxMinStreams;
         bean.singMuxMaxStreams = singMuxMaxStreams;
         bean.singMuxPadding = singMuxPadding;
-        bean.hy2ChromeParrot = hy2ChromeParrot;
     }
 
     @Override
     public boolean isInsecure() {
-        if (Libexclavecore.isLoopbackIP(serverAddress) || serverAddress.equals("localhost")) {
+        if (Libsagernetcore.isLoopbackIP(serverAddress) || serverAddress.equals("localhost")) {
             return false;
         }
         switch (security) {
@@ -671,9 +643,6 @@ public abstract class StandardV2RayBean extends AbstractBean {
                     return false;
                 }
                 if (!pinnedPeerCertificateSha256.isEmpty()) {
-                    return false;
-                }
-                if (!NetsKt.listByLineOrComma(serverNameToVerify).isEmpty()) {
                     return false;
                 }
                 break;

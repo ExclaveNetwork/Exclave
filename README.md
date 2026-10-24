@@ -25,27 +25,24 @@ Some supported protocols:
 - VMess (with various optional sub-protocols)
 - VLESS (with various optional sub-protocols)
 - WireGuard (TCP and UDP only)
-- MASQUE (a.k.a. CONNECT-IP, TCP and UDP only)
 - TrustTunnel (no ICMP echo support)
-- Snell v4 and Snell v6
-- ShadowQUIC
 - SSH proxy ("dynamic port forwarding")
-- HTTP CONNECT tunnel (HTTP/1.1, HTTP/1.1 with TLS, HTTP/2 and HTTP/3, with CONNECT-UDP support)
+- HTTP CONNECT tunnel (HTTP/1.1, HTTP/1.1 with TLS, HTTP/2 and HTTP/3)
 - SOCKS4, SOCKS4A and SOCKS5
 
 </details>
+
+It is a fork of the archived Android proxy client SagerNet and uses a custom overhauled fork of V2Ray.
 
 ## Download
 
 - Exclave
 
-  [Download from GitHub releases](https://github.com/ExclaveNetwork/Exclave/releases)
+  [Download from GitHub releases](https://github.com/dyhkwong/Exclave/releases)
 
   [Download from F-Droid](https://f-droid.org/packages/com.github.dyhkwong.sagernet)
 
   SHA-256 hash of the signing certificate: `e9fe39e1ce254c50c2f9470a757b378c0b7cc536119867f7691405b592e6994b`
-
-  The default flavor (versions without `-legacy` suffix) supports Android 7.0+. The legacy flavor (versions with `-legacy` suffix, with some Gradle dependencies pinned to old versions) supports Android 5.0+. The legacy flavor is for old devices only and using it on new devices may lead to [unexpected behaviors](https://issuetracker.google.com/issues/519796838). The support for the legacy flavor is on a best-efforts basis and may be ended at any time.
 
 - NaïveProxy Plugin
 
@@ -53,11 +50,11 @@ Some supported protocols:
 
   It is distributed and signed by the upstream author.
 
-Starting in ~~September 2026~~ 2027, Google will [block apps from "sideloading"](https://developer.android.com/developer-verification) on [certified Android devices](https://www.android.com/certified/partners/). If you are a user who values digital freedom, we need your voice to [express opposition](https://keepandroidopen.org/). Your support will not only help save this app, but also help defend software freedom and open distribution.
+Starting in September 2026, Google will [block apps from "sideloading"](https://developer.android.com/developer-verification) on [certified Android devices](https://www.android.com/certified/partners/). If you are a user who values digital freedom, we need your voice to [express opposition](https://keepandroidopen.org/). Your support will not only help save this app, but also help defend software freedom and open distribution.
 
 ## Explanation of terms
 
-[Exclave wiki](https://github.com/ExclaveNetwork/Exclave/wiki). It contains some subjective comments. Viewer discretion is advised.
+[Exclave wiki](https://github.com/dyhkwong/Exclave/wiki). It contains some subjective comments. Viewer discretion is advised.
 
 ## Translation
 
@@ -65,7 +62,7 @@ Is Exclave not in your language, or the translation is incorrect or incomplete? 
 
 ## Issue tracker
 
-Please report bugs and submit feature requests [here](https://github.com/ExclaveNetwork/Exclave/issues).
+Please report bugs and submit feature requests [here](https://github.com/dyhkwong/Exclave/issues). Do not report to v2ray-core as this project has heavily modified the code of v2ray-core.
 
 - Before creating a new issue, please search for existing ones. Do not create duplicate issues.
 - Old versions are not supported. Please ensure that you are using the latest version.
@@ -76,12 +73,12 @@ Please report bugs and submit feature requests [here](https://github.com/Exclave
 
 ## Discussion
 
-- Public [discussions](https://github.com/ExclaveNetwork/Exclave/discussions) are always preferred because they can be viewed by everyone.
+- Public [discussions](https://github.com/dyhkwong/Exclave/discussions) are always preferred because they can be viewed by everyone.
 - Private [chat group](https://t.me/s/exclavian).
 
 ## Code contribution
 
-- Create a [pull request](https://github.com/ExclaveNetwork/Exclave/pulls) to contribute code. New features needs prior communications in the issue tracker, while bug fixes does not.
+- Create a [pull request](https://github.com/dyhkwong/Exclave/pulls) to contribute code. New features needs prior communications in the issue tracker, while bug fixes does not.
 
 ## License
 
@@ -103,12 +100,12 @@ Please report bugs and submit feature requests [here](https://github.com/Exclave
 
 ## Notice
 
-Exclave is licensed under the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. However, Exclave optionally incorporates code covered by the GNU General Public License as published by the Free Software Foundation, version 3. If `github.com/exclavenetwork/libexclavecore` is compiled with `with_clash` tag, the GNU General Public License as published by the Free Software Foundation, version 3, applies to all of Exclave.
+Exclave is licensed under the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. However, Exclave optionally incorporates code covered by the GNU General Public License as published by the Free Software Foundation, version 3. If `github.com/dyhkwong/libsagernetcore` is compiled with `with_clash` tag, the GNU General Public License as published by the Free Software Foundation, version 3, applies to all of Exclave.
 
 ## Build from source
 
-- Install and configure JDK 21, Go 1.27 and Go Mobile.
-- Install and configure Android SDK Platform 37.2, Android SDK Build-Tools 37.0.0, Android SDK Platform-Tools and Android NDK r30 through Android Studio or Android SDK Command-line Tools.
+- Install and configure JDK 21, Go 1.26 and Go Mobile.
+- Install and configure Android SDK Platform 36 and 37.0, Android SDK Build-Tools 37.0.0, Android SDK Platform-Tools and Android NDK r29 through Android Studio or Android SDK Command-line Tools.
 - Replace `release.keystore` with your own. It can be generated with Java `keytool`.
 - Create a new `local.properties` file if it does not exist. Append the following lines to `local.properties`.
 ```
@@ -119,17 +116,17 @@ Exclave is licensed under the GNU General Public License as published by the Fre
 
 - Linux (x64) or macOS (x64/arm64):
 
-  - Build libexclavecore: `./run lib core` or `./library/core/build.sh`
+  - Build libsagernetcore: `./run lib core` or `./library/core/build.sh`
   - Download assets: `./gradlew :app:downloadAssets`, or update assets to the latest version: `./gradlew :app:updateAssets`
-  - Build Exclave: `./gradlew :app:assembleOssRelease` (default flavor) or `./gradlew :app:assembleLegacyRelease` (legacy flavor)
+  - Build Exclave: `./gradlew :app:assembleOssRelease`
 
 - Windows (x64):
 
-  - Build libexclavecore: `.\library\core\build.bat`
-  - Download assets: `.\gradlew.bat :app:downloadAssets`, or update assets to the latest version: `.\gradlew.bat :app:updateAssets`
-  - Build Exclave: `.\gradlew.bat :app:assembleOssRelease` (default flavor) or `.\gradlew.bat :app:assembleLegacyRelease` (legacy flavor)
+  - Build libsagernetcore: `./library/core/build.bat`
+  - Download assets: `./gradlew.bat :app:downloadAssets`, or update assets to the latest version: `./gradlew.bat :app:updateAssets`
+  - Build Exclave: `./gradlew.bat :app:assembleOssRelease`
 
-- APK files are located in `.\app\build\outputs\apk\oss\release` (default flavor) or `.\app\build\outputs\apk\legacy\release` (legacy flavor).
+- APK files are located in `./app/build/outputs/apk/oss/release`
 
 ## Acknowledgment
 

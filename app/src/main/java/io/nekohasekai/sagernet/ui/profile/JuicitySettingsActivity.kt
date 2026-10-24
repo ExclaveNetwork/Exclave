@@ -47,11 +47,9 @@ class JuicitySettingsActivity : ProfileSettingsActivity<JuicityBean>() {
         DataStore.serverPinnedCertificatePublicKey = pinnedPeerCertificatePublicKeySha256
         DataStore.serverPinnedCertificate = pinnedPeerCertificateSha256
         DataStore.serverEchEnabled = echEnabled
-        DataStore.serverEchConfigList = echConfigList
-        DataStore.serverEchQueryName = echQueryName
+        DataStore.serverEchConfig = echConfig
         DataStore.serverMtlsCertificate = mtlsCertificate
         DataStore.serverMtlsCertificatePrivateKey = mtlsCertificatePrivateKey
-        DataStore.serverServerNameToVerify = serverNameToVerify
     }
 
     override fun JuicityBean.serialize() {
@@ -67,11 +65,9 @@ class JuicitySettingsActivity : ProfileSettingsActivity<JuicityBean>() {
         pinnedPeerCertificatePublicKeySha256 = DataStore.serverPinnedCertificatePublicKey
         pinnedPeerCertificateSha256 = DataStore.serverPinnedCertificate
         echEnabled = DataStore.serverEchEnabled
-        echConfigList = DataStore.serverEchConfigList
-        echQueryName = DataStore.serverEchQueryName
+        echConfig = DataStore.serverEchConfig
         mtlsCertificate = DataStore.serverMtlsCertificate
         mtlsCertificatePrivateKey = DataStore.serverMtlsCertificatePrivateKey
-        serverNameToVerify = DataStore.serverServerNameToVerify
     }
 
     override fun PreferenceFragmentCompat.createPreferences(
@@ -88,13 +84,10 @@ class JuicitySettingsActivity : ProfileSettingsActivity<JuicityBean>() {
         }
 
         val echEnabled = findPreference<SwitchPreference>(Key.SERVER_ECH_ENABLED)!!
-        val echConfigList = findPreference<EditTextPreference>(Key.SERVER_ECH_CONFIG_LIST)!!
-        val echQueryName = findPreference<EditTextPreference>(Key.SERVER_ECH_QUERY_NAME)!!
-        echConfigList.isEnabled = echEnabled.isChecked
-        echQueryName.isEnabled = echEnabled.isChecked
+        val echConfig = findPreference<EditTextPreference>(Key.SERVER_ECH_CONFIG)!!
+        echConfig.isEnabled = echEnabled.isChecked
         echEnabled.setOnPreferenceChangeListener { _, newValue ->
-            echConfigList.isEnabled = newValue as Boolean
-            echQueryName.isEnabled = newValue
+            echConfig.isEnabled = newValue as Boolean
             true
         }
     }

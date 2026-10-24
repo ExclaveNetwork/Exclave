@@ -24,29 +24,11 @@
             app:key="serverPassword"
             app:title="@string/password"
             app:useSimpleSummaryProvider="true" />
-        <io.nekohasekai.sagernet.widget.SimpleMenuPreference
-            app:icon="@drawable/ic_baseline_texture_24"
-            app:key="serverHysteria2ObfsType"
-            app:entries="@array/hysteria2_obfs_type"
-            app:entryValues="@array/hysteria2_obfs_type"
-            app:singleLineTitle="false"
-            app:title="@string/obfs"
-            app:useSimpleSummaryProvider="true"/>
         <EditTextPreference
             app:dialogLayout="@layout/layout_password_dialog"
             app:icon="@drawable/ic_baseline_texture_24"
             app:key="serverObfs"
             app:title="@string/hysteria_obfs"
-            app:useSimpleSummaryProvider="true" />
-        <EditTextPreference
-            app:icon="@drawable/ic_baseline_texture_24"
-            app:key="serverHysteria2GeckoMinPacketSize"
-            app:title="@string/hysteria2_gecko_min_packet_size"
-            app:useSimpleSummaryProvider="true" />
-        <EditTextPreference
-            app:icon="@drawable/ic_baseline_texture_24"
-            app:key="serverHysteria2GeckoMaxPacketSize"
-            app:title="@string/hysteria2_gecko_max_packet_size"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
             app:icon="@drawable/ic_action_copyright"
@@ -93,7 +75,6 @@
             app:entryValues="@array/hysteria2_congestion_control"
             app:icon="@drawable/ic_baseline_compare_arrows_24"
             app:key="serverCongestionController"
-            app:singleLineTitle="false"
             app:title="@string/congestion_control"
             app:useSimpleSummaryProvider="true" />
         <io.nekohasekai.sagernet.widget.SimpleMenuPreference
@@ -101,7 +82,6 @@
             app:entryValues="@array/hysteria2_bbr_profile"
             app:icon="@drawable/ic_baseline_compare_arrows_24"
             app:key="serverHysteria2BBRProfile"
-            app:singleLineTitle="false"
             app:title="@string/hysteria_bbr_profile"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
@@ -139,24 +119,8 @@
         <EditTextPreference
             app:icon="@drawable/ic_baseline_security_24"
             app:key="serverEchConfig"
-            app:title="@string/ech_config_list"
+            app:title="@string/ech_config"
             app:useSimpleSummaryProvider="true" />
-        <EditTextPreference
-            app:icon="@drawable/ic_baseline_manage_search_24"
-            app:key="serverEchQueryName"
-            app:title="@string/ech_query_name"
-            app:useSimpleSummaryProvider="true" />
-        <EditTextPreference
-            app:dialogMessage="@string/one_per_line"
-            app:icon="@drawable/ic_action_copyright"
-            app:key="serverServerNameToVerify"
-            app:title="@string/server_name_to_verify"
-            app:useSimpleSummaryProvider="true" />
-        <SwitchPreference
-            app:icon="@drawable/ic_baseline_fingerprint_24"
-            app:key="serverHysteria2ChromeParrot"
-            app:summary="@string/chrome_parrot_summary"
-            app:title="@string/chrome_parrot" />
         <SwitchPreference
             app:icon="@drawable/baseline_construction_24"
             app:key="serverHysteria2OmitMaxDatagramFrameSize"

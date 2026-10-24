@@ -12,5 +12,88 @@
         android:id="@+id/action_new_group"
         android:icon="@drawable/ic_av_playlist_add"
         android:title="@string/group_create"
-        app:showAsAction="always" />
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_import_clipboard"
+        android:icon="@drawable/ic_baseline_import_contacts_24"
+        android:title="@string/action_import"
+        app:showAsAction="always"
+        tools:ignore="AlwaysShowAction" />
+    <item
+        android:id="@+id/action_copy_selected_subscription_links"
+        android:icon="@drawable/ic_baseline_link_24"
+        android:title="@string/copy_selected_subscription_links"
+        android:visible="false"
+        app:showAsAction="always"
+        tools:ignore="AlwaysShowAction" />
+    <item
+        android:id="@+id/action_delete_selected_groups"
+        android:icon="@drawable/ic_action_delete"
+        android:title="@string/delete_selected_groups"
+        android:visible="false"
+        app:showAsAction="always"
+        tools:ignore="AlwaysShowAction" />
+    <item
+        android:icon="@drawable/ic_action_note_add"
+        android:title="@string/group_import_profiles_subscriptions"
+        app:showAsAction="never">
+        <menu>
+            <item
+                android:id="@+id/action_scan_qr_code"
+                android:title="@string/add_profile_methods_scan_qr_code" />
+            <item
+                android:id="@+id/action_import_file"
+                android:title="@string/action_import_file" />
+        </menu>
+    </item>
+    <item
+        android:id="@+id/action_group_sort"
+        android:icon="@drawable/ic_baseline_low_priority_24"
+        android:title="@string/group_order">
+        <menu>
+            <item
+                android:id="@+id/action_group_sort_by_total"
+                android:title="@string/group_order_by_total_profiles" />
+            <item
+                android:id="@+id/action_group_sort_by_percent"
+                android:title="@string/group_order_by_working_percent" />
+            <item
+                android:id="@+id/action_group_sort_by_health_checks"
+                android:title="@string/group_order_by_health_checks" />
+            <item
+                android:id="@+id/action_group_sort_by_profile_added"
+                android:title="@string/group_order_by_profile_added" />
+        </menu>
+    </item>
+    <item
+        android:id="@+id/action_copy_all_subscription_links"
+        android:title="@string/copy_all_subscription_links" />
+    <item
+        android:id="@+id/action_copy_working_subscription_links"
+        android:title="@string/copy_working_subscription_links" />
+    <item
+        android:id="@+id/action_groups_enable_all"
+        android:title="@string/group_visibility_enable_all" />
+    <item
+        android:id="@+id/action_groups_disable_all"
+        android:title="@string/group_visibility_disable_all" />
+    <item
+        android:id="@+id/action_group_drag_mode"
+        android:checkable="true"
+        android:title="@string/group_drag_mode" />
+    <item
+        android:id="@+id/action_delete_all_groups"
+        android:icon="@drawable/ic_action_delete"
+        android:title="@string/delete_all_groups"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_record_group_health_check"
+        android:title="@string/group_health_check_record" />
+    <item
+        android:id="@+id/action_reset_group_health_checks"
+        android:title="@string/group_health_check_reset" />
+    <item
+        android:id="@+id/action_sync_group_source"
+        android:icon="@drawable/ic_baseline_link_24"
+        android:title="@string/group_source_sync" />
 </menu>

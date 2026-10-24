@@ -28,8 +28,7 @@ import org.jetbrains.annotations.NotNull;
 
 import io.nekohasekai.sagernet.fmt.AbstractBean;
 import io.nekohasekai.sagernet.fmt.KryoConverters;
-import io.nekohasekai.sagernet.ktx.NetsKt;
-import libexclavecore.Libexclavecore;
+import libsagernetcore.Libsagernetcore;
 
 public class TrustTunnelBean extends AbstractBean {
 
@@ -44,8 +43,7 @@ public class TrustTunnelBean extends AbstractBean {
     public String pinnedPeerCertificatePublicKeySha256;
     public String pinnedPeerCertificateSha256;
     public Boolean echEnabled;
-    public String echConfigList;
-    public String echQueryName;
+    public String echConfig;
     public String mtlsCertificate;
     public String mtlsCertificatePrivateKey;
     public String serverNameToVerify;
@@ -64,8 +62,7 @@ public class TrustTunnelBean extends AbstractBean {
         if (pinnedPeerCertificatePublicKeySha256 == null) pinnedPeerCertificatePublicKeySha256 = "";
         if (pinnedPeerCertificateSha256 == null) pinnedPeerCertificateSha256 = "";
         if (echEnabled == null) echEnabled = false;
-        if (echConfigList == null) echConfigList = "";
-        if (echQueryName == null) echQueryName = "";
+        if (echConfig == null) echConfig = "";
         if (mtlsCertificate == null) mtlsCertificate = "";
         if (mtlsCertificatePrivateKey == null) mtlsCertificatePrivateKey = "";
         if (serverNameToVerify == null) serverNameToVerify = "";
@@ -73,28 +70,23 @@ public class TrustTunnelBean extends AbstractBean {
 
     @Override
     public void serialize(ByteBufferOutput output) {
-        output.writeInt(3);
+        output.writeInt(2);
         super.serialize(output);
         output.writeString(protocol);
         output.writeString(username);
         output.writeString(password);
         output.writeString(sni);
         output.writeString(certificate);
-        if (protocol.equals("https")) {
-            output.writeString(utlsFingerprint);
-        } else {
-            output.writeString("");
-        }
+        output.writeString(utlsFingerprint);
         output.writeBoolean(allowInsecure);
         output.writeString(pinnedPeerCertificateChainSha256);
         output.writeString(pinnedPeerCertificatePublicKeySha256);
         output.writeString(pinnedPeerCertificateSha256);
         output.writeBoolean(echEnabled);
-        output.writeString(echConfigList);
+        output.writeString(echConfig);
         output.writeString(mtlsCertificate);
         output.writeString(mtlsCertificatePrivateKey);
         output.writeString(serverNameToVerify);
-        output.writeString(echQueryName);
     }
 
     @Override
@@ -106,12 +98,7 @@ public class TrustTunnelBean extends AbstractBean {
         password = input.readString();
         sni = input.readString();
         certificate = input.readString();
-        if (protocol.equals("https")) {
-            utlsFingerprint = input.readString();
-        } else {
-            input.readString();
-            utlsFingerprint = "";
-        }
+        utlsFingerprint = input.readString();
         if (version >= 1) {
             allowInsecure = input.readBoolean();
         }
@@ -120,13 +107,10 @@ public class TrustTunnelBean extends AbstractBean {
             pinnedPeerCertificatePublicKeySha256 = input.readString();
             pinnedPeerCertificateSha256 = input.readString();
             echEnabled = input.readBoolean();
-            echConfigList = input.readString();
+            echConfig = input.readString();
             mtlsCertificate = input.readString();
             mtlsCertificatePrivateKey = input.readString();
             serverNameToVerify = input.readString();
-        }
-        if (version >= 3) {
-            echQueryName = input.readString();
         }
     }
 
@@ -153,8 +137,7 @@ public class TrustTunnelBean extends AbstractBean {
             bean.pinnedPeerCertificateSha256 = pinnedPeerCertificateSha256;
         }
         bean.echEnabled = echEnabled;
-        bean.echConfigList = echConfigList;
-        bean.echQueryName = echQueryName;
+        bean.echConfig = echConfig;
     }
 
     @NotNull
@@ -178,13 +161,10 @@ public class TrustTunnelBean extends AbstractBean {
 
     @Override
     public boolean isInsecure() {
-        if (Libexclavecore.isLoopbackIP(serverAddress) || serverAddress.equals("localhost")) {
+        if (Libsagernetcore.isLoopbackIP(serverAddress) || serverAddress.equals("localhost")) {
             return false;
         }
         if (!allowInsecure) {
-            return false;
-        }
-        if (!NetsKt.listByLineOrComma(serverNameToVerify).isEmpty()) {
             return false;
         }
         return true;

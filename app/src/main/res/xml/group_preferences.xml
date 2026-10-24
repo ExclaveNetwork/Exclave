@@ -12,7 +12,6 @@
         app:entryValues="@array/int_array_2"
         app:icon="@drawable/ic_baseline_layers_24"
         app:key="groupType"
-        app:singleLineTitle="false"
         app:title="@string/group_type"
         app:useSimpleSummaryProvider="true" />
     <io.nekohasekai.sagernet.widget.SimpleMenuPreference
@@ -21,25 +20,18 @@
         app:entryValues="@array/int_array_3"
         app:icon="@drawable/ic_baseline_low_priority_24"
         app:key="groupOrder"
-        app:singleLineTitle="false"
         app:title="@string/group_order"
         app:useSimpleSummaryProvider="true" />
 
-    <io.nekohasekai.sagernet.widget.ReselectableSimpleMenuPreference
-        app:icon="@drawable/ic_hardware_router"
-        app:entries="@array/front_landing_proxy_entry"
-        app:entryValues="@array/front_landing_proxy_value"
-        app:key="groupFrontProxy"
-        app:singleLineTitle="false"
-        app:title="@string/front_proxy" />
+    <io.nekohasekai.sagernet.widget.SimpleListPopupPreference
+            app:icon="@drawable/ic_hardware_router"
+            app:key="groupFrontProxy"
+            app:title="@string/front_proxy" />
 
-    <io.nekohasekai.sagernet.widget.ReselectableSimpleMenuPreference
-        app:icon="@drawable/baseline_public_24"
-        app:entries="@array/front_landing_proxy_entry"
-        app:entryValues="@array/front_landing_proxy_value"
-        app:key="groupLandingProxy"
-        app:singleLineTitle="false"
-        app:title="@string/landing_proxy" />
+    <io.nekohasekai.sagernet.widget.SimpleListPopupPreference
+            app:icon="@drawable/baseline_public_24"
+            app:key="groupLandingProxy"
+            app:title="@string/landing_proxy" />
 
     <PreferenceCategory
         app:key="groupSubscription"
@@ -50,7 +42,6 @@
             app:entryValues="@array/subscription_types_value"
             app:icon="@drawable/ic_baseline_nfc_24"
             app:key="subscriptionType"
-            app:singleLineTitle="false"
             app:title="@string/subscription_type"
             app:useSimpleSummaryProvider="true" />
 
@@ -60,14 +51,8 @@
             app:title="@string/group_subscription_link"
             app:useSimpleSummaryProvider="true" />
 
-        <EditTextPreference
-            app:dialogLayout="@layout/layout_password_dialog"
-            app:icon="@drawable/ic_settings_password"
-            app:key="subscriptionAgePrivateKey"
-            app:title="@string/ssh_private_key"
-            app:useSimpleSummaryProvider="true" />
-
         <SwitchPreference
+            app:defaultValue="true"
             app:icon="@drawable/ic_baseline_import_contacts_24"
             app:key="subscriptionDeduplication"
             app:summary="@string/deduplication_sum"
@@ -100,21 +85,11 @@
             app:key="subscriptionUserAgent"
             app:title="@string/subscription_user_agent"
             app:useSimpleSummaryProvider="true" />
-        <EditTextPreference
-            app:icon="@drawable/ic_baseline_texture_24"
-            app:key="subscriptionHTTPHeaders"
-            app:title="@string/extra_headers"
-            app:useSimpleSummaryProvider="true" />
         <SwitchPreference
+            app:defaultValue="true"
             app:icon="@drawable/ic_baseline_flip_camera_android_24"
             app:key="subscriptionAutoUpdate"
             app:title="@string/auto_update" />
-        <EditTextPreference
-            app:defaultValue="1440"
-            app:icon="@drawable/ic_baseline_timelapse_24"
-            app:key="subscriptionAutoUpdateDelay"
-            app:title="@string/auto_update_delay"
-            app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
 </PreferenceScreen>

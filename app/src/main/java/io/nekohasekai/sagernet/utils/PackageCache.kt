@@ -32,6 +32,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.collections.component1
 
 object PackageCache {
 
@@ -40,10 +41,10 @@ object PackageCache {
     lateinit var packageMap: Map<String, Int>
     val uidMap = HashMap<Int, HashSet<String>>()
     val loaded = Mutex(true)
-    var registered = AtomicBoolean(false)
+    var registerd = AtomicBoolean(false)
 
     fun register() {
-        if (registered.getAndSet(true)) return
+        if (registerd.getAndSet(true)) return
         reload()
         app.listenForPackageChanges(false) {
             reload()
@@ -102,7 +103,7 @@ object PackageCache {
         if (::packageMap.isInitialized) {
             return
         }
-        if (!registered.get()) {
+        if (!registerd.get()) {
             register()
             return
         }

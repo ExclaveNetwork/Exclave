@@ -46,14 +46,10 @@ class Http3SettingsActivity : ProfileSettingsActivity<Http3Bean>() {
         DataStore.serverPinnedCertificatePublicKey = pinnedPeerCertificatePublicKeySha256
         DataStore.serverPinnedCertificate = pinnedPeerCertificateSha256
         DataStore.serverEchEnabled = echEnabled
-        DataStore.serverEchConfigList = echConfigList
-        DataStore.serverEchQueryName = echQueryName
+        DataStore.serverEchConfig = echConfig
         DataStore.serverAllowInsecure = allowInsecure
         DataStore.serverMtlsCertificate = mtlsCertificate
         DataStore.serverMtlsCertificatePrivateKey = mtlsCertificatePrivateKey
-        DataStore.serverServerNameToVerify = serverNameToVerify
-        DataStore.serverHTTPConnectUDP = connectUDP
-        DataStore.serverHTTPConnectUDPURITemplate = uriTemplate
     }
 
     override fun Http3Bean.serialize() {
@@ -68,14 +64,10 @@ class Http3SettingsActivity : ProfileSettingsActivity<Http3Bean>() {
         pinnedPeerCertificatePublicKeySha256 = DataStore.serverPinnedCertificatePublicKey
         pinnedPeerCertificateSha256 = DataStore.serverPinnedCertificate
         echEnabled = DataStore.serverEchEnabled
-        echConfigList = DataStore.serverEchConfigList
-        echQueryName = DataStore.serverEchQueryName
+        echConfig = DataStore.serverEchConfig
         allowInsecure = DataStore.serverAllowInsecure
         mtlsCertificate = DataStore.serverMtlsCertificate
         mtlsCertificatePrivateKey = DataStore.serverMtlsCertificatePrivateKey
-        serverNameToVerify = DataStore.serverServerNameToVerify
-        connectUDP = DataStore.serverHTTPConnectUDP
-        uriTemplate = DataStore.serverHTTPConnectUDPURITemplate
     }
 
     override fun PreferenceFragmentCompat.createPreferences(
@@ -90,20 +82,10 @@ class Http3SettingsActivity : ProfileSettingsActivity<Http3Bean>() {
             summaryProvider = PasswordSummaryProvider
         }
         val echEnabled = findPreference<SwitchPreference>(Key.SERVER_ECH_ENABLED)!!
-        val echConfigList = findPreference<EditTextPreference>(Key.SERVER_ECH_CONFIG_LIST)!!
-        val echQueryName = findPreference<EditTextPreference>(Key.SERVER_ECH_QUERY_NAME)!!
-        echConfigList.isEnabled = echEnabled.isChecked
-        echQueryName.isEnabled = echEnabled.isChecked
+        val echConfig = findPreference<EditTextPreference>(Key.SERVER_ECH_CONFIG)!!
+        echConfig.isEnabled = echEnabled.isChecked
         echEnabled.setOnPreferenceChangeListener { _, newValue ->
-            echConfigList.isEnabled = newValue as Boolean
-            echQueryName.isEnabled = newValue
-            true
-        }
-        val connectUDP = findPreference<SwitchPreference>(Key.SERVER_HTTP_CONNECT_UDP)!!
-        val uriTemplate = findPreference<EditTextPreference>(Key.SERVER_HTTP_CONNECT_UDP_URI_TEMPLATE)!!
-        uriTemplate.isEnabled = connectUDP.isChecked
-        connectUDP.setOnPreferenceChangeListener { _, newValue ->
-            uriTemplate.isEnabled = newValue as Boolean
+            echConfig.isEnabled = newValue as Boolean
             true
         }
     }

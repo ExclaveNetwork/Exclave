@@ -38,14 +38,12 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.nekohasekai.sagernet.GroupType
 import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.R
-import io.nekohasekai.sagernet.SubscriptionType
 import io.nekohasekai.sagernet.database.*
 import io.nekohasekai.sagernet.database.preference.OnPreferenceDataStoreChangeListener
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.applyDefaultValues
 import io.nekohasekai.sagernet.ktx.onMainDispatcher
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
-import io.nekohasekai.sagernet.ui.profile.ProfileSettingsActivity.PasswordSummaryProvider
 
 @Suppress("UNCHECKED_CAST")
 class GroupSettingsActivity(
@@ -89,15 +87,12 @@ class GroupSettingsActivity(
         DataStore.subscriptionUpdateWhenConnectedOnly = sub.updateWhenConnectedOnly
         DataStore.subscriptionUserAgent = sub.customUserAgent
         DataStore.subscriptionAutoUpdate = sub.autoUpdate
-        DataStore.subscriptionAutoUpdateDelay = sub.autoUpdateDelay
         DataStore.subscriptionLastUpdated = sub.lastUpdated
         DataStore.subscriptionBytesUsed = sub.bytesUsed
         DataStore.subscriptionBytesRemaining = sub.bytesRemaining
         DataStore.subscriptionExpiryDate = sub.expiryDate
         DataStore.subscriptionNameFilter = sub.nameFilter
         DataStore.subscriptionNameFilter1 = sub.nameFilter1
-        DataStore.subscriptionHTTPHeaders = sub.httpHeaders
-        DataStore.subscriptionAgePrivateKey = sub.agePrivateKey
         DataStore.frontProxyOutbound = frontProxy
         DataStore.landingProxyOutbound = landingProxy
         DataStore.frontProxy = if (frontProxy >= 0) 1 else 0
@@ -124,15 +119,13 @@ class GroupSettingsActivity(
                 updateWhenConnectedOnly = DataStore.subscriptionUpdateWhenConnectedOnly
                 customUserAgent = DataStore.subscriptionUserAgent
                 autoUpdate = DataStore.subscriptionAutoUpdate
-                autoUpdateDelay = DataStore.subscriptionAutoUpdateDelay
+                autoUpdateDelay = DataStore.subscriptionGlobalAutoUpdateDelay
                 lastUpdated = DataStore.subscriptionLastUpdated
                 bytesUsed = DataStore.subscriptionBytesUsed
                 bytesRemaining = DataStore.subscriptionBytesRemaining
                 expiryDate = DataStore.subscriptionExpiryDate
                 nameFilter = DataStore.subscriptionNameFilter
                 nameFilter1 = DataStore.subscriptionNameFilter1
-                httpHeaders = DataStore.subscriptionHTTPHeaders
-                agePrivateKey = DataStore.subscriptionAgePrivateKey
             }
         } else {
             subscription = SubscriptionBean().applyDefaultValues()
@@ -159,6 +152,8 @@ class GroupSettingsActivity(
             frontProxyPreference.setSummary(resources.getString(R.string.disable))
         }
         frontProxyPreference.apply {
+            setEntries(R.array.front_landing_proxy_entry)
+            setEntryValues(R.array.front_landing_proxy_value)
             setOnPreferenceChangeListener { _, newValue ->
                 if (newValue.toString() == "1") {
                     selectProfileForAddFront.launch(
@@ -181,6 +176,8 @@ class GroupSettingsActivity(
             landingProxyPreference.setSummary(resources.getString(R.string.disable))
         }
         landingProxyPreference.apply {
+            setEntries(R.array.front_landing_proxy_entry)
+            setEntryValues(R.array.front_landing_proxy_value)
             setOnPreferenceChangeListener { _, newValue ->
                 if (newValue.toString() == "1") {
                     selectProfileForAddLanding.launch(
@@ -197,20 +194,11 @@ class GroupSettingsActivity(
         val groupType = findPreference<ListPreference>(Key.GROUP_TYPE)!!
         val groupSubscription = findPreference<PreferenceCategory>(Key.GROUP_SUBSCRIPTION)!!
         val subscriptionUpdate = findPreference<PreferenceCategory>(Key.SUBSCRIPTION_UPDATE)!!
-        val subscriptionType = findPreference<ListPreference>(Key.SUBSCRIPTION_TYPE)!!
-        val httpHeaders = findPreference<EditTextPreference>(Key.SUBSCRIPTION_HTTP_HEADERS)!!.apply {
-            dialogMessage = getString(R.string.format, "\nKey1: Value1\nKey2: Value2")
-        }
-        val agePrivateKey = findPreference<EditTextPreference>(Key.SUBSCRIPTION_AGE_PRIVATE_KEY)!!.apply {
-            summaryProvider = PasswordSummaryProvider
-        }
 
         fun updateGroupType(groupType: Int = DataStore.groupType) {
             val isSubscription = groupType == GroupType.SUBSCRIPTION
             groupSubscription.isVisible = isSubscription
             subscriptionUpdate.isVisible = isSubscription
-            httpHeaders.isVisible = isSubscription
-            agePrivateKey.isVisible = isSubscription && (subscriptionType.value as String).toInt() == SubscriptionType.AGE
         }
         updateGroupType()
         groupType.setOnPreferenceChangeListener { _, newValue ->
@@ -218,26 +206,6 @@ class GroupSettingsActivity(
             true
         }
 
-        fun updateSubscriptionType(subscriptionType: Int = DataStore.subscriptionType) {
-            agePrivateKey.isVisible = subscriptionType == SubscriptionType.AGE
-        }
-        updateSubscriptionType()
-        subscriptionType.setOnPreferenceChangeListener { _, newValue ->
-            updateSubscriptionType((newValue as String).toInt())
-            true
-        }
-
-        val subscriptionAutoUpdate = findPreference<SwitchPreference>(Key.SUBSCRIPTION_AUTO_UPDATE)!!
-        val subscriptionAutoUpdateDelay = findPreference<EditTextPreference>(Key.SUBSCRIPTION_AUTO_UPDATE_DELAY)!!
-        subscriptionAutoUpdateDelay.isEnabled = subscriptionAutoUpdate.isChecked
-        subscriptionAutoUpdateDelay.setOnPreferenceChangeListener { _, newValue ->
-            newValue as String
-            newValue.toIntOrNull() != null && newValue.toInt() >= 15
-        }
-        subscriptionAutoUpdate.setOnPreferenceChangeListener { _, newValue ->
-            subscriptionAutoUpdateDelay.isEnabled = (newValue as Boolean)
-            true
-        }
     }
 
     companion object {

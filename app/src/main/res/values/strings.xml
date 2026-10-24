@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Exclave</string>
+    <string name="app_name" translatable="false">ExclaveD</string>
     <string name="project">Project</string>
     <string name="github">Source code</string>
     <string name="app_version">Version</string>
     <string name="version_x">Version (%s)</string>
     <string name="logcat">Export debug information</string>
+    <string name="diagnostic_log">Export persistent diagnostic journal</string>
     <string name="menu_configuration">Configuration</string>
     <string name="menu_group">Group</string>
     <string name="menu_about">About</string>
@@ -21,6 +22,9 @@
     <string name="group_edit">Edit group</string>
     <string name="group_status_empty">Empty group</string>
     <string name="group_status_empty_subscription">Not updated yet</string>
+    <string name="group_status_profile_health">%1$d/%2$d (%3$d%%) profiles</string>
+    <string name="group_status_profile_health_updated">%1$d/%2$d (%3$d%%) profiles, updated %4$s</string>
+    <string name="group_status_profile_health_not_updated">%1$d/%2$d (%3$d%%) profiles, not updated</string>
     <plurals name="group_status_proxies">
         <item quantity="one">%d profile</item>
         <item quantity="other">%d profiles</item>
@@ -139,6 +143,8 @@
     <string name="route_play_store">Play store rule for %s</string>
     <string name="route_bypass_ip">IP rule for %s</string>
     <string name="route_reset">Reset</string>
+    <string name="route_reverse">Reverse proxy</string>
+    <string name="route_reverse_redirect">Reverse proxy address</string>
     <string name="route_manage_assets">Manage route assets</string>
     <string name="route_assets">Assets</string>
     <string name="route_rules_provider">Route assets provider</string>
@@ -150,8 +156,8 @@
     <string name="route_opt_bypass_lan">Bypass private addresses</string>
     <string name="domain_strategy">Domain strategy</string>
     <string name="traffic_sniffing">Enable sniffing</string>
-    <string name="enable_mux">Enable Mux.Cool</string>
-    <string name="mux_concurrency">Maximum concurrent connections</string>
+    <string name="enable_mux">Enable Mux</string>
+    <string name="mux_concurrency">Mux concurrent Connections</string>
     <string name="proxied_apps">Per-app VPN</string>
     <string name="proxied_apps_summary">Exclude selected apps from VPN or include selected apps in VPN</string>
     <string name="off">Off</string>
@@ -195,6 +201,7 @@
     <string name="action_wireguard" translatable="false">WireGuard</string>
     <string name="action_mieru" translatable="false">mieru</string>
     <string name="action_tuic5" translatable="false">TUIC</string>
+    <string name="action_shadowtls" translatable="false">ShadowTLS</string>
     <string name="action_http3" translatable="false">HTTP/3</string>
     <string name="action_anytls" translatable="false">AnyTLS</string>
     <string name="proxy_chain">Proxy chain</string>
@@ -251,6 +258,8 @@
     <string name="no_proxies_found_in_file">No proxy found in the file</string>
     <string name="no_proxies_found_in_clipboard">No proxy found in the clipboard</string>
     <string name="deduplication">Deduplication</string>
+    <string name="deduplication_global">Remove duplicate profiles</string>
+    <string name="deduplication_global_sum">Remove duplicates after subscription updates</string>
     <string name="ignore_battery_optimizations">Ignore battery optimizations</string>
     <string name="ignore_battery_optimizations_sum">Remove some restrictions</string>
     <!-- plugin -->
@@ -285,6 +294,109 @@
     <string name="connection_test">Connection test</string>
     <string name="connection_test_clear_results">Clear test results</string>
     <string name="connection_test_url_test">URL test</string>
+    <string name="connection_test_confirm">Check %d profiles?</string>
+    <string name="connection_test_gemini_filter">Gemini URL test (exclude Russia and unknown countries)</string>
+    <string name="connection_test_no_gemini_profiles">No profiles with a known non-Russian country were found.</string>
+    <string name="connection_test_gemini_filter_enabled">Gemini URL test filter enabled</string>
+    <string name="connection_test_gemini_filter_disabled">Gemini URL test filter disabled</string>
+    <string name="connection_test_window">Test window</string>
+    <string name="connection_test_open_window">Open test window</string>
+    <string name="connection_test_resume">Continue test</string>
+    <string name="connection_test_minimize">Minimize</string>
+    <string name="connection_test_progress">%1$d/%2$d</string>
+    <string name="connection_test_working">%d working</string>
+    <string name="connection_test_timeout_seconds">Profile test timeout (seconds)</string>
+    <string name="connection_test_parallel">Parallel URL tests</string>
+    <string name="connection_test_quick_failure_count">Fast failures before pause</string>
+    <string name="connection_test_quick_failure_millis">Fast failure threshold (milliseconds)</string>
+    <string name="connection_test_quick_failure_pause_seconds">Pause after fast failures (seconds)</string>
+    <string name="connection_test_break_after_count">Break after N tested profiles</string>
+    <string name="connection_test_break_seconds">Break duration (seconds)</string>
+    <string name="connection_test_progress_interval_seconds">Progress update interval (seconds)</string>
+    <string name="connection_test_sort_interval_seconds">Sort during test every N seconds</string>
+    <string name="connection_test_browser_forwarder_unsupported">Browser-forwarded profile cannot be tested here</string>
+    <string name="connection_test_complex_profile_unsupported">Balancer or observatory profile cannot be tested here</string>
+    <string name="connection_test_interrupted">Test was interrupted</string>
+    <string name="auto_switch_profile">Switch profile</string>
+    <string name="auto_switch_profile_gemini_soft">Switch Gemini once</string>
+    <string name="auto_vpn_enabled">Auto VPN profile switching</string>
+    <string name="auto_vpn_enabled_sum">Automatically pick, monitor, and switch profiles when VPN is running</string>
+    <string name="auto_vpn_precheck_enabled">Preliminary profile test</string>
+    <string name="auto_vpn_precheck_enabled_sum">Test the selected candidate before connecting it</string>
+    <string name="auto_vpn_check_interval_seconds">Auto VPN check interval, seconds</string>
+    <string name="auto_vpn_bad_ping_millis">Bad ping threshold, ms</string>
+    <string name="auto_vpn_failures_before_switch">Failures before switching profile</string>
+    <string name="auto_vpn_candidate_limit">Candidates to test before switching</string>
+    <string name="auto_vpn_lite_mode">Lite configuration screen</string>
+    <string name="auto_vpn_lite_mode_sum">Hide regular profiles in Configurations and show only Auto modes</string>
+    <string name="auto_vpn_floating_switch">Floating profile switch button</string>
+    <string name="auto_vpn_floating_switch_sum">Show a draggable overlay button for quickly switching the Auto VPN profile</string>
+    <string name="auto_vpn_floating_switch_permission_required">Allow drawing over other apps to show the floating switch button</string>
+    <string name="auto_vpn_working_target">Working profiles to keep in reserve</string>
+    <string name="auto_vpn_initial_selection_timeout_seconds">Initial Auto search timeout, seconds</string>
+    <string name="auto_vpn_switch_cooldown_seconds">Minimum time between switches, seconds</string>
+    <string name="auto_vpn_quarantine_minutes">Bad profile quarantine, minutes</string>
+    <string name="auto_vpn_gemini_test_url">Gemini access test URL</string>
+    <string name="auto_vpn_current_profile">Current: %s</string>
+    <string name="auto_vpn_ready_address">Current: %1$s</string>
+    <string name="auto_vpn_reserve_count">Reserve: %1$d/%2$d</string>
+    <string name="auto_vpn_candidates_count">Candidates: %1$d/%2$d</string>
+    <string name="auto_vpn_last_ping">Last ping: %d ms</string>
+    <string name="auto_vpn_last_ping_error">Last ping: error</string>
+    <string name="auto_vpn_enabled_short">Auto selection enabled</string>
+    <string name="auto_vpn_tap_to_start">Tap to auto-select</string>
+    <string name="auto_vpn_any_name">Auto</string>
+    <string name="auto_vpn_no_ru_name">Auto no RU</string>
+    <string name="auto_vpn_gemini_name">Auto Gemini</string>
+    <string name="auto_vpn_type">Auto VPN</string>
+    <string name="auto_vpn_notification_title">%1$s - %2$s</string>
+    <string name="auto_vpn_notification_running">%1$s enabled</string>
+    <string name="auto_vpn_status_selected">%1$s selected</string>
+    <string name="auto_vpn_status_selecting">%1$s: selecting profile...</string>
+    <string name="auto_vpn_status_prechecking_candidate">%1$s: prechecking %2$s...</string>
+    <string name="auto_vpn_status_initial_search">%1$s: starting VPN, searching candidates first...</string>
+    <string name="auto_vpn_status_initial_found">%1$s: found %2$d/%3$d candidates</string>
+    <string name="auto_vpn_status_testing_more">%1$s: testing more profiles...</string>
+    <string name="auto_vpn_status_restart_scan">%1$s: starting another scan round...</string>
+    <string name="auto_vpn_status_rechecking_reserve">%1$s: rechecking %2$d reserve profiles...</string>
+    <string name="auto_vpn_status_verifying_connected">%1$s: checking connected profile %2$d/%3$d...</string>
+    <string name="auto_vpn_status_checking_active">%1$s: checking active profile...</string>
+    <string name="auto_vpn_status_active_issue">%1$s: active profile failed %2$d/%3$d</string>
+    <string name="auto_vpn_status_active_bad_ping">%1$s: active ping %2$d ms is above %3$d ms</string>
+    <string name="auto_vpn_status_active_bad_ping_count">%1$s: active ping %2$d ms is above %3$d ms, failed %4$d/%5$d</string>
+    <string name="auto_vpn_status_no_candidate">%1$s: no suitable profile found</string>
+    <string name="auto_vpn_status_switched_to">%1$s: switched to %2$s</string>
+    <string name="auto_vpn_status_ready">%1$s: %2$s</string>
+    <string name="auto_vpn_status_scan_stopped">%1$s: profile search stopped</string>
+    <string name="auto_vpn_scan_stopped">Profile search stopped</string>
+    <string name="auto_vpn_notification_searching">Searching profiles...</string>
+    <string name="auto_vpn_notification_switching">Switching profile...</string>
+    <string name="auto_vpn_notification_checking">Checking profile...</string>
+    <string name="auto_vpn_notification_no_candidate">No suitable profile</string>
+    <string name="auto_vpn_notification_failed_attempt">Profile check failed %1$d/%2$d</string>
+    <string name="auto_vpn_notification_bad_ping_attempt">Bad ping %1$d/%2$d</string>
+    <string name="auto_vpn_notification_scan_stopped">Search stopped</string>
+    <string name="auto_vpn_selection_reason">score %1$d, ok %2$d, fail %3$d, skipped %4$d</string>
+    <string name="auto_vpn_selection_reason_ping">lowest ping %1$d ms</string>
+    <string name="auto_vpn_progress">%1$s: %2$d/%3$d checked</string>
+    <string name="auto_vpn_progress_short">checked %1$d/%2$d</string>
+    <string name="auto_vpn_checked_count">checked %1$d/%2$d</string>
+    <string name="auto_vpn_working_count_target">working %1$d/%2$d</string>
+    <string name="auto_vpn_quarantine_count">quarantine %d</string>
+    <string name="auto_vpn_diag_mode">Mode: %s</string>
+    <string name="auto_vpn_diag_current">Current: %s</string>
+    <string name="auto_vpn_diag_reason">Reason: %s</string>
+    <string name="auto_vpn_diag_score">Current score: %d</string>
+    <string name="auto_vpn_diag_history">History: ok %1$d, fail %2$d, skipped %3$d</string>
+    <string name="auto_vpn_diag_reserve">Reserve: %1$d/%2$d</string>
+    <string name="auto_vpn_diag_progress">Checked: %1$d/%2$d</string>
+    <string name="auto_vpn_diag_failures">Active failures: %1$d/%2$d</string>
+    <string name="auto_vpn_diag_quarantine">Quarantine: %d</string>
+    <string name="auto_vpn_reset_gemini_rejected">Reset skipped Gemini profiles</string>
+    <string name="auto_vpn_reset_gemini_rejected_done">Reset %d skipped Gemini profiles</string>
+    <string name="auto_vpn_switch_requested">Selecting profile...</string>
+    <string name="auto_vpn_no_candidate">No suitable profile found</string>
+    <string name="auto_vpn_switched_to">Switched to %s</string>
     <string name="connection_test_domain_not_found">Domain not found</string>
     <string name="connection_test_refused">Connection refused</string>
     <string name="connection_test_unreachable">Unreachable</string>
@@ -304,6 +416,45 @@
     <string name="update_settings">Update settings</string>
     <string name="auto_update">Automatic update</string>
     <string name="auto_update_delay">Automatic update interval (minutes)</string>
+    <string name="subscription_global_auto_update">Automatic subscription update</string>
+    <string name="subscription_global_auto_update_sum">Update subscriptions in the background when the interval has passed</string>
+    <string name="subscription_send_hwid">Send HWID to subscriptions</string>
+    <string name="subscription_send_hwid_sum">Send a random app HWID and Android version in subscription HTTP headers for provider compatibility</string>
+    <string name="group_source_url">Group source</string>
+    <string name="group_source_sync_enabled">Enable group source sync</string>
+    <string name="group_source_sync_enabled_sum">Automatically sync subscriptions from the group source</string>
+    <string name="group_source_sync_interval_minutes">Group source sync interval (minutes)</string>
+    <string name="group_source_sync">Sync group source</string>
+    <string name="group_source_sync_disabled">Group source is empty or disabled; sync is disabled</string>
+    <string name="group_source_sync_result">Group source synced: %1$d added, %2$d kept, %3$d removed</string>
+    <string name="group_source_sync_error">Group source sync failed: %s</string>
+    <string name="subscription_update_parallel">Parallel subscription updates</string>
+    <string name="subscription_update_timeout_seconds">Subscription update timeout (seconds)</string>
+    <string name="subscription_auto_sort_groups">Sort groups after subscription updates</string>
+    <string name="subscription_auto_sort_groups_sum">Sort groups by total profile count after subscription updates</string>
+    <string name="subscription_update_later">Later</string>
+    <string name="subscription_update_all">Update all</string>
+    <string name="subscription_vpn_background_update">Update subscriptions while VPN is running</string>
+    <string name="subscription_vpn_background_update_sum">Use a separate VPN-only background schedule for outdated subscription updates</string>
+    <string name="subscription_vpn_initial_delay_minutes">VPN subscription first check delay (minutes)</string>
+    <string name="subscription_vpn_interval_minutes">VPN subscription check interval (minutes)</string>
+    <string name="subscription_vpn_retry_interval_minutes">VPN subscription retry interval (minutes)</string>
+    <string name="subscription_vpn_retry_count">VPN subscription retry count</string>
+    <string name="group_source_vpn_sync_enabled">Sync group source while VPN is running</string>
+    <string name="group_source_vpn_sync_enabled_sum">Use a separate VPN-only background schedule for group source sync</string>
+    <string name="group_source_vpn_initial_delay_minutes">VPN group source first sync delay (minutes)</string>
+    <string name="group_source_vpn_interval_minutes">VPN group source sync interval (minutes)</string>
+    <string name="group_source_vpn_retry_interval_minutes">VPN group source retry interval (minutes)</string>
+    <string name="group_source_vpn_retry_count">VPN group source retry count</string>
+    <string name="subscription_vpn_retest_prompt">Subscriptions were updated through VPN. It is recommended to run profile check again to find current working profiles after the update. The current VPN must be turned off before checking.</string>
+    <string name="subscription_vpn_retest_close">Close</string>
+    <string name="subscription_vpn_retest_stop_and_test">Turn off VPN and start test</string>
+    <string name="subscription_update_never">never</string>
+    <string name="subscription_update_progress">Updated %1$d of %2$d</string>
+    <string name="subscription_update_counters">Success: %1$d | Errors: %2$d | Skipped: %3$d</string>
+    <string name="subscription_dedup_progress">Deduplication: %d removed</string>
+    <string name="subscription_update_result">Subscriptions updated: %1$d success, %2$d errors, %3$d skipped. Duplicates removed: %4$d.</string>
+    <string name="subscription_update_no_internet">No working Internet connection; update skipped.</string>
     <string name="update_when_connected_only">Update only when connected</string>
     <string name="update_when_connected_only_sum">Prevent IP address leak</string>
     <string name="subscription_user_agent">User agent</string>
@@ -339,6 +490,47 @@
     <string name="group_order_origin">By original order</string>
     <string name="group_order_by_name">Alphabetically</string>
     <string name="group_order_by_delay">By latency</string>
+    <string name="group_order_by_total_profiles">By profile count</string>
+    <string name="group_order_by_working_percent">By working percent</string>
+    <string name="group_order_by_health_checks">By work success percent</string>
+    <string name="group_order_by_profile_added">By profile added date</string>
+    <string name="group_all">All</string>
+    <string name="group_visibility">Show in configurations and tests</string>
+    <string name="group_visibility_enable_all">Enable all groups for display and tests</string>
+    <string name="group_visibility_disable_all">Disable all groups from display and tests</string>
+    <string name="group_visibility_all_enabled">All groups enabled for display and tests</string>
+    <string name="group_visibility_all_disabled">All groups disabled from display and tests</string>
+    <string name="delete_group">Delete group</string>
+    <string name="delete_all_groups">Delete all groups</string>
+    <string name="delete_all_groups_prompt">Delete all groups and their profiles?</string>
+    <string name="delete_all_groups_empty">No groups to delete</string>
+    <string name="delete_selected_groups">Delete selected groups</string>
+    <string name="delete_selected_groups_prompt">Delete selected groups and their profiles?</string>
+    <string name="copy_selected_subscription_links">Copy selected subscription links</string>
+    <string name="group_selection_title">%d selected</string>
+    <string name="import_duplicates_title">Duplicates found</string>
+    <string name="import_duplicates_message">Duplicates: %1$d. New items: %2$d. New items will be added; add duplicates too?</string>
+    <string name="import_duplicates_skip">Do not add</string>
+    <string name="import_duplicates_add_anyway">Add anyway</string>
+    <string name="import_duplicates_skipped">Duplicates were not added</string>
+    <string name="group_drag_mode">Drag mode</string>
+    <string name="group_drag_mode_enabled">Group drag mode enabled</string>
+    <string name="group_drag_mode_disabled">Group drag mode disabled</string>
+    <string name="group_counter">%1$d/%2$d, %3$d%%</string>
+    <string name="group_pin">Pin to top</string>
+    <string name="group_unpin">Unpin</string>
+    <string name="copy_all_subscription_links">Copy all subscription links</string>
+    <string name="copy_working_subscription_links">Copy subscription links with working profiles</string>
+    <string name="group_import_profiles_subscriptions">Import profiles/subscriptions</string>
+    <string name="group_health_check_record">Record work check</string>
+    <string name="group_health_check_reset">Reset work checks</string>
+    <string name="group_health_check_reset_group">Reset this group work checks</string>
+    <string name="group_health_check_status">Success: %1$s</string>
+    <string name="group_health_check_recorded">Work check recorded: %1$d/%2$d groups working</string>
+    <string name="group_health_check_reset_done">Work checks reset</string>
+    <string name="group_health_check_stats_enabled">Developer group work checks</string>
+    <string name="group_health_check_stats_enabled_sum">Show group work-check counters and developer menu actions</string>
+    <string name="no_subscription_links">No subscription links found</string>
     <string name="plugin_exists_but_on_shit_system">Profile %s requires %s plugin, but your proprietary equipment vendor (usually surveillance capital giants and malware maker) tampered with your Android, making the plugin unusable.</string>
     <string name="traffic_uplink">%s | %s/s ↑</string>
     <string name="traffic_downlink">%s | %s/s ↓</string>
@@ -372,7 +564,6 @@
     <string name="app_statistics_disabled">App traffic statistics disabled</string>
     <string name="ssh_auth_type_none">None</string>
     <string name="ssh_public_key">Public key</string>
-    <string name="ssh_host_key">Host key</string>
     <string name="ssh_private_key">Private key</string>
     <string name="ssh_private_key_passphrase">Private key passphrase</string>
     <string name="menu_tools">Tools</string>
@@ -443,6 +634,7 @@
     <string name="reality_short_id">REALITY Short ID</string>
     <string name="reality_fingerprint">REALITY uTLS fingerprint</string>
     <string name="wireguard_reserved">Reserved</string>
+    <string name="shadowsocks_2022_implementation">Shadowsocks 2022 implementation</string>
     <string name="bootstrap_dns">Bootstrap DNS</string>
     <string name="use_local_dns_as_bootstrap_dns">Use system DNS as Bootstrap DNS</string>
     <string name="brook_fragment">Fragment</string>
@@ -468,7 +660,7 @@
     <string name="rules_geosite_url">geosite.dat URL</string>
     <string name="rules_geoip_url">geoip.dat URL</string>
     <string name="http_proxy_exception_list">HTTP proxy exception list</string>
-    <string name="mux_settings">Mux.Cool settings</string>
+    <string name="mux_settings">Mux settings</string>
     <string name="update_subscription">Update subscription</string>
     <string name="group_not_a_subscription">This group is not a subscription.</string>
     <string name="enable_fragment">Enable TLS Client Hello fragmentation</string>
@@ -486,7 +678,8 @@
     <string name="allow_apps_bypass_vpn_sum">Allow apps to bypass VPN using system-provided methods on their own</string>
     <string name="update_all_subscriptions">Update all subscriptions</string>
     <string name="cag_splithttp">XHTTP settings</string>
-    <string name="ech_config_list" translatable="false">ECHConfigList</string>
+    <string name="ech_config">ECH Config</string>
+    <string name="ech_doh_server">ECH DoH server</string>
     <string name="splithttp_mode">Mode</string>
     <string name="splithttp_extra" translatable="false">Extra</string>
     <string name="backup_all_profiles">Backup all profiles</string>
@@ -594,7 +787,7 @@
     <string name="insecure_warn">Security tips</string>
     <string name="insecure_warn_sum">Display warnings for profiles with equivalent security to cleartext.</string>
     <string name="ech">ECH</string>
-    <string name="server_name_to_verify" translatable="false">ServerNameToVerify</string>
+    <string name="server_name_to_verify">ServerNameToVerify</string>
     <string name="mieru_traffic_pattern">Traffic pattern</string>
     <string name="insecure_warning_detail">The security of this profile is equivalent to cleartext.\n\nThis warning is displayed because \"security tips\" is enabled.</string>
     <string name="hysteria_hop_interval_min">Minimum port hopping interval (s)</string>
@@ -602,7 +795,6 @@
     <string name="hysteria_bbr_profile">BBR profile</string>
     <string name="require_socks">Enable SOCKS5 inbound</string>
     <string name="custom_package_name_or_uid">Custom package name or UID</string>
-    <string name="tcp" translatable="false">TCP</string>
     <string name="udp" translatable="false">UDP</string>
     <string name="reality_mldsa65_verify" translatable="false">REALITY mldsa65Verify</string>
     <string name="socks5_udp_authentication_warning">SOCKS5 UDP is not protected by username/password authentication. If UDP is enabled, the authentication can be bypassed easily.</string>
@@ -610,25 +802,4 @@
     <string name="hysteria2_omit_max_datagram_frame_size" translatable="false">OmitMaxDatagramFrameSize</string>
     <string name="hysteria2_omit_max_datagram_frame_size_sum">If the Hysteria 2 server does not support this breaking change, UDP will be unusable. This is a temporary option and may be removed in the future.</string>
     <string name="ssh_keepalive_interval">Keepalive interval (s)</string>
-    <string name="custom_outbound">Custom outbound</string>
-    <string name="hysteria2_gecko_max_packet_size">Maximum packet size</string>
-    <string name="hysteria2_gecko_min_packet_size">Minimum packet size</string>
-    <string name="nearby_devices_permission_notice">This requires the \"nearby devices\" permission to work, but the permission has not been granted.</string>
-    <string name="action_snell" translatable="false">Snell</string>
-    <string name="snell_reuse">Connection reuse</string>
-    <string name="pre_shared_key">Pre-shared key</string>
-    <string name="snell_obfs_mode">Obfuscation mode</string>
-    <string name="snell_obfs_host">Obfuscation host</string>
-    <string name="snell_mode">Mode</string>
-    <string name="anytls_disable_reuse">Disable connection reuse</string>
-    <string name="chrome_parrot" translatable="false">Chrome parrot</string>
-    <string name="chrome_parrot_summary">Imitate Chrome\'s QUIC Client Hello</string>
-    <string name="chrome_parrot_omit_max_datagram_frame_size_datagram_warning">This option is disabled to match Chrome\'s behavior.</string>
-    <string name="option_globally_enabled">This option has been enabled globally and the value will be omitted.</string>
-    <string name="ech_query_name" translatable="false">ECHQueryName</string>
-    <string name="snell_obfs_uri">Obfuscation URI</string>
-    <string name="naiveproxy_tunnel_timeout">Tunnel timeout (s)</string>
-    <string name="naiveproxy_idle_timeout">Idle timeout (s)</string>
-    <string name="uri_template">URI Template</string>
-    <string name="action_masque" translatable="false">MASQUE</string>
 </resources>

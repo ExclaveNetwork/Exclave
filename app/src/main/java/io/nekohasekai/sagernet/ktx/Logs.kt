@@ -20,6 +20,7 @@
 package io.nekohasekai.sagernet.ktx
 
 import android.util.Log
+import io.nekohasekai.sagernet.utils.DiagnosticLog
 import java.io.InputStream
 import java.io.OutputStream
 
@@ -63,23 +64,33 @@ object Logs {
     }
 
     fun w(message: String) {
-        Log.w(mkTag(), message)
+        val tag = mkTag()
+        Log.w(tag, message)
+        DiagnosticLog.warn(tag, message)
     }
 
     fun w(message: String, exception: Throwable) {
-        Log.w(mkTag(), message, exception)
+        val tag = mkTag()
+        Log.w(tag, message, exception)
+        DiagnosticLog.warn(tag, message, exception)
     }
 
     fun w(exception: Throwable) {
-        Log.w(mkTag(), exception)
+        val tag = mkTag()
+        Log.w(tag, exception)
+        DiagnosticLog.warn(tag, exception.toString(), exception)
     }
 
     fun e(message: String) {
-        Log.e(mkTag(), message)
+        val tag = mkTag()
+        Log.e(tag, message)
+        DiagnosticLog.error(tag, message)
     }
 
     fun e(message: String, exception: Throwable) {
-        Log.e(mkTag(), message, exception)
+        val tag = mkTag()
+        Log.e(tag, message, exception)
+        DiagnosticLog.error(tag, message, exception)
     }
 
 }

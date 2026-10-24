@@ -38,6 +38,7 @@ class ConfigFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChange
     private val mode by lazy { findPreference<ListPreference>("mode")!! }
     private val host by lazy { findPreference<EditTextPreference>("host")!! }
     private val path by lazy { findPreference<EditTextPreference>("path")!! }
+    private val serviceName by lazy { findPreference<EditTextPreference>("serviceName")!! }
     private val mux by lazy { findPreference<EditTextPreference>("mux")!! }
     private val certRaw by lazy { findPreference<EditTextPreference>("certRaw")!! }
     private val loglevel by lazy { findPreference<ListPreference>("loglevel")!! }
@@ -46,6 +47,8 @@ class ConfigFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChange
         "websocket-http" -> Pair(null, false)
         "websocket-tls" -> Pair(null, true)
         "quic-tls" -> Pair("quic", false)
+        "grpc" -> Pair("grpc", false)
+        "grpc-tls" -> Pair("grpc", true)
         else -> {
             check(false)
             Pair(null, false)
@@ -59,6 +62,9 @@ class ConfigFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChange
         putWithDefault("host", host.text, "cloudfront.com")
         putWithDefault("path", path.text, "/")
         putWithDefault("mux", mux.text, "1")
+        if (mode == "grpc") {
+            putWithDefault("serviceName", serviceName.text, "")
+        }
         putWithDefault("certRaw", certRaw.text?.replace("\n", ""), "")
         putWithDefault("loglevel", loglevel.value, "warning")
     }
@@ -67,12 +73,15 @@ class ConfigFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChange
         mode.value = when (options["mode"] ?: "websocket") {
             "quic" -> "quic-tls"
             "websocket" if "tls" in options -> "websocket-tls"
+            "grpc" if "tls" !in options -> "grpc"
+            "grpc" if "tls" in options -> "grpc-tls"
             else -> "websocket-http"
         }.also { onModeChange(it) }
         host.text = options["host"] ?: "cloudfront.com"
         path.text = options["path"] ?: "/"
         mux.text = options["mux"] ?: "1"
         certRaw.text = options["certRaw"]
+        serviceName.text = options["serviceName"]
         loglevel.value = options["loglevel"] ?: "warning"
     }
 
@@ -108,6 +117,11 @@ class ConfigFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChange
             it.setSelection(it.text.length)
         }
         certRaw.onPreferenceChangeListener = this
+        serviceName.setOnBindEditTextListener {
+            it.inputType = InputType.TYPE_TEXT_VARIATION_URI
+            it.setSelection(it.text.length)
+        }
+        serviceName.onPreferenceChangeListener = this
         loglevel.onPreferenceChangeListener = this
     }
 
@@ -131,7 +145,8 @@ class ConfigFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChange
         val (mode, tls) = readMode(modeValue)
         path.isEnabled = mode == null
         mux.isEnabled = mode == null
-        certRaw.isEnabled = (mode == null && tls) || (mode == "quic")
+        serviceName.isVisible = mode == "grpc"
+        certRaw.isEnabled = (mode == null && tls) || (mode == "quic") || (mode == "grpc" && tls)
     }
 
     override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {

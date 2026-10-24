@@ -21,13 +21,26 @@ package io.nekohasekai.sagernet.widget
 
 import android.content.Context
 import android.util.AttributeSet
+import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.ProfileManager
 
-class TaskerProfilePreference : ReselectableSimpleMenuPreference {
+class TaskerProfilePreference : SimpleMenuPreference {
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
+    constructor(context: Context, attrs: AttributeSet?, defStyle: Int) : super(
+        context, attrs, defStyle
+    )
+
+    constructor(
+        context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int
+    ) : super(context, attrs, defStyleAttr, defStyleRes)
+
+    init {
+        setEntries(R.array.tasker_outbound_entry)
+        setEntryValues(R.array.int_array_2)
+    }
 
     override fun getSummary(): CharSequence? {
         if (value == "1") {

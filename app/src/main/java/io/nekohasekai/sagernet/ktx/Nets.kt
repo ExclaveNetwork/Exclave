@@ -20,8 +20,8 @@
 package io.nekohasekai.sagernet.ktx
 
 import io.nekohasekai.sagernet.BuildConfig
-import libexclavecore.Libexclavecore
-import libexclavecore.URL
+import libsagernetcore.Libsagernetcore
+import libsagernetcore.URL
 import java.net.IDN
 import java.net.InetSocketAddress
 import java.net.Socket
@@ -45,14 +45,14 @@ fun URL.addPathSegments(vararg segments: String) {
 }
 
 fun String.wrapIDN(): String {
-    if (Libexclavecore.isIP(this)) {
+    if (Libsagernetcore.isIP(this)) {
         return this
     }
     return IDN.toUnicode(this, IDN.ALLOW_UNASSIGNED)
 }
 
 fun String.unwrapIDN(): String {
-    if (Libexclavecore.isIP(this) || this.all { it.code < 128 }) {
+    if (Libsagernetcore.isIP(this) || this.all { it.code < 128 }) {
         return this
     }
     return try {
@@ -63,7 +63,7 @@ fun String.unwrapIDN(): String {
 }
 
 fun joinHostPort(host: String, port: Int): String {
-    if (Libexclavecore.isIPv6(host)) {
+    if (Libsagernetcore.isIPv6(host)) {
         return "[$host]:$port"
     }
     return "$host:$port"
@@ -78,7 +78,7 @@ fun String.unwrapHost(): String {
 
 fun isHTTPorHTTPSURL(url: String): Boolean {
     try {
-        val u = Libexclavecore.parseURL(url)
+        val u = Libsagernetcore.parseURL(url)
         return (u.scheme == "http" || u.scheme == "https")
     } catch (_: Exception) {
         return false
@@ -189,16 +189,12 @@ fun String.toHysteriaPort(disallowFromGreaterThanTo: Boolean = false): Int {
 
 const val USER_AGENT = "Exclave/${BuildConfig.VERSION_NAME}"
 
+// Taken from https://gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/-/blob/main/client/torrc with unsupported servers removed.
 val PUBLIC_STUN_SERVERS = arrayOf(
-    "stunserver2025.stunprotocol.org:3478",
+    "stun.epygi.com:3478",
+    "stun.uls.co.za:3478",
     "stun.voipgate.com:3478",
-    "stun.mixvoip.com:3478",
-    "stun.dus.net:3478",
-    "stun.m-online.net:3478",
-    "stun.pure-ip.com:3478",
-    "stun.sip.us:3478",
-    "stun.siptrunk.com:3478",
-    "stun.voipia.net:3478"
+    "stun.mixvoip.com:3478"
 )
 
 fun String.unescapeLineFeed(): String {

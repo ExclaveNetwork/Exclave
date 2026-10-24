@@ -39,7 +39,11 @@ data class ProxyGroup(
     var subscription: SubscriptionBean? = null,
     var order: Int = GroupOrder.ORIGIN,
     @ColumnInfo(defaultValue = (-1L).toString()) var frontProxy: Long = -1L,
-    @ColumnInfo(defaultValue = (-1L).toString()) var landingProxy: Long = -1L
+    @ColumnInfo(defaultValue = (-1L).toString()) var landingProxy: Long = -1L,
+    @ColumnInfo(defaultValue = "0") var pinned: Boolean = false,
+    @ColumnInfo(defaultValue = "0") var healthCheckSuccess: Long = 0L,
+    @ColumnInfo(defaultValue = "0") var healthCheckTotal: Long = 0L,
+    @ColumnInfo(defaultValue = "''") var healthCheckHistory: String = ""
 ) : Serializable() {
 
     @Transient
@@ -57,7 +61,7 @@ data class ProxyGroup(
             val subscription = subscription!!
             subscription.serializeForShare(output)
         } else {
-            output.writeInt(1)
+            output.writeInt(4)
             output.writeLong(id)
             output.writeLong(userOrder)
             output.writeBoolean(ungrouped)
@@ -69,6 +73,10 @@ data class ProxyGroup(
             output.writeInt(order)
             output.writeLong(frontProxy)
             output.writeLong(landingProxy)
+            output.writeBoolean(pinned)
+            output.writeLong(healthCheckSuccess)
+            output.writeLong(healthCheckTotal)
+            output.writeString(healthCheckHistory)
         }
     }
 
@@ -97,7 +105,43 @@ data class ProxyGroup(
                 frontProxy = input.readLong()
                 landingProxy = input.readLong()
             }
+            if (version >= 2) {
+                pinned = input.readBoolean()
+            }
+            if (version >= 3) {
+                healthCheckSuccess = input.readLong()
+                healthCheckTotal = input.readLong()
+            }
+            if (version >= 4) {
+                healthCheckHistory = input.readString()
+            }
         }
+    }
+
+    fun parsedHealthCheckHistory(): GroupHealthCheckHistory {
+        return GroupHealthCheckHistory.decode(healthCheckHistory)
+    }
+
+    fun healthCheckSuccessPercent(): Int? {
+        return parsedHealthCheckHistory().successPercent()
+    }
+
+    fun healthCheckStatusLabel(): String {
+        val history = parsedHealthCheckHistory()
+        val percent = history.successPercent() ?: return "-"
+        return "$percent%" + if (history.isComplete) " (+)" else ""
+    }
+
+    fun recordHealthCheck(success: Boolean) {
+        healthCheckHistory = parsedHealthCheckHistory().append(success).encode()
+        healthCheckSuccess = 0L
+        healthCheckTotal = 0L
+    }
+
+    fun resetHealthChecks() {
+        healthCheckHistory = ""
+        healthCheckSuccess = 0L
+        healthCheckTotal = 0L
     }
 
     fun displayName(): String {
@@ -107,10 +151,10 @@ data class ProxyGroup(
     @androidx.room.Dao
     interface Dao {
 
-        @Query("SELECT * FROM proxy_groups ORDER BY userOrder")
+        @Query("SELECT * FROM proxy_groups ORDER BY pinned DESC, userOrder")
         fun allGroups(): List<ProxyGroup>
 
-        @Query("SELECT * FROM proxy_groups WHERE type = ${GroupType.SUBSCRIPTION}")
+        @Query("SELECT * FROM proxy_groups WHERE type = ${GroupType.SUBSCRIPTION} ORDER BY pinned DESC, userOrder")
         fun subscriptions(): List<ProxyGroup>
 
         @Query("SELECT MAX(userOrder) + 1 FROM proxy_groups")
@@ -133,6 +177,9 @@ data class ProxyGroup(
 
         @Update
         fun updateGroup(group: ProxyGroup)
+
+        @Update
+        fun updateGroup(groupList: List<ProxyGroup>)
 
         @Query("DELETE FROM proxy_groups")
         fun reset()

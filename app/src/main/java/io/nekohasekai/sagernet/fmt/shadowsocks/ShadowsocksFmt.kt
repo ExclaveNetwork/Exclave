@@ -23,7 +23,7 @@ import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.plugin.PluginOptions
 import com.google.gson.JsonObject
 import io.nekohasekai.sagernet.ktx.*
-import libexclavecore.Libexclavecore
+import libsagernetcore.Libsagernetcore
 import kotlin.io.encoding.Base64
 
 val supportedShadowsocksMethod = arrayOf(
@@ -58,15 +58,17 @@ fun ShadowsocksBean.fixInvalidParams() {
 }
 
 fun parseShadowsocks(url: String): ShadowsocksBean {
-    val link = Libexclavecore.parseURL(url)
-    if (!link.hasPort() && link.userInfo.isEmpty()) {
+    val link = Libsagernetcore.parseURL(url)
+    if (link.port == 0 && link.username.isEmpty() && link.password.isEmpty()) {
         // pre-SIP002, https://shadowsocks.org/doc/configs.html#uri-and-qr-code
         // example: ss://YmYtY2ZiOnRlc3QvIUAjOkAxOTIuMTY4LjEwMC4xOjg4ODg#example-server
         val plainUri = url.substring("ss://".length).substringBefore("#").decodeBase64()
+
         return ShadowsocksBean().apply {
-            val hostPort = Libexclavecore.splitHostPort(plainUri.substringAfterLast("@"))
-            serverAddress = hostPort.host
-            serverPort = hostPort.port
+            serverAddress = plainUri.substringAfterLast("@").substringBeforeLast(":")
+                .removePrefix("[").removeSuffix("]").ifEmpty { error("empty host") }
+            serverPort = plainUri.substringAfterLast("@").substringAfterLast(":")
+                .toIntOrNull() ?: error("invalid port")
             method = when (val m = plainUri.substringBeforeLast("@").substringBefore(":").lowercase()) {
                 in supportedShadowsocksMethod -> m
                 "plain", "dummy" -> "none"
@@ -75,22 +77,18 @@ fun parseShadowsocks(url: String): ShadowsocksBean {
                 else -> error("unsupported method")
             }
             password = plainUri.substringBeforeLast("@").substringAfter(":")
-            if (method in supportedShadowsocks2022Method) {
-                validateShadowsocks2022Password(method, password)
-            }
             name = link.fragment
         }
     }
-    if (link.hasPassword()) {
+    if (link.password.isNotEmpty() ||
+        url.substring("ss://".length).substringBefore("#")
+            .substringBefore("@").endsWith(":")) {
         // SIP002, plain user info
         // example: ss://2022-blake3-aes-256-gcm:YctPZ6U7xPPcU%2Bgp3u%2B0tx%2FtRizJN9K8y%2BuKlW2qjlI%3D@192.168.100.1:8888#Example3
         // example: ss://none:@192.168.100.1:8888#example
         return ShadowsocksBean().apply {
-            serverAddress = link.host
-            serverPort = when {
-                !link.hasPort() -> error("invalid port")
-                else -> link.port
-            }
+            serverAddress = link.host.ifEmpty { error("empty host") }
+            serverPort = link.port
             method = when (val m = link.username?.lowercase()) {
                 in supportedShadowsocksMethod -> m
                 "plain", "dummy" -> "none"
@@ -99,9 +97,6 @@ fun parseShadowsocks(url: String): ShadowsocksBean {
                 else -> error("unsupported method")
             }
             password = link.password
-            if (method in supportedShadowsocks2022Method) {
-                validateShadowsocks2022Password(method, password)
-            }
             plugin = link.queryParameter("plugin")
             name = link.fragment
             fixInvalidParams()
@@ -110,11 +105,8 @@ fun parseShadowsocks(url: String): ShadowsocksBean {
     return ShadowsocksBean().apply {
         // SIP002, user info encoded with Base64URL
         // example: ss://YWVzLTEyOC1nY206dGVzdA@127.0.0.1:8888#Example1
-        serverAddress = link.host
-        serverPort = when {
-            !link.hasPort() -> error("invalid port")
-            else -> link.port
-        }
+        serverAddress = link.host.ifEmpty { error("empty host") }
+        serverPort = link.port
         method = when (val m = link.username?.decodeBase64()?.substringBefore(":")?.lowercase()) {
             in supportedShadowsocksMethod -> m
             "plain", "dummy" -> "none"
@@ -123,34 +115,9 @@ fun parseShadowsocks(url: String): ShadowsocksBean {
             else -> error("unsupported method")
         }
         password = link.username.decodeBase64().substringAfter(":")
-        if (method in supportedShadowsocks2022Method) {
-            validateShadowsocks2022Password(method, password)
-        }
         plugin = link.queryParameter("plugin")
         name = link.fragment
         fixInvalidParams()
-    }
-}
-
-private fun validateShadowsocks2022Password(method: String, password: String) {
-    try {
-        when (method) {
-            "2022-blake3-aes-128-gcm" -> {
-                for (p in password.split(":")) {
-                    require(Base64.decode(p).size == 16)
-                }
-            }
-            "2022-blake3-aes-256-gcm" -> {
-                for (p in password.split(":")) {
-                    require(Base64.decode(p).size == 32)
-                }
-            }
-            "2022-blake3-chacha20-poly1305" -> {
-                require(Base64.decode(password).size == 32)
-            }
-        }
-    } catch (_: Exception) {
-        throw IllegalArgumentException("invalid password")
     }
 }
 
@@ -158,12 +125,15 @@ fun ShadowsocksBean.toUri(): String? {
     if (security != "none") error("unsupported ss with tls")
     if (type != "tcp" || headerType != "none") error("unsupported ss with v2ray transport")
 
-    val builder = Libexclavecore.newURL("ss")
-    builder.setHostPort(serverAddress, serverPort)
+    val builder = Libsagernetcore.newURL("ss")
+    builder.setHostPort(serverAddress.ifEmpty { error("empty server address") }, serverPort)
     if (method in supportedShadowsocks2022Method) {
-        validateShadowsocks2022Password(method, password)
         builder.username = method
-        builder.password = password
+        if (password.isNotEmpty()) {
+            builder.password = password
+        } else {
+            error("empty password")
+        }
     } else {
         builder.username = Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).encode("$method:$password".toByteArray())
     }
@@ -188,7 +158,7 @@ fun ShadowsocksBean.toUri(): String? {
 
 fun parseShadowsocksConfig(config: JsonObject): ShadowsocksBean? {
     return ShadowsocksBean().apply {
-        serverAddress = config.getString("server") ?: return null
+        serverAddress = config.getString("server")?.ifEmpty { error("empty host") } ?: return null
         serverPort = config.getInt("server_port") ?: return null
         password = config.getString("password")
 
@@ -206,9 +176,6 @@ fun parseShadowsocksConfig(config: JsonObject): ShadowsocksBean? {
             "aead-aes-256-gcm" -> "aes-256-gcm"
             "", null -> error("unsupported method") // different impl has different default value
             else -> error("unsupported method")
-        }
-        if (method in supportedShadowsocks2022Method) {
-            validateShadowsocks2022Password(method, password)
         }
         val pluginId = when (val id = config.getString("plugin")) {
             "simple-obfs" -> "obfs-local"

@@ -28,7 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import io.nekohasekai.sagernet.fmt.AbstractBean;
 import io.nekohasekai.sagernet.fmt.KryoConverters;
 import io.nekohasekai.sagernet.ktx.NetsKt;
-import libexclavecore.Libexclavecore;
+import libsagernetcore.Libsagernetcore;
 
 public class MieruBean extends AbstractBean {
 
@@ -121,11 +121,19 @@ public class MieruBean extends AbstractBean {
         if (portRange.isEmpty()) {
             return super.displayAddress();
         }
-        if (Libexclavecore.isIPv6(serverAddress)) {
+        if (Libsagernetcore.isIPv6(serverAddress)) {
             return "[" + serverAddress + "]:" + String.join(",", NetsKt.listByLineOrComma(portRange));
         } else {
             return NetsKt.wrapIDN(serverAddress) + ":" + String.join(",", NetsKt.listByLineOrComma(portRange));
         }
+    }
+
+    @Override
+    public String network() {
+        if (protocol == PROTOCOL_UDP) {
+            return "udp";
+        }
+        return "tcp";
     }
 
     @NotNull

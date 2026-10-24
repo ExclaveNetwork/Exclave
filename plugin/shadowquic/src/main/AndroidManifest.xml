@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:installLocation="internalOnly"
+    tools:ignore="MissingLeanbackLauncher">
+
+    <uses-feature
+        android:name="android.software.leanback"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
+
+    <application
+        android:allowBackup="false"
+        android:label="ShadowQUIC Plugin">
+        <provider
+            android:name="io.nekohasekai.sagernet.plugin.shadowquic.BinaryProvider"
+            android:authorities="com.github.dyhkwong.plugin.shadowquic.BinaryProvider"
+            android:directBootAware="true"
+            android:exported="true"
+            tools:ignore="ExportedContentProvider">
+            <intent-filter>
+                <action android:name="io.nekohasekai.sagernet.plugin.ACTION_NATIVE_PLUGIN" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="io.nekohasekai.sagernet.plugin.ACTION_NATIVE_PLUGIN" />
+                <data
+                    android:host="com.github.dyhkwong.sagernet"
+                    android:path="/shadowquic-plugin"
+                    android:scheme="plugin" />
+            </intent-filter>
+
+            <meta-data
+                android:name="io.nekohasekai.sagernet.plugin.id"
+                android:value="shadowquic-plugin" />
+            <meta-data
+                android:name="io.nekohasekai.sagernet.plugin.executable_path"
+                android:value="libshadowquic.so" />
+        </provider>
+    </application>
+
+</manifest>

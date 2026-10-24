@@ -35,8 +35,6 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.snackbar.Snackbar
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.R
-import io.nekohasekai.sagernet.ktx.getBooleanProperty
-import io.nekohasekai.sagernet.ktx.getColorAttr
 import io.nekohasekai.sagernet.utils.Theme
 
 abstract class ThemedActivity : AppCompatActivity {
@@ -52,8 +50,6 @@ abstract class ThemedActivity : AppCompatActivity {
 
     var themeResId = 0
     var uiMode = 0
-
-    private val setNavigationBarColor = DataStore.experimentalFlagsProperties.getBooleanProperty("setNavigationBarColor")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         when (type) {
@@ -83,21 +79,9 @@ abstract class ThemedActivity : AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && Build.VERSION.SDK_INT <= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             WindowCompat.setDecorFitsSystemWindows(window, false)
         }
-
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val insetController = WindowCompat.getInsetsController(window, window.decorView)
-            if (setNavigationBarColor) {
-                insetController.isAppearanceLightNavigationBars =
-                    if (DataStore.appTheme == Theme.BLACK) !Theme.usingNightMode() else false
-                @Suppress("DEPRECATION")
-                window.navigationBarColor = getColorAttr(androidx.appcompat.R.attr.colorPrimaryDark)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    window.isNavigationBarContrastEnforced = true
-                }
-            } else {
-                insetController.isAppearanceLightNavigationBars = !Theme.usingNightMode()
-            }
+            insetController.isAppearanceLightNavigationBars = !Theme.usingNightMode()
             insetController.isAppearanceLightStatusBars =
                 if (DataStore.appTheme == Theme.BLACK) !Theme.usingNightMode() else false
         }

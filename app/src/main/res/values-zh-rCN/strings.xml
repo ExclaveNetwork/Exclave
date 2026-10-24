@@ -156,8 +156,8 @@
     <string name="traffic_sniffing">启用流量嗅探</string>
     <string name="disable">禁用</string>
     <string name="cag_misc">杂项</string>
-    <string name="enable_mux">启用 Mux.Cool</string>
-    <string name="mux_concurrency">最大并发连接</string>
+    <string name="enable_mux">启用 Mux</string>
+    <string name="mux_concurrency">Mux 最大并发</string>
     <string name="ws_host">WebSocket 主机</string>
     <string name="ws_path">WebSocket 路径</string>
     <string name="http_host">HTTP 主机</string>
@@ -203,6 +203,8 @@
     <string name="port_transproxy">透明代理端口</string>
     <string name="connection_test_url">连接测试 URL</string>
     <string name="connection_test_available_http">连接成功：HTTP 握手耗时 %d 毫秒</string>
+    <string name="route_reverse">反向代理</string>
+    <string name="route_reverse_redirect">反向代理地址</string>
     <string name="certificates">证书（链）</string>
     <string name="pinned_peer_certificate_chain_sha256">固定证书链 SHA-256</string>
     <string name="ignore_battery_optimizations">忽略电池优化</string>
@@ -335,7 +337,6 @@
     <string name="ssh_private_key_passphrase">私钥密码句</string>
     <string name="ssh_private_key">私钥</string>
     <string name="ssh_public_key">公钥</string>
-    <string name="ssh_host_key">主机密钥</string>
     <string name="ssh_auth_type_none">无</string>
     <string name="clear_logcat">清空日志</string>
     <string name="menu_log">日志</string>
@@ -416,6 +417,7 @@
     <string name="reality_short_id">REALITY Short ID</string>
     <string name="reality_fingerprint">REALITY uTLS 指纹</string>
     <string name="wireguard_reserved">保留字段</string>
+    <string name="shadowsocks_2022_implementation">Shadowsocks 2022 实现</string>
     <string name="bootstrap_dns">Bootstrap DNS</string>
     <string name="use_local_dns_as_bootstrap_dns">使用系统 DNS 作为 Bootstrap DNS</string>
     <string name="brook_fragment">Fragment</string>
@@ -440,7 +442,7 @@
     <string name="rules_geosite_url">geosite.dat URL</string>
     <string name="rules_geoip_url">geoip.dat URL</string>
     <string name="http_proxy_exception_list">HTTP 代理例外列表</string>
-    <string name="mux_settings">Mux.Cool 设置</string>
+    <string name="mux_settings">Mux 设置</string>
     <string name="update_subscription">更新订阅</string>
     <string name="group_not_a_subscription">此分组不是订阅。</string>
     <string name="enable_fragment">启用 TLS Client Hello 分片</string>
@@ -458,6 +460,8 @@
     <string name="allow_apps_bypass_vpn_sum">允许应用使用系统提供的方法自行绕过 VPN</string>
     <string name="update_all_subscriptions">更新所有订阅</string>
     <string name="cag_splithttp">XHTTP 设置</string>
+    <string name="ech_config">ECH 配置</string>
+    <string name="ech_doh_server">ECH DoH 服务器</string>
     <string name="splithttp_mode">模式</string>
     <string name="backup_all_profiles">备份所有配置</string>
     <string name="browser_forwarder_hint">请从 v2ray-core 发行下载 v2ray-extra.zip 并将 index.html 和 index.js 放置到 Android/data/%s/files，或者将 index.html 和 index.js 导入为路由资源。</string>
@@ -561,6 +565,7 @@
     <string name="insecure_warn">安全建议</string>
     <string name="insecure_warn_sum">对安全性相当于明文的配置显示警告。</string>
     <string name="ech">ECH</string>
+    <string name="server_name_to_verify">ServerNameToVerify</string>
     <string name="mieru_traffic_pattern">流量模式</string>
     <string name="insecure_warning_detail">此配置的安全性相当于明文。\n\n该警告被显示是因为“安全建议”被启用。</string>
     <string name="hysteria_hop_interval_min">最小端口跳跃间隔（秒）</string>
@@ -575,21 +580,4 @@
     <string name="enable_hysteria2_omit_max_datagram_frame_size">启用 Hysteria 2 OmitMaxDatagramFrameSize</string>
     <string name="hysteria2_omit_max_datagram_frame_size_sum">如果 Hysteria 2 服务端不支持此破坏性变更，UDP 将无法使用。这是一个临时性选项，将来可能会被移除。</string>
     <string name="ssh_keepalive_interval">保活间隔（秒）</string>
-    <string name="custom_outbound">自定义出站</string>
-    <string name="hysteria2_gecko_max_packet_size">最大包大小</string>
-    <string name="hysteria2_gecko_min_packet_size">最小包大小</string>
-    <string name="nearby_devices_permission_notice">这需要“附近的设备”权限以工作，但是权限未被授予。</string>
-    <string name="snell_reuse">连接复用</string>
-    <string name="pre_shared_key">预共享密钥</string>
-    <string name="snell_obfs_mode">混淆模式</string>
-    <string name="snell_obfs_host">混淆主机</string>
-    <string name="snell_mode">模式</string>
-    <string name="anytls_disable_reuse">禁用连接复用</string>
-    <string name="chrome_parrot_summary">模仿 Chrome 的 QUIC Client Hello</string>
-    <string name="chrome_parrot_omit_max_datagram_frame_size_datagram_warning">此选项被禁用以匹配 Chrome 的行为。 </string>
-    <string name="option_globally_enabled">此选项已被全局启用，该值将被忽略。</string>
-    <string name="snell_obfs_uri">混淆 URI</string>
-    <string name="naiveproxy_tunnel_timeout">隧道超时（秒）</string>
-    <string name="naiveproxy_idle_timeout">空闲超时（秒）</string>
-    <string name="uri_template">URI 模板</string>
 </resources>

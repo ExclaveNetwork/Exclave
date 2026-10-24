@@ -32,6 +32,7 @@ import androidx.core.text.isDigitsOnly
 object Executable {
     private val EXECUTABLES = setOf(
         "libnaive.so",
+        "libshadowquic.so",
     )
 
     fun killAll() {

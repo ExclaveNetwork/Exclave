@@ -129,6 +129,8 @@
     <string name="route_play_store">%s 用のPlayストアルール</string>
     <string name="route_bypass_ip">%s 用のIPルール</string>
     <string name="route_reset">初期化</string>
+    <string name="route_reverse">逆方向のリバースプロキシ</string>
+    <string name="route_reverse_redirect">リバースプロキシ アドレス</string>
     <string name="route_manage_assets">ルート一覧を管理</string>
     <string name="route_assets">資産</string>
     <string name="route_rules_provider">ルート設定のプロバイダ</string>
@@ -396,6 +398,7 @@
     <string name="reality_short_id">REALITY Short ID</string>
     <string name="reality_fingerprint">REALITY uTLS 指紋</string>
     <string name="wireguard_reserved">予約済</string>
+    <string name="shadowsocks_2022_implementation">Shadowsocks 2022 導入</string>
     <string name="bootstrap_dns">最初のDNS</string>
     <string name="use_local_dns_as_bootstrap_dns">システムDNSをブートストラップDNSとして使う</string>
     <string name="brook_fragment">断片</string>
@@ -438,6 +441,8 @@
     <string name="allow_apps_bypass_vpn_sum">アプリがシステムが提供するバイバス手段を使うことを許可</string>
     <string name="update_all_subscriptions">すべてのサブスクを更新</string>
     <string name="cag_splithttp">XHTTP 設定</string>
+    <string name="ech_config">ECH 設定</string>
+    <string name="ech_doh_server">ECH DoH サーバ</string>
     <string name="splithttp_mode">モード</string>
     <string name="backup_all_profiles">すべてのプロファイルをバックアップ</string>
     <string name="browser_forwarder_hint">v2ray-extra.zipをv2ray-coreのリリースからダウンロードし、index.htmlとindex.jsをAndroid/data/%s/filesに配置するか、それらをルートアセットとしてインポートしてください。</string>

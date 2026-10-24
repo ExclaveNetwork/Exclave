@@ -40,7 +40,7 @@ class Hysteria2SettingsActivity : ProfileSettingsActivity<Hysteria2Bean>() {
         DataStore.profileName = name
         DataStore.serverAddress = serverAddress
         DataStore.serverPort = serverPort
-        DataStore.serverObfs = obfsPassword
+        DataStore.serverObfs = obfs
         DataStore.serverPassword = auth
         DataStore.serverSNI = sni
         DataStore.serverCertificates = certificates
@@ -55,29 +55,19 @@ class Hysteria2SettingsActivity : ProfileSettingsActivity<Hysteria2Bean>() {
         DataStore.serverHopIntervalMin = hopIntervalMin
         DataStore.serverHopIntervalMax = hopIntervalMax
         DataStore.serverEchEnabled = echEnabled
-        DataStore.serverEchConfigList = echConfigList
-        DataStore.serverEchQueryName = echQueryName
+        DataStore.serverEchConfig = echConfig
         DataStore.serverMtlsCertificate = mtlsCertificate
         DataStore.serverMtlsCertificatePrivateKey = mtlsCertificatePrivateKey
         DataStore.serverCongestionController = congestionControl
         DataStore.serverHysteria2BBRProfile = bbrProfile
-        DataStore.serverHysteria2OmitMaxDatagramFrameSize = if (chromeParrot) {
-            false
-        } else {
-            omitMaxDatagramFrameSize
-        }
-        DataStore.serverHysteria2ObfsType = obfsType
-        DataStore.serverHysteria2GeckoMinPacketSize = geckoMinPacketSize
-        DataStore.serverHysteria2GeckoMaxPacketSize = geckoMaxPacketSize
-        DataStore.serverServerNameToVerify = serverNameToVerify
-        DataStore.serverHysteria2ChromeParrot = chromeParrot
+        DataStore.serverHysteria2OmitMaxDatagramFrameSize = omitMaxDatagramFrameSize
     }
 
     override fun Hysteria2Bean.serialize() {
         name = DataStore.profileName
         serverAddress = DataStore.serverAddress.unwrapIDN()
         serverPort = DataStore.serverPort
-        obfsPassword = DataStore.serverObfs
+        obfs = DataStore.serverObfs
         auth = DataStore.serverPassword
         sni = DataStore.serverSNI
         certificates = DataStore.serverCertificates
@@ -92,23 +82,12 @@ class Hysteria2SettingsActivity : ProfileSettingsActivity<Hysteria2Bean>() {
         hopIntervalMin = DataStore.serverHopIntervalMin
         hopIntervalMax = DataStore.serverHopIntervalMax
         echEnabled = DataStore.serverEchEnabled
-        echConfigList = DataStore.serverEchConfigList
-        echQueryName = DataStore.serverEchQueryName
+        echConfig = DataStore.serverEchConfig
         mtlsCertificate = DataStore.serverMtlsCertificate
         mtlsCertificatePrivateKey = DataStore.serverMtlsCertificatePrivateKey
         congestionControl = DataStore.serverCongestionController
         bbrProfile = DataStore.serverHysteria2BBRProfile
-        omitMaxDatagramFrameSize = if (DataStore.serverHysteria2ChromeParrot) {
-            false
-        } else {
-            DataStore.serverHysteria2OmitMaxDatagramFrameSize
-        }
         omitMaxDatagramFrameSize = DataStore.serverHysteria2OmitMaxDatagramFrameSize
-        obfsType = DataStore.serverHysteria2ObfsType
-        geckoMinPacketSize = DataStore.serverHysteria2GeckoMinPacketSize
-        geckoMaxPacketSize = DataStore.serverHysteria2GeckoMaxPacketSize
-        serverNameToVerify = DataStore.serverServerNameToVerify
-        chromeParrot = DataStore.serverHysteria2ChromeParrot
     }
 
     override fun PreferenceFragmentCompat.createPreferences(
@@ -131,39 +110,15 @@ class Hysteria2SettingsActivity : ProfileSettingsActivity<Hysteria2Bean>() {
         findPreference<EditTextPreference>(Key.SERVER_PASSWORD)!!.apply {
             summaryProvider = PasswordSummaryProvider
         }
-
-        val obfsType = findPreference<ListPreference>(Key.SERVER_HYSTERIA2_OBFS_TYPE)!!
-        val obfsPassword = findPreference<EditTextPreference>(Key.SERVER_OBFS)!!
-        obfsPassword.apply {
+        findPreference<EditTextPreference>(Key.SERVER_OBFS)!!.apply {
             summaryProvider = PasswordSummaryProvider
-        }
-        obfsPassword.isVisible = obfsType.value.isNotEmpty()
-        val geckoMinPacketSize = findPreference<EditTextPreference>(Key.SERVER_HYSTERIA2_GECKO_MIN_PACKET_SIZE)!!
-        geckoMinPacketSize.apply {
-            setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
-        }
-        geckoMinPacketSize.isVisible = obfsType.value == "gecko"
-        val geckoMaxPacketSize = findPreference<EditTextPreference>(Key.SERVER_HYSTERIA2_GECKO_MAX_PACKET_SIZE)
-        geckoMaxPacketSize!!.apply {
-            setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
-        }
-        geckoMaxPacketSize.isVisible = obfsType.value == "gecko"
-        obfsType.setOnPreferenceChangeListener { _, newValue ->
-            newValue as String
-            obfsPassword.isVisible = newValue.isNotEmpty()
-            geckoMinPacketSize.isVisible = newValue == "gecko"
-            geckoMaxPacketSize.isVisible = newValue == "gecko"
-            true
         }
 
         val echEnabled = findPreference<SwitchPreference>(Key.SERVER_ECH_ENABLED)!!
-        val echConfigList = findPreference<EditTextPreference>(Key.SERVER_ECH_CONFIG_LIST)!!
-        val echQueryName = findPreference<EditTextPreference>(Key.SERVER_ECH_QUERY_NAME)!!
-        echConfigList.isEnabled = echEnabled.isChecked
-        echQueryName.isEnabled = echEnabled.isChecked
+        val echConfig = findPreference<EditTextPreference>(Key.SERVER_ECH_CONFIG)!!
+        echConfig.isEnabled = echEnabled.isChecked
         echEnabled.setOnPreferenceChangeListener { _, newValue ->
-            echConfigList.isEnabled = newValue as Boolean
-            echQueryName.isEnabled = newValue
+            echConfig.isEnabled = newValue as Boolean
             true
         }
 
@@ -209,35 +164,6 @@ class Hysteria2SettingsActivity : ProfileSettingsActivity<Hysteria2Bean>() {
             bbrProfile.isVisible = newValue == "bbr"
             true
         }
-        val chromeParrot = findPreference<SwitchPreference>(Key.SERVER_HYSTERIA2_CHROME_PARROT)!!
-        val omitMaxDatagramFrameSize = findPreference<SwitchPreference>(Key.SERVER_HYSTERIA2_OMIT_MAX_DATAGRAM_FRAME_SIZE)!!
-        chromeParrot.setOnPreferenceChangeListener { _, newValue ->
-            newValue as Boolean
-            if (newValue) {
-                omitMaxDatagramFrameSize.isEnabled = false
-                omitMaxDatagramFrameSize.isChecked = false
-                omitMaxDatagramFrameSize.summary = getString(R.string.chrome_parrot_omit_max_datagram_frame_size_datagram_warning)
-            } else if (DataStore.hysteria2OmitMaxDatagramFrameSize) {
-                omitMaxDatagramFrameSize.isEnabled = true
-                omitMaxDatagramFrameSize.summary = getString(R.string.option_globally_enabled)
-            } else {
-                omitMaxDatagramFrameSize.isEnabled = true
-                omitMaxDatagramFrameSize.summary = getString(R.string.hysteria2_omit_max_datagram_frame_size_sum)
-            }
-            true
-        }
-        if (chromeParrot.isChecked) {
-            omitMaxDatagramFrameSize.isEnabled = false
-            omitMaxDatagramFrameSize.isChecked = false
-            omitMaxDatagramFrameSize.summary = getString(R.string.chrome_parrot_omit_max_datagram_frame_size_datagram_warning)
-        } else if (DataStore.hysteria2OmitMaxDatagramFrameSize) {
-            omitMaxDatagramFrameSize.isEnabled = true
-            omitMaxDatagramFrameSize.summary = getString(R.string.option_globally_enabled)
-        } else {
-            omitMaxDatagramFrameSize.isEnabled = true
-            omitMaxDatagramFrameSize.summary = getString(R.string.hysteria2_omit_max_datagram_frame_size_sum)
-        }
-
     }
 
 }

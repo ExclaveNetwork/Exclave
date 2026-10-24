@@ -28,6 +28,7 @@ import android.content.IntentFilter
 import android.os.*
 import io.nekohasekai.sagernet.Action
 import io.nekohasekai.sagernet.BootReceiver
+import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.aidl.AppStatsList
 import io.nekohasekai.sagernet.aidl.ISagerNetService
@@ -39,14 +40,15 @@ import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.fmt.Alerts
 import io.nekohasekai.sagernet.fmt.TAG_SOCKS
 import io.nekohasekai.sagernet.ktx.*
+import io.nekohasekai.sagernet.utils.DiagnosticLog
 import io.nekohasekai.sagernet.plugin.PluginManager
 import io.nekohasekai.sagernet.utils.PackageCache
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import libexclavecore.AppStats
-import libexclavecore.Libexclavecore
-import libexclavecore.TrafficListener
+import libsagernetcore.AppStats
+import libsagernetcore.Libsagernetcore
+import libsagernetcore.TrafficListener
 import java.net.UnknownHostException
 import com.github.shadowsocks.plugin.PluginManager as ShadowsocksPluginPluginManager
 import io.nekohasekai.sagernet.aidl.AppStats as AidlAppStats
@@ -74,9 +76,17 @@ class BaseService {
         var notification: ServiceNotification? = null
 
         val receiver = broadcastReceiver { _, intent ->
+            DiagnosticLog.critical(
+                "service",
+                "receiver action=${intent.action.orEmpty()} state=$state ${DiagnosticLog.stateSummary()}"
+            )
             when (intent.action) {
                 Intent.ACTION_SHUTDOWN -> service.persistStats()
                 Action.RELOAD -> service.forceLoad()
+                Action.AUTO_SWITCH -> AutoVpnManager.switchNowFromNotification()
+                Action.AUTO_SWITCH_GEMINI_SOFT -> AutoVpnManager.switchGeminiSoftFromNotification()
+                Action.AUTO_SCAN_STOP -> AutoVpnManager.stopScanFromService()
+                Action.AUTO_SCAN_RESUME -> AutoVpnManager.resumeScanFromService()
                 else -> service.stopRunner(keepState = false)
             }
         }
@@ -87,6 +97,10 @@ class BaseService {
 
         fun changeState(s: State, msg: String? = null) {
             if (state == s && msg == null) return
+            DiagnosticLog.critical(
+                "service",
+                "data.changeState from=$state to=$s msg=${msg.orEmpty()} ${DiagnosticLog.stateSummary()}"
+            )
             binder.stateChanged(s, msg)
             state = s
         }
@@ -268,7 +282,7 @@ class BaseService {
         override fun urlTest(): Int {
             val v2rayPoint = data?.proxy?.v2rayPoint ?: error("core not started")
             try {
-                return Libexclavecore.urlTest(
+                return Libsagernetcore.urlTest(
                     v2rayPoint, TAG_SOCKS, DataStore.connectionTestURL, 5000
                 )
             } catch (e: Exception) {
@@ -365,7 +379,40 @@ class BaseService {
         fun onBind(intent: Intent): IBinder? =
             if (intent.action == Action.SERVICE) data.binder else null
 
+        fun ensureCloseReceiverRegistered() {
+            this as Context
+            if (data.closeReceiverRegistered) return
+            val filter = IntentFilter().apply {
+                addAction(Action.RELOAD)
+                addAction(Intent.ACTION_SHUTDOWN)
+                addAction(Action.CLOSE)
+                addAction(Action.AUTO_SWITCH)
+                addAction(Action.AUTO_SWITCH_GEMINI_SOFT)
+                addAction(Action.AUTO_SCAN_STOP)
+                addAction(Action.AUTO_SCAN_RESUME)
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                registerReceiver(data.receiver, filter, "$packageName.SERVICE", null, Context.RECEIVER_EXPORTED)
+            } else {
+                registerReceiver(data.receiver, filter, "$packageName.SERVICE", null)
+            }
+            data.closeReceiverRegistered = true
+        }
+
         fun forceLoad() {
+            DiagnosticLog.critical(
+                "service",
+                "forceLoad state=${data.state} selected=${DataStore.selectedProxy} " +
+                        "autoEnabled=${DataStore.autoVpnEnabled} ${DiagnosticLog.stateSummary()}"
+            )
+            if (DataStore.autoVpnEnabled && data.state == State.Stopped) {
+                if (AutoVpnManager.shouldStartAutoSelectionInsteadOfService()) {
+                    AutoVpnManager.startSelectedModeFromVpnButton()
+                } else {
+                    startRunner()
+                }
+                return
+            }
             if (DataStore.selectedProxy == 0L) {
                 stopRunner(false, (this as Context).getString(R.string.profile_empty))
                 return
@@ -384,10 +431,19 @@ class BaseService {
 
         fun startRunner() {
             this as Context
+            DiagnosticLog.critical(
+                "service",
+                "startRunner service=${javaClass.name} state=${data.state} selected=${DataStore.selectedProxy} " +
+                        "${DiagnosticLog.stateSummary()}"
+            )
             startService(Intent(this, javaClass))
         }
 
         fun killProcesses() {
+            DiagnosticLog.critical(
+                "service",
+                "killProcesses hasProxy=${data.proxy != null} hasWakeLock=${wakeLock != null}"
+            )
             data.proxy?.close()
             wakeLock?.apply {
                 release()
@@ -396,6 +452,11 @@ class BaseService {
         }
 
         fun stopRunner(restart: Boolean = false, msg: String? = null, keepState: Boolean = true) {
+            DiagnosticLog.critical(
+                "service",
+                "stopRunner restart=$restart keepState=$keepState msg=${msg.orEmpty()} " +
+                        "state=${data.state} ${DiagnosticLog.stateSummary()}"
+            )
             data.notification?.destroy()
             data.notification = null
             if (data.state == State.Stopping) return
@@ -420,6 +481,12 @@ class BaseService {
                 // change the state
                 data.changeState(State.Stopped, msg)
                 DataStore.startedProfile = 0L
+                if (DataStore.serviceMode == Key.MODE_VPN) {
+                    VpnSubscriptionUpdateScheduler.onVpnStopped()
+                    GroupSourceSyncer.onVpnStopped()
+                    AutoVpnManager.onVpnStopped()
+                }
+                AutoVpnManager.onServiceFailed(msg)
                 if (!keepState) DataStore.currentProfile = 0L
                 // stop the service if nothing has bound to it
                 if (restart) startRunner() else { //   BootReceiver.enabled = false
@@ -444,7 +511,9 @@ class BaseService {
                 wakeLock = null
             }
 
-            if (DataStore.acquireWakeLock) {
+            if (DataStore.acquireWakeLock ||
+                (DataStore.serviceMode == Key.MODE_VPN && DataStore.autoVpnEnabled)
+            ) {
                 acquireWakeLock()
             }
         }
@@ -452,35 +521,44 @@ class BaseService {
         fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
             val data = data
+            DiagnosticLog.critical(
+                "service",
+                "onStartCommand action=${intent?.action.orEmpty()} flags=$flags startId=$startId " +
+                        "state=${data.state} selected=${DataStore.selectedProxy} autoEnabled=${DataStore.autoVpnEnabled} " +
+                        "${DiagnosticLog.stateSummary()}"
+            )
             if (data.state != State.Stopped) return Service.START_NOT_STICKY
+            if (AutoVpnManager.shouldStartAutoSelectionInsteadOfService()) {
+                DiagnosticLog.critical("service", "onStartCommand-auto-selection-instead")
+                ensureCloseReceiverRegistered()
+                data.notification?.destroy()
+                data.notification = createNotification(AutoVpnManager.modeName())
+                AutoVpnManager.startSelectedModeFromVpnButton {
+                    if (data.state == State.Stopped && !AutoVpnManager.isServiceTransitionPending()) {
+                        stopRunner(false)
+                    }
+                }
+                return Service.START_NOT_STICKY
+            }
             val profile = SagerDatabase.proxyDao.getById(DataStore.selectedProxy)
             this as Context
             if (profile == null) { // gracefully shutdown: https://stackoverflow.com/q/47337857/2245107
+                DiagnosticLog.critical("service", "onStartCommand-profile-null selected=${DataStore.selectedProxy}")
                 data.notification = createNotification("")
                 stopRunner(false, getString(R.string.profile_empty))
                 return Service.START_NOT_STICKY
             }
             val proxy = ProxyInstance(profile, this)
+            DiagnosticLog.critical(
+                "service",
+                "onStartCommand-profile " + ProfileTestRunner.profileDiagnosticSummary(profile)
+            )
             data.proxy = proxy
             BootReceiver.enabled = DataStore.persistAcrossReboot
-            if (!data.closeReceiverRegistered) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    registerReceiver(data.receiver, IntentFilter().apply {
-                        addAction(Action.RELOAD)
-                        addAction(Intent.ACTION_SHUTDOWN)
-                        addAction(Action.CLOSE)
-                    }, "$packageName.SERVICE", null, Context.RECEIVER_EXPORTED)
-                } else {
-                    registerReceiver(data.receiver, IntentFilter().apply {
-                        addAction(Action.RELOAD)
-                        addAction(Intent.ACTION_SHUTDOWN)
-                        addAction(Action.CLOSE)
-                    }, "$packageName.SERVICE", null)
-                }
-                data.closeReceiverRegistered = true
-            }
+            ensureCloseReceiverRegistered()
 
             val group = SagerDatabase.groupDao.getById(profile.groupId)
+            data.notification?.destroy()
             data.notification = if (DataStore.showGroupName && group != null){
                 createNotification("[" + group.displayName() + "] " + profile.displayName())
             } else {
@@ -501,6 +579,15 @@ class BaseService {
                     DataStore.startedProfile = profile.id
                     startProcesses()
                     data.changeState(State.Connected)
+                    DiagnosticLog.critical(
+                        "service",
+                        "service-connected profile=${profile.id} ${DiagnosticLog.stateSummary()}"
+                    )
+                    if (DataStore.serviceMode == Key.MODE_VPN) {
+                        VpnSubscriptionUpdateScheduler.onVpnStarted()
+                        GroupSourceSyncer.onVpnStarted()
+                        AutoVpnManager.onVpnStarted { data.binder.urlTest() }
+                    }
                     data.binder.checkLoop()
 
                     for ((type, routeName) in proxy.config.alerts) {
@@ -526,6 +613,11 @@ class BaseService {
                     }
                     stopRunner(false, null)
                 } catch (exc: Throwable) {
+                    DiagnosticLog.error(
+                        "service",
+                        "service-start-failed profile=${profile.id} ${DiagnosticLog.stateSummary()}",
+                        exc,
+                    )
                     if (exc is ExpectedException) Logs.d(exc.readableMessage) else Logs.w(exc)
                     stopRunner(
                         false, exc.readableMessage

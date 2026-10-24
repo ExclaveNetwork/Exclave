@@ -24,7 +24,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ShortcutManager
 import android.graphics.ImageDecoder
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
@@ -53,10 +52,8 @@ import io.nekohasekai.sagernet.ktx.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import androidx.core.net.toUri
-import androidx.room.util.query
 import io.nekohasekai.sagernet.utils.ZxingQRCodeAnalyzer
-import libexclavecore.Libexclavecore
-import java.net.URI
+import libsagernetcore.Libsagernetcore
 
 class ScannerActivity : ThemedActivity() {
 
@@ -162,15 +159,21 @@ class ScannerActivity : ThemedActivity() {
             try {
                 val results = RawUpdater.parseRaw(value)
                 if (results.isNullOrEmpty()) {
-                    if (!value.contains("\n") && !value.contains("\r") && isHTTPorHTTPSURL(value)) {
-                        val uri = Uri.Builder()
-                            .scheme("exclave")
-                            .authority("subscription")
-                            .appendQueryParameter("url", value)
-                            .build()
+                    if (!value.contains("\n") && !value.contains("\r")
+                        && value.startsWith("exclave://", ignoreCase = true)
+                        && value.substring("exclave://".length).startsWith("subscription?", ignoreCase = true)) {
                         startActivity(Intent(this@ScannerActivity, MainActivity::class.java).apply {
                             action = Intent.ACTION_VIEW
-                            data = uri
+                            data = value.toUri()
+                        })
+                    } else if (!value.contains("\n") && !value.contains("\r") && isHTTPorHTTPSURL(value)) {
+                        val builder = Libsagernetcore.newURL("exclave").apply {
+                            host = "subscription"
+                        }
+                        builder.addQueryParameter("url", value)
+                        startActivity(Intent(this@ScannerActivity, MainActivity::class.java).apply {
+                            action = Intent.ACTION_VIEW
+                            data = builder.string.toUri()
                         })
                     } else {
                         fatalError(null)
@@ -254,15 +257,22 @@ class ScannerActivity : ThemedActivity() {
                                     }
                                 }
                             } else {
-                                if (!result.text.contains("\n") && !result.text.contains("\r") && isHTTPorHTTPSURL(result.text)) {
-                                    val uri = Uri.Builder()
-                                        .scheme("exclave")
-                                        .authority("subscription")
-                                        .appendQueryParameter("url", result.text)
-                                        .build()
+                                if (!result.text.contains("\n") && !result.text.contains("\r")
+                                    && result.text.startsWith("exclave://", ignoreCase = true)
+                                    && result.text.substring("exclave://".length).startsWith("subscription?", ignoreCase = true)) {
                                     startActivity(Intent(this@ScannerActivity, MainActivity::class.java).apply {
                                         action = Intent.ACTION_VIEW
-                                        data = uri
+                                        data = result.text.toUri()
+                                    })
+                                    finish()
+                                } else if (!result.text.contains("\n") && !result.text.contains("\r") && isHTTPorHTTPSURL(result.text)) {
+                                    val builder = Libsagernetcore.newURL("exclave").apply {
+                                        host = "subscription"
+                                    }
+                                    builder.addQueryParameter("url", result.text)
+                                    startActivity(Intent(this@ScannerActivity, MainActivity::class.java).apply {
+                                        action = Intent.ACTION_VIEW
+                                        data = builder.string.toUri()
                                     })
                                     finish()
                                 } else {

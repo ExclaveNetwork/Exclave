@@ -21,7 +21,6 @@
         app:entryValues="@array/network_type_value"
         app:icon="@drawable/baseline_public_24"
         app:key="routeNetworkType"
-        app:singleLineTitle="false"
         app:title="@string/network_type"
         app:useSimpleSummaryProvider="true" />
     <EditTextPreference
@@ -60,7 +59,6 @@
             app:entryValues="@array/route_protocol_value"
             app:icon="@drawable/ic_baseline_compare_arrows_24"
             app:key="routeNetwork"
-            app:singleLineTitle="false"
             app:title="network"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
@@ -80,12 +78,18 @@
             app:key="routeAttrs"
             app:title="attrs"
             app:useSimpleSummaryProvider="true" /-->
-        <io.nekohasekai.sagernet.widget.ReselectableSimpleMenuPreference
+        <io.nekohasekai.sagernet.widget.SimpleListPopupPreference
             app:icon="@drawable/ic_hardware_router"
-            app:entries="@array/outbound_entry"
-            app:entryValues="@array/outbound_value"
             app:key="routeOutbound"
-            app:singleLineTitle="false"
             app:title="outbound" />
+        <SwitchPreference
+            app:icon="@drawable/ic_baseline_domain_24"
+            app:key="routeReverse"
+            app:title="@string/route_reverse" />
+        <EditTextPreference
+            app:icon="@drawable/ic_baseline_flip_camera_android_24"
+            app:key="routeRedirect"
+            app:title="@string/route_reverse_redirect"
+            app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 </PreferenceScreen>

@@ -201,6 +201,8 @@
     <string name="empty_route_notice">Imposta alcune regole prima di salvare</string>
     <string name="route_play_store">Regola del Play Store per %s</string>
     <string name="route_reset">Ripristino</string>
+    <string name="route_reverse">Proxy Inverso</string>
+    <string name="route_reverse_redirect">Reindirizzamento Inverso</string>
     <string name="route_manage_assets">Gestisci Risorse del Percorso</string>
     <string name="route_assets">Risorse</string>
     <string name="route_rules_provider">Fornitore Risorse delle Regole</string>

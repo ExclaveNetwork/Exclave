@@ -42,17 +42,12 @@
             app:key="serverAnyTLSMinIdleSession"
             app:title="@string/anytls_min_idle_session"
             app:useSimpleSummaryProvider="true" />
-        <SwitchPreference
-            app:icon="@drawable/ic_baseline_compare_arrows_24"
-            app:key="serverAnyTLSDisableReuse"
-            app:title="@string/anytls_disable_reuse" />
         <io.nekohasekai.sagernet.widget.SimpleMenuPreference
             app:defaultValue="tls"
             app:entries="@array/transport_layer_encryption_entry"
             app:entryValues="@array/transport_layer_encryption_value"
             app:icon="@drawable/ic_baseline_layers_24"
             app:key="serverSecurity"
-            app:singleLineTitle="false"
             app:title="@string/security"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
@@ -104,7 +99,6 @@
             app:entryValues="@array/utls_value"
             app:icon="@drawable/ic_baseline_fingerprint_24"
             app:key="serverUTLSFingerprint"
-            app:singleLineTitle="false"
             app:title="@string/utls_fingerprint"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
@@ -129,11 +123,10 @@
             app:title="@string/reality_short_id"
             app:useSimpleSummaryProvider="true" />
         <io.nekohasekai.sagernet.widget.SimpleMenuPreference
-            app:entries="@array/reality_fingerprint_entry"
+            app:entries="@array/reality_fingerprint_value"
             app:entryValues="@array/reality_fingerprint_value"
             app:icon="@drawable/ic_baseline_fingerprint_24"
             app:key="serverRealityFingerprint"
-            app:singleLineTitle="false"
             app:title="@string/reality_fingerprint"
             app:useSimpleSummaryProvider="true" />
         <SwitchPreference
@@ -143,18 +136,7 @@
         <EditTextPreference
             app:icon="@drawable/ic_baseline_security_24"
             app:key="serverEchConfig"
-            app:title="@string/ech_config_list"
-            app:useSimpleSummaryProvider="true" />
-        <EditTextPreference
-            app:icon="@drawable/ic_baseline_manage_search_24"
-            app:key="serverEchQueryName"
-            app:title="@string/ech_query_name"
-            app:useSimpleSummaryProvider="true" />
-        <EditTextPreference
-            app:dialogMessage="@string/one_per_line"
-            app:icon="@drawable/ic_action_copyright"
-            app:key="serverServerNameToVerify"
-            app:title="@string/server_name_to_verify"
+            app:title="@string/ech_config"
             app:useSimpleSummaryProvider="true" />
         <SwitchPreference
             app:icon="@drawable/baseline_construction_24"

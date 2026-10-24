@@ -36,10 +36,12 @@ import io.nekohasekai.sagernet.fmt.V2rayBuildResult
 import io.nekohasekai.sagernet.fmt.buildV2RayConfig
 import io.nekohasekai.sagernet.fmt.naive.NaiveBean
 import io.nekohasekai.sagernet.fmt.naive.buildNaiveConfig
+import io.nekohasekai.sagernet.fmt.shadowquic.ShadowQUICBean
+import io.nekohasekai.sagernet.fmt.shadowquic.buildShadowQUICConfig
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.plugin.PluginManager
 import kotlinx.coroutines.*
-import libexclavecore.V2RayInstance
+import libsagernetcore.V2RayInstance
 import java.io.File
 
 abstract class V2RayInstance(
@@ -84,6 +86,18 @@ abstract class V2RayInstance(
                     is NaiveBean -> {
                         initPlugin("naive-plugin")
                         pluginConfigs[port] = profile.type to bean.buildNaiveConfig(port, username, password)
+                    }
+                    is ShadowQUICBean -> {
+                        initPlugin("shadowquic-plugin")
+                        pluginConfigs[port] = profile.type to bean.buildShadowQUICConfig(
+                            port, username, password,
+                            {
+                                File(app.noBackupFilesDir, "shadowquic_" + SystemClock.elapsedRealtime() + ".pem").apply {
+                                    parentFile?.mkdirs()
+                                    cacheFiles.add(this)
+                                }
+                            }
+                        )
                     }
                 }
             }
@@ -138,6 +152,25 @@ abstract class V2RayInstance(
                         }
                         val commands = mutableListOf(
                             initPlugin("naive-plugin").path, configFile.absolutePath
+                        )
+                        processes.start(commands, env)
+                    }
+                    bean is ShadowQUICBean -> {
+                        val configFile = File(
+                            context.noBackupFilesDir,
+                            "shadowquic_" + SystemClock.elapsedRealtime() + ".yaml"
+                        )
+                        configFile.parentFile?.mkdirs()
+                        configFile.writeText(config)
+                        cacheFiles.add(configFile)
+                        if (DataStore.providerRootCA == RootCAProvider.SYSTEM) {
+                            // https://github.com/rustls/rustls-native-certs/issues/3
+                            env["SSL_CERT_DIR"] = "/system/etc/security/cacerts"
+                        }
+                        val commands = mutableListOf(
+                            initPlugin("shadowquic-plugin").path,
+                            "-c",
+                            configFile.absolutePath,
                         )
                         processes.start(commands, env)
                     }

@@ -3,9 +3,21 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_search"
-        android:title="@android:string/search_go"
-        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        android:id="@+id/action_auto_switch_profile"
+        android:icon="@drawable/ic_baseline_cached"
+        android:title="@string/auto_switch_profile"
+        app:showAsAction="always"
+        tools:ignore="AlwaysShowAction" />
+    <item
+        android:id="@+id/action_connection_url_test"
+        android:icon="@drawable/ic_baseline_speed_24"
+        android:title="@string/connection_test_url_test"
+        app:showAsAction="always"
+        tools:ignore="AlwaysShowAction" />
+    <item
+        android:id="@+id/action_connection_test_stop"
+        android:icon="@drawable/ic_baseline_stop_24"
+        android:title="@string/stop"
         app:showAsAction="always"
         tools:ignore="AlwaysShowAction" />
     <item
@@ -81,17 +93,14 @@
                                 android:title="TrustTunnel"
                                 tools:ignore="HardcodedText" />
                             <item
-                                android:id="@+id/action_new_snell"
-                                android:title="@string/action_snell" />
-                            <item
                                 android:id="@+id/action_new_ssh"
                                 android:title="@string/action_ssh" />
                             <item
                                 android:id="@+id/action_new_wg"
                                 android:title="@string/action_wireguard" />
                             <item
-                                android:id="@+id/action_new_masque"
-                                android:title="@string/action_masque" />
+                                android:id="@+id/action_new_shadowtls"
+                                android:title="@string/action_shadowtls" />
                             <item
                                 android:id="@+id/action_new_shadowquic"
                                 android:title="@string/action_shadowquic" />
@@ -102,47 +111,20 @@
                     </item>
                 </menu>
             </item>
-            <item
-                android:id="@+id/action_import_backup"
-                android:visible="false"
-                android:title="@string/backup">
-                <menu>
-                    <item
-                        android:id="@+id/action_import_backup_clipboard"
-                        android:title="@string/action_import" />
-                    <item
-                        android:id="@+id/action_import_backup_file"
-                        android:title="@string/action_import_file" />
-                </menu>
-            </item>
         </menu>
     </item>
     <item
         android:id="@+id/action_clear_traffic_statistics"
         android:title="@string/clear_traffic_statistics" />
     <item
+        android:id="@+id/action_auto_switch_gemini_soft"
+        android:title="@string/auto_switch_profile_gemini_soft" />
+    <item
         android:id="@+id/action_remove_duplicate"
         android:title="@string/deduplication" />
     <item
-        android:id="@+id/action_connection_test"
-        android:title="@string/connection_test">
-        <menu>
-            <item
-                android:id="@+id/action_connection_url_test"
-                android:title="@string/connection_test_url_test" />
-            <item
-                android:id="@+id/action_connection_test_clear_results"
-                android:title="@string/connection_test_clear_results" />
-            <item
-                android:id="@+id/action_connection_test_delete_unavailable"
-                android:title="@string/connection_test_delete_unavailable" />
-        </menu>
-    </item>
-    <item
-        android:id="@+id/action_update_subscription"
-        android:title="@string/update_subscription" />
-    <item
         android:id="@+id/action_order"
+        android:icon="@drawable/ic_baseline_low_priority_24"
         android:title="@string/group_order">
         <menu>
             <group android:checkableBehavior="single">
@@ -158,5 +140,22 @@
             </group>
         </menu>
     </item>
+    <item
+        android:id="@+id/action_connection_test_resume"
+        android:title="@string/connection_test_resume" />
+    <item
+        android:id="@+id/action_connection_test_clear_results"
+        android:title="@string/connection_test_clear_results" />
+    <item
+        android:id="@+id/action_connection_test_delete_unavailable"
+        android:title="@string/connection_test_delete_unavailable" />
+    <item
+        android:id="@+id/action_connection_test_gemini_filter"
+        android:checkable="true"
+        android:title="@string/connection_test_gemini_filter"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_group_sort_by_percent"
+        android:title="@string/group_order_by_working_percent" />
 
 </menu>

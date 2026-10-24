@@ -45,8 +45,11 @@ import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import go.Seq
+import io.nekohasekai.sagernet.bg.GroupSourceSyncer
+import io.nekohasekai.sagernet.bg.RouteAssetUpdater
 import io.nekohasekai.sagernet.bg.SagerConnection
 import io.nekohasekai.sagernet.bg.SubscriptionUpdater
+import io.nekohasekai.sagernet.bg.VpnSubscriptionUpdateScheduler
 import io.nekohasekai.sagernet.bg.test.DebugInstance
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.SagerDatabase
@@ -55,24 +58,21 @@ import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ui.MainActivity
 import io.nekohasekai.sagernet.utils.CrashHandler
+import io.nekohasekai.sagernet.utils.DiagnosticLog
 import io.nekohasekai.sagernet.utils.DefaultNetworkListener
 import io.nekohasekai.sagernet.utils.DeviceStorageApp
 import io.nekohasekai.sagernet.utils.PackageCache
 import io.nekohasekai.sagernet.utils.Theme
 import kotlinx.coroutines.DEBUG_PROPERTY_NAME
 import kotlinx.coroutines.DEBUG_PROPERTY_VALUE_ON
-import libexclavecore.AndroidCAStore
-import libexclavecore.Libexclavecore
-import libexclavecore.UidDumper
-import java.io.ByteArrayOutputStream
+import libsagernetcore.Libsagernetcore
+import libsagernetcore.UidDumper
 import java.net.Inet6Address
 import java.net.InetSocketAddress
-import java.security.KeyStore
 import androidx.work.Configuration as WorkConfiguration
 
 class SagerNet : Application(),
     UidDumper,
-    AndroidCAStore,
     WorkConfiguration.Provider {
 
     override fun attachBaseContext(base: Context) {
@@ -91,12 +91,6 @@ class SagerNet : Application(),
         updateNotificationChannels()
         Seq.setContext(this)
 
-        if (DataStore.getInstalledPackagesInited) {
-            runOnDefaultDispatcher {
-                PackageCache.register()
-            }
-        }
-
         val processName = if (Build.VERSION.SDK_INT >= 28) {
             getProcessName()
         } else {
@@ -109,33 +103,42 @@ class SagerNet : Application(),
         }
 
         val isMainProcess = processName == BuildConfig.APPLICATION_ID
+        DiagnosticLog.init(processName, isMainProcess)
 
         if (!isMainProcess) {
-            Libexclavecore.setUidDumper(this, Build.VERSION.SDK_INT < Build.VERSION_CODES.Q)
+            Libsagernetcore.setUidDumper(this, Build.VERSION.SDK_INT < Build.VERSION_CODES.Q)
             if (DataStore.enableDebug && DataStore.pprofServer.isNotEmpty()) {
                 DebugInstance().launch()
             }
         }
 
-        if (!isMainProcess) runOnDefaultDispatcher {
+        if (isMainProcess) runOnDefaultDispatcher {
             runCatching {
                 SubscriptionUpdater.reconfigureUpdater()
             }
+            runCatching {
+                VpnSubscriptionUpdateScheduler.reconfigureForState()
+            }
+            runCatching {
+                GroupSourceSyncer.reconfigureSync()
+            }
         }
 
-        Libexclavecore.setenv("exclave.conf.geoloader", "memconservative")
+        Libsagernetcore.setenv("v2ray.conf.geoloader", "memconservative")
         externalAssets.mkdirs()
-        Libexclavecore.initializeV2Ray(
+        RouteAssetUpdater.copyBundledInternalAssetsIfMissing()
+        Libsagernetcore.initializeV2Ray(
             filesDir.absolutePath + "/",
             externalAssets.absolutePath + "/",
-            "exclave-core/",
+            "v2ray/",
         )
 
+        if (isMainProcess) runOnDefaultDispatcher {
+            RouteAssetUpdater.updateInternalAssetsOnceIfNeeded()
+        }
+
         try {
-            if (DataStore.providerRootCA == RootCAProvider.SYSTEM_AND_USER) {
-                Libexclavecore.registerAndroidCAStore(this)
-            }
-            Libexclavecore.updateSystemRoots(DataStore.providerRootCA)
+            Libsagernetcore.updateSystemRoots(DataStore.providerRootCA)
         } catch (e: Exception) {
             Toast.makeText(this, e.readableMessage, Toast.LENGTH_LONG).show()
         }
@@ -151,21 +154,6 @@ class SagerNet : Application(),
                 .penaltyLog()
                 .build()
         )
-    }
-
-    override fun certificates(): ByteArray {
-        try {
-            val keyStore = KeyStore.getInstance("AndroidCAStore")
-            val byteArrayStream = ByteArrayOutputStream()
-            keyStore.load(null, null)
-            val aliases = keyStore.aliases()
-            while (aliases.hasMoreElements()) {
-                byteArrayStream.write(keyStore.getCertificate(aliases.nextElement()).encoded)
-            }
-            return byteArrayStream.toByteArray()
-        } catch (e: Exception) {
-            throw e
-        }
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -245,7 +233,6 @@ class SagerNet : Application(),
         val power by lazy { application.getSystemService<PowerManager>()!! }
         val wifi by lazy { application.getSystemService<WifiManager>()!! }
         val location by lazy { application.getSystemService<LocationManager>()!! }
-        val locale by lazy { application.getSystemService<LocaleManager>()!! }
 
         val currentProfile get() = SagerDatabase.proxyDao.getById(DataStore.selectedProxy)
 
@@ -279,8 +266,25 @@ class SagerNet : Application(),
                         ), NotificationChannel(
                             "service-subscription",
                             application.getText(R.string.service_subscription),
-                            NotificationManager.IMPORTANCE_DEFAULT
-                        )
+                            NotificationManager.IMPORTANCE_LOW
+                        ).apply {
+                            setSound(null, null)
+                            enableVibration(false)
+                        }, NotificationChannel(
+                            "service-subscription-silent",
+                            application.getText(R.string.service_subscription),
+                            NotificationManager.IMPORTANCE_LOW
+                        ).apply {
+                            setSound(null, null)
+                            enableVibration(false)
+                        }, NotificationChannel(
+                            "service-profile-test",
+                            application.getText(R.string.connection_test),
+                            NotificationManager.IMPORTANCE_LOW
+                        ).apply {
+                            setSound(null, null)
+                            enableVibration(false)
+                        }
                     )
                 )
             }
@@ -306,7 +310,7 @@ class SagerNet : Application(),
                 // capabilities.hasTransport(NetworkCapabilities.TRANSPORT_THREAD) -> "thread"
                 else -> ""
             }
-            Libexclavecore.setNetworkType(networkType)
+            Libsagernetcore.setNetworkType(networkType)
 
             var ssid = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 DefaultNetworkListener.ssid ?: ""
@@ -318,13 +322,13 @@ class SagerNet : Application(),
             if (ssid.length >= 2 && ssid.first() == '\"' && ssid.last() == '\"') {
                 ssid = ssid.substring(1, ssid.length - 1)
             }
-            Libexclavecore.setSSID(ssid)
+            Libsagernetcore.setSSID(ssid)
 
             val linkAddresses = linkProperties.linkAddresses.toSet()
             if (DataStore.logLevel == LogLevel.DEBUG && currentLinkAddresses != linkAddresses) {
                 Log.d("Exclave", "updated link addresses: " + linkAddresses.joinToString(" ", "[", "]") { it.address.hostAddress!! + "/" + it.prefixLength })
             }
-            Libexclavecore.setDiscardIPv6(!linkAddresses.any { it.address is Inet6Address && !it.address.isLinkLocalAddress })
+            Libsagernetcore.setDiscardIPv6(!linkAddresses.any { it.address is Inet6Address && !it.address.isLinkLocalAddress })
 
             if (DataStore.interruptReusedConnections) {
                 val networkChanged = currentNetwork != null && currentNetwork != network
@@ -333,7 +337,7 @@ class SagerNet : Application(),
                     if (DataStore.logLevel == LogLevel.DEBUG) {
                         Log.d("Exclave", "network changed, interrupt reused connections")
                     }
-                    Libexclavecore.interfaceUpdate()
+                    Libsagernetcore.interfaceUpdate()
                 }
             }
 

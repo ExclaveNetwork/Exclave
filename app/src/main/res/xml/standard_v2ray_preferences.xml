@@ -40,7 +40,6 @@
             app:entryValues="@array/vmess_encryption_value"
             app:icon="@drawable/ic_notification_enhanced_encryption"
             app:key="serverEncryption"
-            app:singleLineTitle="false"
             app:title="@string/enc_method"
             app:useSimpleSummaryProvider="true" />
         <io.nekohasekai.sagernet.widget.NonBlackEditTextPreference
@@ -55,7 +54,6 @@
             app:entryValues="@array/int_array_3"
             app:icon="@drawable/ic_baseline_nfc_24"
             app:key="serverProtocol"
-            app:singleLineTitle="false"
             app:title="@string/app_version"
             app:useSimpleSummaryProvider="true" />
         <io.nekohasekai.sagernet.widget.SimpleMenuPreference
@@ -63,7 +61,6 @@
             app:entryValues="@array/xtls_flow_value"
             app:icon="@drawable/ic_baseline_stream_24"
             app:key="serverFlow"
-            app:singleLineTitle="false"
             app:title="@string/flow"
             app:useSimpleSummaryProvider="true" />
         <io.nekohasekai.sagernet.widget.SimpleMenuPreference
@@ -71,7 +68,6 @@
             app:entryValues="@array/packet_encoding_value"
             app:icon="@drawable/baseline_widgets_24"
             app:key="serverPacketEncoding"
-            app:singleLineTitle="false"
             app:title="@string/packet_encoding"
             app:useSimpleSummaryProvider="true" />
         <io.nekohasekai.sagernet.widget.SimpleMenuPreference
@@ -79,7 +75,6 @@
             app:entryValues="@array/networks_value"
             app:icon="@drawable/ic_baseline_compare_arrows_24"
             app:key="serverNetwork"
-            app:singleLineTitle="false"
             app:title="@string/network"
             app:useSimpleSummaryProvider="true" />
         <io.nekohasekai.sagernet.widget.SimpleMenuPreference
@@ -88,7 +83,6 @@
             app:entryValues="@array/kcp_quic_headers_value"
             app:icon="@drawable/ic_baseline_texture_24"
             app:key="serverHeader"
-            app:singleLineTitle="false"
             app:title="@string/header_type"
             app:useSimpleSummaryProvider="true" />
         <io.nekohasekai.sagernet.widget.SimpleMenuPreference
@@ -97,7 +91,6 @@
             app:entryValues="@array/quic_security_value"
             app:icon="@drawable/ic_baseline_security_24"
             app:key="serverQuicSecurity"
-            app:singleLineTitle="false"
             app:title="@string/quic_security"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
@@ -120,11 +113,6 @@
             app:key="serverDownloadSpeed"
             app:title="@string/hysteria_download_mbps"
             app:useSimpleSummaryProvider="true" />
-        <SwitchPreference
-            app:icon="@drawable/ic_baseline_fingerprint_24"
-            app:key="serverHysteria2ChromeParrot"
-            app:summary="@string/chrome_parrot_summary"
-            app:title="@string/chrome_parrot" />
         <EditTextPreference
             app:dialogLayout="@layout/layout_password_dialog"
             app:icon="@drawable/ic_settings_password"
@@ -143,7 +131,6 @@
             app:entryValues="@array/kcp_quic_headers_value"
             app:icon="@drawable/ic_baseline_texture_24"
             app:key="serverMekyaKcpHeaderType"
-            app:singleLineTitle="false"
             app:title="@string/header_type"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
@@ -157,7 +144,6 @@
             app:entryValues="@array/transport_layer_encryption_value"
             app:icon="@drawable/ic_baseline_layers_24"
             app:key="serverSecurity"
-            app:singleLineTitle="false"
             app:title="@string/security"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
@@ -209,7 +195,6 @@
             app:entryValues="@array/utls_value"
             app:icon="@drawable/ic_baseline_fingerprint_24"
             app:key="serverUTLSFingerprint"
-            app:singleLineTitle="false"
             app:title="@string/utls_fingerprint"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
@@ -229,11 +214,10 @@
             app:title="@string/reality_mldsa65_verify"
             app:useSimpleSummaryProvider="true" />
         <io.nekohasekai.sagernet.widget.SimpleMenuPreference
-            app:entries="@array/reality_fingerprint_entry"
+            app:entries="@array/reality_fingerprint_value"
             app:entryValues="@array/reality_fingerprint_value"
             app:icon="@drawable/ic_baseline_fingerprint_24"
             app:key="serverRealityFingerprint"
-            app:singleLineTitle="false"
             app:title="@string/reality_fingerprint"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
@@ -253,18 +237,7 @@
         <EditTextPreference
             app:icon="@drawable/ic_baseline_security_24"
             app:key="serverEchConfig"
-            app:title="@string/ech_config_list"
-            app:useSimpleSummaryProvider="true" />
-        <EditTextPreference
-            app:icon="@drawable/ic_baseline_manage_search_24"
-            app:key="serverEchQueryName"
-            app:title="@string/ech_query_name"
-            app:useSimpleSummaryProvider="true" />
-        <EditTextPreference
-            app:dialogMessage="@string/one_per_line"
-            app:icon="@drawable/ic_action_copyright"
-            app:key="serverServerNameToVerify"
-            app:title="@string/server_name_to_verify"
+            app:title="@string/ech_config"
             app:useSimpleSummaryProvider="true" />
         <SwitchPreference
             app:icon="@drawable/baseline_construction_24"
@@ -309,7 +282,6 @@
             app:entryValues="@array/splithttp_mode_value"
             app:icon="@drawable/ic_baseline_stream_24"
             app:key="serverSplithttpMode"
-            app:singleLineTitle="false"
             app:title="@string/splithttp_mode"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
@@ -377,20 +349,6 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        app:key="serverHTTPConnectUDPCategory"
-        app:title="@string/experimental_settings">
-        <SwitchPreference
-            app:icon="@drawable/ic_baseline_compare_arrows_24"
-            app:key="serverHTTPConnectUDP"
-            app:title="@string/udp" />
-        <EditTextPreference
-            app:icon="@drawable/ic_baseline_color_lens_24"
-            app:key="serverHTTPConnectUDPURITemplate"
-            app:title="@string/uri_template"
-            app:useSimpleSummaryProvider="true" />
-    </PreferenceCategory>
-
-    <PreferenceCategory
         app:key="serverSingUotCategory"
         app:title="sing-uot settings">
         <SwitchPreference
@@ -418,7 +376,6 @@
             app:entryValues="@array/packet_encoding_value"
             app:icon="@drawable/baseline_widgets_24"
             app:key="serverMuxPacketEncoding"
-            app:singleLineTitle="false"
             app:title="@string/packet_encoding"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
@@ -436,7 +393,6 @@
             app:entryValues="@array/sing_mux_protocol_value"
             app:defaultValue="h2mux"
             app:key="serverSingMuxProtocol"
-            app:singleLineTitle="false"
             app:title="Protocol"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference

@@ -205,8 +205,8 @@ fun stripJson(jsonString: String, stripTrailingCommas: Boolean = false): String 
     var isInsideString = false
     var isInsideComment = notInsideComment
     var offset = 0
-    val buffer = StringBuilder()
-    val result = StringBuilder(jsonString.length)
+    var buffer = ""
+    var result = ""
     var commaIndex = -1
 
     var index = 0
@@ -229,7 +229,7 @@ fun stripJson(jsonString: String, stripTrailingCommas: Boolean = false): String 
         when {
             isInsideComment == notInsideComment && currentCharacter == '/' && nextCharacter == '/' -> {
                 // Enter single-line comment
-                buffer.append(jsonString, offset, index)
+                buffer += jsonString.substring(offset, index)
                 offset = index
                 isInsideComment = singleComment
                 index++
@@ -247,7 +247,7 @@ fun stripJson(jsonString: String, stripTrailingCommas: Boolean = false): String 
             }
             isInsideComment == notInsideComment && currentCharacter == '/' && nextCharacter == '*' -> {
                 // Enter multiline comment
-                buffer.append(jsonString, offset, index)
+                buffer += jsonString.substring(offset, index)
                 offset = index
                 isInsideComment = multiComment
                 index++
@@ -262,21 +262,21 @@ fun stripJson(jsonString: String, stripTrailingCommas: Boolean = false): String 
                 if (commaIndex != -1) {
                     if (currentCharacter == '}' || currentCharacter == ']') {
                         // Strip trailing comma
-                        buffer.append(jsonString, offset, index)
-                        result.append(buffer, 1, buffer.length)
-                        buffer.setLength(0)
+                        buffer += jsonString.substring(offset, index)
+                        result += buffer.substring(1)
+                        buffer = ""
                         offset = index
                         commaIndex = -1
                     } else if (currentCharacter != ' ' && currentCharacter != '\t' && currentCharacter != '\r' && currentCharacter != '\n') {
                         // Hit non-whitespace following a comma; comma is not trailing
-                        buffer.append(jsonString, offset, index)
+                        buffer += jsonString.substring(offset, index)
                         offset = index
                         commaIndex = -1
                     }
                 } else if (currentCharacter == ',') {
                     // Flush buffer prior to this point, and save new comma index
-                    result.append(buffer).append(jsonString, offset, index)
-                    buffer.setLength(0)
+                    result += buffer + jsonString.substring(offset, index)
+                    buffer = ""
                     offset = index
                     commaIndex = index
                 }
@@ -284,9 +284,10 @@ fun stripJson(jsonString: String, stripTrailingCommas: Boolean = false): String 
         }
         index++
     }
-    result.append(buffer)
-    if (isInsideComment == notInsideComment) {
-        result.append(jsonString, offset, jsonString.length)
+    val end = if (isInsideComment > notInsideComment) {
+        ""
+    } else {
+        jsonString.substring(offset)
     }
-    return result.toString()
+    return result + buffer + end
 }

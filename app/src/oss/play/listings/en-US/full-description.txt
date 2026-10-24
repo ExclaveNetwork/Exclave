@@ -21,12 +21,11 @@ Some supported protocols:
 - VMess (with various optional sub-protocols)
 - VLESS (with various optional sub-protocols)
 - WireGuard (TCP and UDP only)
-- MASQUE (a.k.a. CONNECT-IP, TCP and UDP only)
 - TrustTunnel (no ICMP echo support)
-- Snell v4 and Snell v6
-- ShadowQUIC
 - SSH proxy ("dynamic port forwarding")
-- HTTP CONNECT tunnel (HTTP/1.1, HTTP/1.1 with TLS, HTTP/2 and HTTP/3, with CONNECT-UDP support)
+- HTTP CONNECT tunnel (HTTP/1.1, HTTP/1.1 with TLS, HTTP/2 and HTTP/3)
 - SOCKS4, SOCKS4A and SOCKS5
 
 Although it can take charge of the traffic through the VPN service provided by the system, it is a TCP and UDP proxy used as a "pseudo-VPN" rather than a VPN.
+
+It is a fork of the archived Android proxy client SagerNet and uses a custom overhauled fork of V2Ray.

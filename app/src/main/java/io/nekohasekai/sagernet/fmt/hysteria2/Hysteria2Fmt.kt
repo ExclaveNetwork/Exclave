@@ -23,8 +23,8 @@ import io.nekohasekai.sagernet.ktx.isValidHysteriaMultiPort
 import io.nekohasekai.sagernet.ktx.isValidHysteriaPort
 import io.nekohasekai.sagernet.ktx.listByLineOrComma
 import io.nekohasekai.sagernet.ktx.queryParameter
-import libexclavecore.Libexclavecore
-import kotlin.io.encoding.Base64
+import io.nekohasekai.sagernet.ktx.queryParameterNotBlank
+import libsagernetcore.Libsagernetcore
 
 fun parseHysteria2(rawURL: String): Hysteria2Bean {
     var url = rawURL
@@ -40,69 +40,79 @@ fun parseHysteria2(rawURL: String): Hysteria2Bean {
         }
     }
 
-    val link = Libexclavecore.parseURL(url)
+    val link = Libsagernetcore.parseURL(url)
     return Hysteria2Bean().apply {
         name = link.fragment
-        serverAddress = link.host
-        serverPorts = when {
-            port.isNotEmpty() -> if (port.isValidHysteriaPort()) port else error("invalid port")
-            !link.hasPort() -> "443"
-            else -> link.port.toString()
+        serverAddress = link.host.ifEmpty { error("empty host") }
+        serverPorts = if (port.isNotEmpty() && port.isValidHysteriaMultiPort()) {
+            port
+        } else if (link.port > 0) {
+            link.port.toString()
+        } else {
+            "443"
         }
         link.queryParameter("mport")?.takeIf { it.isValidHysteriaMultiPort() }?.also {
             serverPorts = it
         }
-        // Warning: Do not use colon in username or password in so-called `userpass` authentication.
-        // Official Hysteria2 server can not handle it correctly.
-        // need to handle so-called broken "userpass" authentication
-        auth = if (link.hasPassword()) {
-            link.username + ":" + link.password
-        } else {
-            link.username
+        when {
+            // Warning: Do not use colon in username or password in so-called `userpass` authentication.
+            // Official Hysteria2 server can not handle it correctly.
+            // need to handle so-called broken "userpass" authentication
+            link.username.isEmpty() && link.password.isEmpty() -> {
+                if (rawURL.substringAfter("://").substringBefore("@") == ":") {
+                    auth = ":"
+                }
+            }
+            link.username.isNotEmpty() && link.password.isEmpty() -> {
+                auth = if (rawURL.substringAfter("://").substringBefore("@").endsWith(":")) {
+                    link.username + ":"
+                } else {
+                    link.username
+                }
+            }
+            link.username.isEmpty() && link.password.isNotEmpty() -> {
+                auth = ":" + link.password
+            }
+            link.username.isNotEmpty() && link.password.isNotEmpty() -> {
+                auth = link.username + ":" + link.password
+            }
         }
-        link.queryParameter("sni")?.also {
+        link.queryParameterNotBlank("sni")?.also {
             sni = it
         }
-        link.queryParameter("insecure")?.takeIf { it == "1" }?.also {
+        link.queryParameter("insecure")?.takeIf { it == "1" || it == "true" }?.also {
             allowInsecure = true
         }
-        link.queryParameter("pinSHA256")?.takeIf { it.isNotEmpty() }?.also {
+        link.queryParameter("allow_insecure")?.takeIf { it == "1" || it == "true" }?.also {
+            allowInsecure = true
+        }
+        link.queryParameter("allowInsecure")?.takeIf { it == "1" || it == "true" }?.also {
+            allowInsecure = true
+        }
+        link.queryParameter("pinSHA256")?.also {
             // https://github.com/apernet/hysteria/blob/922128e425a700c5bc01290e7a9560f182fe451b/app/cmd/client.go#L882-L889
-            val pinSHA256 = it.replace(":", "").replace("-", "").lowercase()
-            require(pinSHA256.hexToByteArray().size == 32) { "invalid pinSHA256" }
-            pinnedPeerCertificateSha256 = pinSHA256
+            pinnedPeerCertificateSha256 = it.replace(":", "").replace("-", "").lowercase()
         }
         link.queryParameter("obfs")?.also {
-            when (it) {
-                "" -> {}
-                "salamander", "gecko"-> {
-                    obfsType = it
-                    link.queryParameter("obfs-password")?.also { password ->
-                        require(password.toByteArray().size >= 4) { "invalid obfs-password" }
-                        obfsPassword = password
-                    }
-                }
-                else -> error("unsupported obfs")
+            if (it.isNotEmpty() && it != "salamander") {
+                error("unsupported obfs")
             }
-        }
-        link.queryParameter("ech")?.takeIf { it.isNotEmpty() }?.also {
-            // TODO: validate echConfig
-            try {
-                Base64.decode(it)
-            } catch (_: Exception) {
-                throw IllegalArgumentException("invalid ech")
+            link.queryParameter("obfs-password")?.also {
+                obfs = it
             }
-            echEnabled = true
-            echConfigList = it
-            echQueryName = ""
         }
     }
 }
 
 fun Hysteria2Bean.toUri(): String? {
-    require(serverPorts.isValidHysteriaPort()) { "invalid port" }
+    if (!serverPorts.isValidHysteriaPort()) {
+        error("invalid port")
+    }
+    if (serverAddress.isEmpty()) {
+        error("empty server address")
+    }
 
-    val builder = Libexclavecore.newURL("hysteria2").apply {
+    val builder = Libsagernetcore.newURL("hysteria2").apply {
         // fuck port hopping URL
         rawHost = if (serverAddress.contains(":")) {
             "[$serverAddress]:$serverPorts"
@@ -121,32 +131,16 @@ fun Hysteria2Bean.toUri(): String? {
     // as `pinnedPeerCertificate[Chain|PublicKey]Sha256` is not exportable,
     // only add `allow_insecure=1` if `pinnedPeerCertificate[Chain|PublicKey]Sha256` is not used
     if (allowInsecure &&
-        pinnedPeerCertificateChainSha256.isEmpty() && pinnedPeerCertificatePublicKeySha256.isEmpty()
-        && serverNameToVerify.listByLineOrComma().isEmpty()) {
+        pinnedPeerCertificateChainSha256.isEmpty() && pinnedPeerCertificatePublicKeySha256.isEmpty()) {
         builder.addQueryParameter("insecure", "1")
     }
     if (pinnedPeerCertificateSha256.isNotEmpty()) {
-        val pinSHA256 = pinnedPeerCertificateSha256.listByLineOrComma()[0].replace(":", "").lowercase()
-        try {
-            require(pinSHA256.hexToByteArray().size == 32)
-        } catch (_: Exception) {
-            throw IllegalArgumentException("invalid pinSHA256")
-        }
-        builder.addQueryParameter("pinSHA256", pinSHA256)
+        builder.addQueryParameter("pinSHA256", pinnedPeerCertificateSha256.listByLineOrComma()[0].replace(":", "").lowercase())
     }
-    if (obfsType.isNotEmpty()) {
-        builder.addQueryParameter("obfs", obfsType)
-        require(obfsPassword.toByteArray().size >= 4) { "invalid obfs password" }
-        builder.addQueryParameter("obfs-password", obfsPassword)
-    }
-    if (echEnabled && echConfigList.isNotEmpty()) {
-        try {
-            // TODO: validate echConfig
-            Base64.decode(echConfigList)
-        } catch (_: Exception) {
-            throw IllegalArgumentException("invalid ech")
-        }
-        builder.addQueryParameter("ech", echConfigList)
+    if (obfs.isNotEmpty()) {
+        // obfs password must not be empty
+        builder.addQueryParameter("obfs", "salamander")
+        builder.addQueryParameter("obfs-password", obfs)
     }
     if (name.isNotEmpty()) {
         builder.fragment = name

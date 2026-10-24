@@ -31,7 +31,6 @@
             app:entryValues="@array/ssr_enc_method_value"
             app:icon="@drawable/ic_notification_enhanced_encryption"
             app:key="serverMethod"
-            app:singleLineTitle="false"
             app:title="@string/enc_method"
             app:useSimpleSummaryProvider="true" />
         <io.nekohasekai.sagernet.widget.SimpleMenuPreference
@@ -39,7 +38,6 @@
             app:entryValues="@array/protocol_value"
             app:icon="@drawable/ic_baseline_compare_arrows_24"
             app:key="serverProtocol"
-            app:singleLineTitle="false"
             app:title="@string/protocol"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
@@ -52,7 +50,6 @@
             app:entryValues="@array/obfs_value"
             app:icon="@drawable/ic_baseline_texture_24"
             app:key="serverObfs"
-            app:singleLineTitle="false"
             app:title="@string/obfs"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference

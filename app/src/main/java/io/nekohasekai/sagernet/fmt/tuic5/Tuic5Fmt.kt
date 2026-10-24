@@ -21,85 +21,60 @@ package io.nekohasekai.sagernet.fmt.tuic5
 
 import io.nekohasekai.sagernet.fmt.AbstractBean
 import io.nekohasekai.sagernet.ktx.listByLineOrComma
-import io.nekohasekai.sagernet.ktx.parseUUID
 import io.nekohasekai.sagernet.ktx.queryParameter
-import libexclavecore.Libexclavecore
+import io.nekohasekai.sagernet.ktx.queryParameterNotBlank
+import libsagernetcore.Libsagernetcore
+import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 val supportedTuic5CongestionControl = arrayOf("cubic", "bbr", "new_reno")
 val supportedTuic5RelayMode = arrayOf("native", "quic")
 
+@OptIn(ExperimentalUuidApi::class)
 fun parseTuic(server: String): AbstractBean {
-    val link = Libexclavecore.parseURL(server)
+    var link = Libsagernetcore.parseURL(server)
     if (link.queryParameter("version") == "4") {
         error("unsupported")
     }
+    if (server.length >= 46
+        && server.substring(7, 15).all {
+            (it in '0'..'9') || (it in 'a'..'f') || (it in 'A'..'F')
+        } && server[15] == '-'
+        && server.substring(16, 20).all {
+            (it in '0'..'9') || (it in 'a'..'f') || (it in 'A'..'F')
+        } && server[20] == '-'
+        && server.substring(21, 25).all {
+            (it in '0'..'9') || (it in 'a'..'f') || (it in 'A'..'F')
+        } && server[25] == '-'
+        && server.substring(26, 30).all {
+            (it in '0'..'9') || (it in 'a'..'f') || (it in 'A'..'F')
+        } && server[30] == '-'
+        && server.substring(31, 43).all {
+            (it in '0'..'9') || (it in 'a'..'f') || (it in 'A'..'F')
+        } && server.substring(43, 46) == "%3A"
+    ) {
+        // v2rayN broken format
+        link = Libsagernetcore.parseURL(server.take(43) + ":" + server.substring(46, server.length))
+    }
+
+    try {
+        Uuid.parse(link.username)
+    } catch (_: Exception) {
+        error("unsupported")
+    }
+
     return Tuic5Bean().apply {
-        serverAddress = link.host
-        serverPort = when {
-            !link.hasPort() -> 443
-            else -> link.port
+        serverAddress = link.host.ifEmpty { error("empty host") }
+        serverPort = link.port
+        if (link.port == 0) {
+            serverPort = 443
         }
-        val u = when {
-            // BEGIN v2rayN broken format
-            !link.hasPassword() && link.username.length >= 33 && link.username[32] == ':'
-                    && Uuid.parseHexOrNull(link.username.substring(0, 32)) != null -> {
-                if (link.username.length >= 34) {
-                    password = link.username.substring(33)
-                }
-                Uuid.parseHex(link.username.substring(0, 32))
-            }
-            !link.hasPassword() && link.username.length >= 35 && link.username[34] == ':'
-                    && link.username[0] == '{' && link.username[33] == '}'
-                    && Uuid.parseHexOrNull(link.username.substring(1, 33)) != null -> {
-                if (link.username.length >= 36) {
-                    password = link.username.substring(35)
-                }
-                Uuid.parseHex(link.username.substring(1, 33))
-            }
-            !link.hasPassword() && link.username.length >= 37 && link.username[36] == ':'
-                    && Uuid.parseHexDashOrNull(link.username.substring(0, 36)) != null -> {
-                if (link.username.length >= 38) {
-                    password = link.username.substring(37)
-                }
-                Uuid.parseHexDash(link.username.substring(0, 36))
-            }
-            !link.hasPassword() && link.username.length >= 39 && link.username[38] == ':'
-                    && link.username[0] == '{' && link.username[37] == '}'
-                    && Uuid.parseHexDashOrNull(link.username.substring(1, 37)) != null -> {
-                if (link.username.length >= 40) {
-                    password = link.username.substring(39)
-                }
-                Uuid.parseHexDash(link.username.substring(1, 37))
-            }
-            !link.hasPassword() && link.username.length >= 42 && link.username[41] == ':'
-                    && link.username.substring(0, 9) == "urn:uuid:"
-                    && Uuid.parseHexOrNull(link.username.substring(9, 41)) != null -> {
-                if (link.username.length >= 42) {
-                    password = link.username.substring(41)
-                }
-                Uuid.parseHex(link.username.substring(9, 41))
-            }
-            !link.hasPassword() && link.username.length >= 46 && link.username[45] == ':'
-                    && link.username.substring(0, 9) == "urn:uuid:"
-                    && Uuid.parseHexDashOrNull(link.username.substring(9, 45)) != null -> {
-                if (link.username.length >= 47) {
-                    password = link.username.substring(46)
-                }
-                Uuid.parseHexDash(link.username.substring(9, 45))
-            }
-            // END v2rayN broken format
-            else -> {
-                password = link.password
-                parseUUID(link.username)
-            }
-        }
-        require(u != null) { "invalid uuid" }
-        uuid = u.toHexDashString()
-        link.queryParameter("sni")?.let {
+        uuid = link.username
+        password = link.password
+        link.queryParameterNotBlank("sni")?.let {
             sni = it
         }
-        link.queryParameter("alpn")?.let {
+        link.queryParameterNotBlank("alpn")?.let {
             alpn = it.split(",").joinToString("\n")
         }
         (link.queryParameter("congestion_controller") ?:
@@ -141,10 +116,9 @@ fun parseTuic(server: String): AbstractBean {
 }
 
 fun Tuic5Bean.toUri(): String? {
-    val builder = Libexclavecore.newURL("tuic").apply {
-        setHostPort(serverAddress, serverPort)
-        require(Uuid.parseHexDashOrNull(uuid) != null) { "invalid uuid" }
-        username = uuid
+    val builder = Libsagernetcore.newURL("tuic").apply {
+        setHostPort(serverAddress.ifEmpty { error("empty server address") }, serverPort)
+        username = uuid.ifEmpty { error("empty uuid") }
         if (name.isNotEmpty()) {
             fragment = name
         }
@@ -170,8 +144,7 @@ fun Tuic5Bean.toUri(): String? {
     }
     // as pinned certificate is not exportable, only add `allow_insecure=1` if pinned certificate is not used
     if (allowInsecure && pinnedPeerCertificateSha256.isEmpty() &&
-        pinnedPeerCertificatePublicKeySha256.isEmpty() && pinnedPeerCertificateChainSha256.isEmpty() &&
-        serverNameToVerify.listByLineOrComma().isEmpty()) {
+        pinnedPeerCertificatePublicKeySha256.isEmpty() && pinnedPeerCertificateChainSha256.isEmpty()) {
         builder.addQueryParameter("allow_insecure", "1")
     }
     return builder.string

@@ -45,7 +45,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"
                     android:gravity="center_vertical"
-                    android:paddingStart="12dp"
+                    android:paddingLeft="12dp"
                     android:paddingTop="8dp"
                     android:paddingBottom="8dp">
 
@@ -123,20 +123,18 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:text="@string/server_address"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="?android:attr/textColorSecondary"
-                    android:textDirection="locale"
-                    tools:text="@string/server_address" />
+                    android:textColor="?android:attr/textColorSecondary" />
 
                 <TextView
                     android:id="@+id/traffic_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
+                    android:text="@string/traffic"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="?android:attr/textColorSecondary"
-                    android:textDirection="locale"
-                    tools:text="@string/traffic" />
+                    android:textColor="?android:attr/textColorSecondary" />
 
             </LinearLayout>
 
@@ -154,9 +152,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="?colorAccent"
-                    android:textDirection="locale"
-                    tools:text="Protocol" />
+                    android:textColor="?colorAccent" />
 
                 <TextView
                     android:id="@+id/profile_status"
@@ -164,10 +160,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="?colorAccent"
-                    android:textDirection="locale"
-                    tools:text="1 ms"
-                    tools:textColor="@color/material_green_500"/>
+                    android:textColor="?colorAccent" />
 
             </LinearLayout>
 

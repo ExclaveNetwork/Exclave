@@ -19,15 +19,13 @@
 
 package io.nekohasekai.sagernet.ui
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.icu.util.ULocale
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import androidx.core.os.LocaleListCompat
@@ -41,7 +39,11 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.nekohasekai.sagernet.*
+import io.nekohasekai.sagernet.bg.AutoVpnManager
+import io.nekohasekai.sagernet.bg.FloatingSwitchButton
+import io.nekohasekai.sagernet.bg.GroupSourceSyncer
 import io.nekohasekai.sagernet.Key.MODE_VPN
+import io.nekohasekai.sagernet.bg.SubscriptionUpdater
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.preference.EditTextPreferenceModifiers
 import io.nekohasekai.sagernet.ktx.*
@@ -119,7 +121,6 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             return when (code) {
                 "" -> getString(R.string.language_system_default)
                 "ar" -> getString(R.string.language_ar_display_name)
-                "cs" -> getString(R.string.language_cs_display_name)
                 "en-US" -> getString(R.string.language_en_display_name)
                 "es" -> getString(R.string.language_es_display_name)
                 "fa" -> getString(R.string.language_fa_display_name)
@@ -127,18 +128,12 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 "id" -> getString(R.string.language_id_display_name)
                 "it" -> getString(R.string.language_it_display_name)
                 "ja" -> getString(R.string.language_ja_display_name)
-                "ko" -> getString(R.string.language_ko_display_name)
                 "nb-NO" -> getString(R.string.language_nb_NO_display_name)
                 "ru" -> getString(R.string.language_ru_display_name)
-                "ta" -> getString(R.string.language_ta_display_name)
                 "tr" -> getString(R.string.language_tr_display_name)
                 "zh-Hans-CN" -> getString(R.string.language_zh_Hans_CN_display_name)
                 "zh-Hant-TW" -> getString(R.string.language_zh_Hant_TW_display_name)
-                else -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    ULocale.forLanguageTag(code).displayName
-                } else {
-                    Locale.forLanguageTag(code).displayName
-                }
+                else -> Locale.forLanguageTag(code).displayName // just a fallback name from Java
             }
         }
         val appLanguage = findPreference<ListPreference>(Key.APP_LANGUAGE)!!
@@ -189,9 +184,9 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                         && httpPassword.isVisible && httpPassword.text.isNullOrEmpty()
             }
             if (SagerNet.started) {
-                runOnDefaultDispatcher {
-                    SagerNet.stopService()
-                    delay(300) // FIXME: Why this is needed?
+                SagerNet.stopService()
+                runOnMainDispatcher {
+                    delay(300)
                     SagerNet.startService()
                 }
             }
@@ -199,27 +194,11 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         }
         tunImplementation.isEnabled = serviceMode.value == MODE_VPN
         tunImplementation.setOnPreferenceChangeListener { _, newValue ->
-            if ((newValue as String).toInt() == TunImplementation.SYSTEM && Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN && app.checkSelfPermission(Manifest.permission.ACCESS_LOCAL_NETWORK) != PackageManager.PERMISSION_GRANTED) {
-                MaterialAlertDialogBuilder(requireContext()).apply {
-                    setTitle(R.string.error_title)
-                    setMessage(R.string.nearby_devices_permission_notice)
-                    setNeutralButton(R.string.open_settings) { _, _ ->
-                        try {
-                            startActivity(Intent().apply {
-                                action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                                data = Uri.fromParts("package", app.packageName, null)
-                            })
-                        } catch (e: Exception) {
-                            snackbar(e.readableMessage).show()
-                        }
-                    }
-                    setPositiveButton(android.R.string.ok, null)
-                }.show()
-            }
-            enablePcap.isEnabled = serviceMode.value == MODE_VPN && newValue.toInt() == TunImplementation.GVISOR
+            enablePcap.isEnabled = serviceMode.value == MODE_VPN && (newValue as String).toInt() == TunImplementation.GVISOR
             if (SagerNet.started) {
-                runOnDefaultDispatcher {
-                    SagerNet.reloadService()
+                SagerNet.stopService()
+                runOnMainDispatcher {
+                    SagerNet.startService()
                 }
             }
             true
@@ -231,7 +210,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         enableVPNInterfaceIPv6Address.onPreferenceChangeListener = reloadListener
         allowAppsBypassVpn.isEnabled = serviceMode.value == MODE_VPN
         allowAppsBypassVpn.onPreferenceChangeListener = reloadListener
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+        if (Build.VERSION.SDK_INT < 28) {
             meteredNetwork.remove()
         }
         meteredNetwork.isEnabled = serviceMode.value == MODE_VPN
@@ -359,6 +338,266 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         rulesGeoipUrl.isVisible = DataStore.rulesProvider == 3
 
         // protocol settings
+        findPreference<EditTextPreference>(Key.CONNECTION_TEST_TIMEOUT_SECONDS)!!
+            .setOnPreferenceChangeListener { _, newValue ->
+                (newValue as String).toIntOrNull()?.let { it >= 1 } == true
+            }
+        findPreference<EditTextPreference>(Key.CONNECTION_TEST_PARALLEL)!!
+            .setOnPreferenceChangeListener { _, newValue ->
+                (newValue as String).toIntOrNull()?.let { it >= 1 } == true
+            }
+        findPreference<EditTextPreference>(Key.CONNECTION_TEST_QUICK_FAILURE_COUNT)!!
+            .setOnPreferenceChangeListener { _, newValue ->
+                (newValue as String).toIntOrNull()?.let { it >= 1 } == true
+            }
+        findPreference<EditTextPreference>(Key.CONNECTION_TEST_QUICK_FAILURE_MILLIS)!!
+            .setOnPreferenceChangeListener { _, newValue ->
+                (newValue as String).toIntOrNull()?.let { it >= 1 } == true
+            }
+        findPreference<EditTextPreference>(Key.CONNECTION_TEST_QUICK_FAILURE_PAUSE_SECONDS)!!
+            .setOnPreferenceChangeListener { _, newValue ->
+                (newValue as String).toIntOrNull()?.let { it >= 1 } == true
+            }
+        findPreference<EditTextPreference>(Key.CONNECTION_TEST_BREAK_AFTER_COUNT)!!
+            .setOnPreferenceChangeListener { _, newValue ->
+                (newValue as String).toIntOrNull()?.let { it >= 0 } == true
+            }
+        findPreference<EditTextPreference>(Key.CONNECTION_TEST_BREAK_SECONDS)!!
+            .setOnPreferenceChangeListener { _, newValue ->
+                (newValue as String).toIntOrNull()?.let { it >= 0 } == true
+            }
+        findPreference<EditTextPreference>(Key.CONNECTION_TEST_PROGRESS_INTERVAL_SECONDS)!!.apply {
+            setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
+            setOnPreferenceChangeListener { _, newValue ->
+                (newValue as String).toIntOrNull()?.let { it >= 1 } == true
+            }
+        }
+        findPreference<EditTextPreference>(Key.CONNECTION_TEST_SORT_INTERVAL_SECONDS)!!.apply {
+            setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
+            setOnPreferenceChangeListener { _, newValue ->
+                (newValue as String).toIntOrNull()?.let { it >= 1 } == true
+            }
+        }
+
+        val autoVpnEnabled = findPreference<SwitchPreference>(Key.AUTO_VPN_ENABLED)!!
+        val autoVpnPrecheck = findPreference<SwitchPreference>(Key.AUTO_VPN_PRECHECK_ENABLED)!!
+        val autoVpnCheckInterval = findPreference<EditTextPreference>(Key.AUTO_VPN_CHECK_INTERVAL_SECONDS)!!
+        val autoVpnBadPing = findPreference<EditTextPreference>(Key.AUTO_VPN_BAD_PING_MILLIS)!!
+        val autoVpnFailuresBeforeSwitch = findPreference<EditTextPreference>(Key.AUTO_VPN_FAILURES_BEFORE_SWITCH)!!
+        val autoVpnLiteMode = findPreference<SwitchPreference>(Key.AUTO_VPN_LITE_MODE)!!
+        val autoVpnFloatingSwitch = findPreference<SwitchPreference>(Key.AUTO_VPN_FLOATING_SWITCH_ENABLED)!!
+        val autoVpnWorkingTarget = findPreference<EditTextPreference>(Key.AUTO_VPN_WORKING_TARGET)!!
+        val autoVpnInitialSelectionTimeout = findPreference<EditTextPreference>(Key.AUTO_VPN_INITIAL_SELECTION_TIMEOUT_SECONDS)!!
+        val autoVpnSwitchCooldown = findPreference<EditTextPreference>(Key.AUTO_VPN_SWITCH_COOLDOWN_SECONDS)!!
+        val autoVpnQuarantine = findPreference<EditTextPreference>(Key.AUTO_VPN_QUARANTINE_MINUTES)!!
+        val autoVpnGeminiTestUrl = findPreference<EditTextPreference>(Key.AUTO_VPN_GEMINI_TEST_URL)!!
+        val autoVpnResetGeminiRejected = findPreference<Preference>(Key.AUTO_VPN_RESET_GEMINI_REJECTED)!!
+        val subscriptionGlobalAutoUpdate = findPreference<SwitchPreference>(Key.SUBSCRIPTION_GLOBAL_AUTO_UPDATE)!!
+        val subscriptionGlobalAutoUpdateDelay = findPreference<EditTextPreference>(Key.SUBSCRIPTION_GLOBAL_AUTO_UPDATE_DELAY)!!
+        val subscriptionVpnBackgroundUpdate = findPreference<SwitchPreference>(Key.SUBSCRIPTION_VPN_BACKGROUND_UPDATE)!!
+        val subscriptionVpnInitialDelay = findPreference<EditTextPreference>(Key.SUBSCRIPTION_VPN_INITIAL_DELAY_MINUTES)!!
+        val subscriptionVpnInterval = findPreference<EditTextPreference>(Key.SUBSCRIPTION_VPN_INTERVAL_MINUTES)!!
+        val subscriptionVpnRetryInterval = findPreference<EditTextPreference>(Key.SUBSCRIPTION_VPN_RETRY_INTERVAL_MINUTES)!!
+        val subscriptionVpnRetryCount = findPreference<EditTextPreference>(Key.SUBSCRIPTION_VPN_RETRY_COUNT)!!
+        val groupSourceSyncEnabled = findPreference<SwitchPreference>(Key.GROUP_SOURCE_SYNC_ENABLED)!!
+        val groupSourceVpnSyncEnabled = findPreference<SwitchPreference>(Key.GROUP_SOURCE_VPN_SYNC_ENABLED)!!
+        val groupSourceUrl = findPreference<Preference>(Key.GROUP_SOURCE_URL)!!
+        val groupSourceSyncInterval = findPreference<EditTextPreference>(Key.GROUP_SOURCE_SYNC_INTERVAL_MINUTES)!!
+        val groupSourceVpnInitialDelay = findPreference<EditTextPreference>(Key.GROUP_SOURCE_VPN_INITIAL_DELAY_MINUTES)!!
+        val groupSourceVpnInterval = findPreference<EditTextPreference>(Key.GROUP_SOURCE_VPN_INTERVAL_MINUTES)!!
+        val groupSourceVpnRetryInterval = findPreference<EditTextPreference>(Key.GROUP_SOURCE_VPN_RETRY_INTERVAL_MINUTES)!!
+        val groupSourceVpnRetryCount = findPreference<EditTextPreference>(Key.GROUP_SOURCE_VPN_RETRY_COUNT)!!
+        val subscriptionVpnPreferences = listOf(
+            subscriptionVpnInitialDelay,
+            subscriptionVpnInterval,
+            subscriptionVpnRetryInterval,
+            subscriptionVpnRetryCount,
+        )
+        val groupSourceVpnPreferences = listOf(
+            groupSourceVpnInitialDelay,
+            groupSourceVpnInterval,
+            groupSourceVpnRetryInterval,
+            groupSourceVpnRetryCount,
+        )
+        fun syncSubscriptionVpnPreferenceState() {
+            val enabled = subscriptionGlobalAutoUpdate.isChecked
+            subscriptionVpnBackgroundUpdate.isEnabled = enabled
+            subscriptionVpnPreferences.forEach {
+                it.isEnabled = enabled && subscriptionVpnBackgroundUpdate.isChecked
+            }
+        }
+        fun syncGroupSourcePreferenceState() {
+            val enabled = groupSourceSyncEnabled.isChecked
+            groupSourceUrl.isEnabled = enabled
+            groupSourceSyncInterval.isEnabled = enabled
+            groupSourceVpnSyncEnabled.isEnabled = enabled
+            groupSourceVpnPreferences.forEach {
+                it.isEnabled = enabled && groupSourceVpnSyncEnabled.isChecked
+            }
+        }
+        fun bindPositiveNumberPreference(preference: EditTextPreference) {
+            preference.setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
+            preference.setOnPreferenceChangeListener { _, newValue ->
+                (newValue as String).toIntOrNull()?.let { it >= 1 } == true
+            }
+        }
+        fun bindNonNegativeNumberPreference(preference: EditTextPreference) {
+            preference.setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
+            preference.setOnPreferenceChangeListener { _, newValue ->
+                (newValue as String).toIntOrNull()?.let { it >= 0 } == true
+            }
+        }
+        val autoVpnPreferences = listOf(
+            autoVpnPrecheck,
+            autoVpnCheckInterval,
+            autoVpnBadPing,
+            autoVpnFailuresBeforeSwitch,
+            autoVpnLiteMode,
+            autoVpnFloatingSwitch,
+            autoVpnWorkingTarget,
+            autoVpnInitialSelectionTimeout,
+            autoVpnSwitchCooldown,
+            autoVpnQuarantine,
+            autoVpnGeminiTestUrl,
+        )
+        fun syncAutoVpnPreferenceState() {
+            autoVpnPreferences.forEach {
+                it.isEnabled = autoVpnEnabled.isChecked
+            }
+        }
+        bindPositiveNumberPreference(autoVpnCheckInterval)
+        bindPositiveNumberPreference(autoVpnBadPing)
+        bindPositiveNumberPreference(autoVpnFailuresBeforeSwitch)
+        bindPositiveNumberPreference(autoVpnWorkingTarget)
+        bindPositiveNumberPreference(autoVpnInitialSelectionTimeout)
+        bindNonNegativeNumberPreference(autoVpnSwitchCooldown)
+        bindPositiveNumberPreference(autoVpnQuarantine)
+        autoVpnLiteMode.setOnPreferenceChangeListener { _, _ ->
+            view?.post {
+                ConfigurationFragment.reloadActiveProfileListsWithCurrentOrder()
+            }
+            true
+        }
+        autoVpnFloatingSwitch.setOnPreferenceChangeListener { _, newValue ->
+            val enabled = newValue as Boolean
+            if (enabled && !FloatingSwitchButton.canDrawOverlays(requireContext())) {
+                Toast.makeText(
+                    requireContext(),
+                    R.string.auto_vpn_floating_switch_permission_required,
+                    Toast.LENGTH_LONG,
+                ).show()
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    runCatching {
+                        startActivity(
+                            Intent(
+                                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                Uri.parse("package:${requireContext().packageName}"),
+                            )
+                        )
+                    }
+                }
+                false
+            } else {
+                view?.post {
+                    if (enabled) {
+                        FloatingSwitchButton.sync(requireContext().applicationContext)
+                    } else {
+                        FloatingSwitchButton.hide()
+                    }
+                }
+                true
+            }
+        }
+        autoVpnGeminiTestUrl.setOnPreferenceChangeListener { _, newValue ->
+            (newValue as String).trim().startsWith("http://") || newValue.trim().startsWith("https://")
+        }
+        autoVpnResetGeminiRejected.setOnPreferenceClickListener {
+            val count = AutoVpnManager.resetGeminiRejectedProfiles()
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.auto_vpn_reset_gemini_rejected_done, count),
+                Toast.LENGTH_SHORT,
+            ).show()
+            true
+        }
+        syncAutoVpnPreferenceState()
+        autoVpnEnabled.setOnPreferenceChangeListener { _, newValue ->
+            val enabled = newValue as Boolean
+            autoVpnPreferences.forEach { it.isEnabled = enabled }
+            if (enabled) {
+                AutoVpnManager.selectMode(DataStore.autoVpnMode)
+            } else {
+                AutoVpnManager.disable()
+            }
+            true
+        }
+        syncGroupSourcePreferenceState()
+        syncSubscriptionVpnPreferenceState()
+        groupSourceSyncEnabled.setOnPreferenceChangeListener { _, newValue ->
+            val enabled = newValue as Boolean
+            groupSourceUrl.isEnabled = enabled
+            groupSourceSyncInterval.isEnabled = enabled
+            groupSourceVpnSyncEnabled.isEnabled = enabled
+            groupSourceVpnPreferences.forEach {
+                it.isEnabled = enabled && groupSourceVpnSyncEnabled.isChecked
+            }
+            runOnDefaultDispatcher { GroupSourceSyncer.reconfigureSync() }
+            true
+        }
+        groupSourceVpnSyncEnabled.setOnPreferenceChangeListener { _, newValue ->
+            val enabled = newValue as Boolean
+            groupSourceVpnPreferences.forEach {
+                it.isEnabled = groupSourceSyncEnabled.isChecked && enabled
+            }
+            runOnDefaultDispatcher { GroupSourceSyncer.reconfigureVpnSyncForState() }
+            true
+        }
+        groupSourceSyncInterval.setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
+        groupSourceSyncInterval.setOnPreferenceChangeListener { _, newValue ->
+            val valid = (newValue as String).toIntOrNull()?.let { it >= 15 } == true
+            if (valid) runOnDefaultDispatcher { GroupSourceSyncer.reconfigureSync() }
+            valid
+        }
+        bindPositiveNumberPreference(groupSourceVpnInitialDelay)
+        bindPositiveNumberPreference(groupSourceVpnInterval)
+        bindPositiveNumberPreference(groupSourceVpnRetryInterval)
+        bindNonNegativeNumberPreference(groupSourceVpnRetryCount)
+        findPreference<EditTextPreference>(Key.SUBSCRIPTION_UPDATE_PARALLEL)!!
+            .setOnPreferenceChangeListener { _, newValue ->
+                (newValue as String).toIntOrNull()?.let { it >= 1 } == true
+            }
+        findPreference<EditTextPreference>(Key.SUBSCRIPTION_UPDATE_TIMEOUT_SECONDS)!!
+            .setOnPreferenceChangeListener { _, newValue ->
+                (newValue as String).toIntOrNull()?.let { it >= 10 } == true
+            }
+        subscriptionGlobalAutoUpdateDelay.isEnabled = subscriptionGlobalAutoUpdate.isChecked
+        subscriptionGlobalAutoUpdateDelay.setOnPreferenceChangeListener { _, newValue ->
+            val valid = (newValue as String).toIntOrNull()?.let { it >= 15 } == true
+            if (valid) runOnDefaultDispatcher { SubscriptionUpdater.reconfigureUpdater() }
+            valid
+        }
+        bindPositiveNumberPreference(subscriptionVpnInitialDelay)
+        bindPositiveNumberPreference(subscriptionVpnInterval)
+        bindPositiveNumberPreference(subscriptionVpnRetryInterval)
+        bindNonNegativeNumberPreference(subscriptionVpnRetryCount)
+        subscriptionVpnBackgroundUpdate.setOnPreferenceChangeListener { _, newValue ->
+            val enabled = newValue as Boolean
+            subscriptionVpnPreferences.forEach {
+                it.isEnabled = subscriptionGlobalAutoUpdate.isChecked && enabled
+            }
+            true
+        }
+        subscriptionGlobalAutoUpdate.setOnPreferenceChangeListener { _, newValue ->
+            val enabled = newValue as Boolean
+            subscriptionGlobalAutoUpdateDelay.isEnabled = enabled
+            subscriptionVpnBackgroundUpdate.isEnabled = enabled
+            subscriptionVpnPreferences.forEach {
+                it.isEnabled = enabled && subscriptionVpnBackgroundUpdate.isChecked
+            }
+            runOnDefaultDispatcher { SubscriptionUpdater.reconfigureUpdater() }
+            true
+        }
+
         val enableFragment = findPreference<SwitchPreference>(Key.ENABLE_FRAGMENT)!!
         val enableFragmentForDirect = findPreference<SwitchPreference>(Key.ENABLE_FRAGMENT_FOR_DIRECT)!!
         val fragmentMethod = findPreference<ListPreference>(Key.FRAGMENT_METHOD)!!
@@ -409,29 +648,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         findPreference<SwitchPreference>(Key.ALLOW_ACCESS)!!.onPreferenceChangeListener = reloadListener
 
         val allowAccess = findPreference<SwitchPreference>(Key.ALLOW_ACCESS)!!
-        allowAccess.setOnPreferenceChangeListener { _, newValue ->
-            newValue as Boolean
-            if (newValue && Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN && app.checkSelfPermission(Manifest.permission.ACCESS_LOCAL_NETWORK) != PackageManager.PERMISSION_GRANTED) {
-                MaterialAlertDialogBuilder(requireContext()).apply {
-                    setTitle(R.string.error_title)
-                    setMessage(R.string.nearby_devices_permission_notice)
-                    setNeutralButton(R.string.open_settings) { _, _ ->
-                        try {
-                            startActivity(Intent().apply {
-                                action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                                data = Uri.fromParts("package", app.packageName, null)
-                            })
-                        } catch (e: Exception) {
-                            snackbar(e.readableMessage).show()
-                        }
-                    }
-                    setPositiveButton(android.R.string.ok, null)
-                }.show()
-            }
-            needReload()
-            true
-        }
-
+        allowAccess.onPreferenceChangeListener = reloadListener
         val requireSocks = findPreference<SwitchPreference>(Key.REQUIRE_SOCKS)!!
         val requireTransproxy = findPreference<SwitchPreference>(Key.REQUIRE_TRANSPROXY)!!
         val requireDns = findPreference<SwitchPreference>(Key.REQUIRE_DNS_INBOUND)!!

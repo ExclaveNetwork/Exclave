@@ -20,6 +20,7 @@
 package io.nekohasekai.sagernet.database
 
 import androidx.room.*
+import androidx.sqlite.db.SupportSQLiteDatabase
 import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.fmt.KryoConverters
@@ -29,7 +30,7 @@ import kotlinx.coroutines.launch
 
 @Database(
     entities = [ProxyGroup::class, ProxyEntity::class, RuleEntity::class, StatsEntity::class, AssetEntity::class],
-    version = 38,
+    version = 40,
     autoMigrations = [AutoMigration(
         from = 12,
         to = 14,
@@ -104,13 +105,18 @@ import kotlinx.coroutines.launch
     ), AutoMigration(
         from = 35,
         to = 36,
-        spec = SagerDatabase_Migration_35_36::class
     ), AutoMigration(
         from = 36,
         to = 37,
     ), AutoMigration(
         from = 37,
         to = 38,
+    ), AutoMigration(
+        from = 38,
+        to = 39,
+    ), AutoMigration(
+        from = 39,
+        to = 40,
     )]
 )
 @TypeConverters(value = [KryoConverters::class, GsonConverters::class])
@@ -137,6 +143,15 @@ abstract class SagerDatabase : RoomDatabase() {
                 .fallbackToDestructiveMigrationOnDowngrade()
                 .allowMainThreadQueries()
                 .enableMultiInstanceInvalidation()
+                .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
+                .addCallback(object : RoomDatabase.Callback() {
+                    override fun onOpen(db: SupportSQLiteDatabase) {
+                        super.onOpen(db)
+                        runCatching {
+                            db.query("PRAGMA busy_timeout=5000").close()
+                        }
+                    }
+                })
                 .setQueryExecutor { GlobalScope.launch { it.run() } }
                 .build()
         }

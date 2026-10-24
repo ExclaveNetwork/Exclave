@@ -22,7 +22,6 @@
     </item>
     <item
         android:id="@+id/action_export_backup"
-        android:visible="false"
         android:title="@string/backup">
         <menu>
             <item

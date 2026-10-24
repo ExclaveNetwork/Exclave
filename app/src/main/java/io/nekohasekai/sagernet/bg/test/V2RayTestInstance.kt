@@ -26,39 +26,29 @@ import io.nekohasekai.sagernet.bg.proto.V2RayInstance
 import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.fmt.buildV2RayConfig
 import io.nekohasekai.sagernet.ktx.Logs
-import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
-import io.nekohasekai.sagernet.ktx.tryResume
-import io.nekohasekai.sagernet.ktx.tryResumeWithException
 import io.nekohasekai.sagernet.utils.DefaultNetworkListener
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import libexclavecore.Libexclavecore
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.suspendCoroutine
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import libsagernetcore.Libsagernetcore
+import java.util.concurrent.atomic.AtomicBoolean
 
 class V2RayTestInstance(profile: ProxyEntity, val link: String, val timeout: Int, val protectPath: String = "") : V2RayInstance(
     profile,
 ), LocalResolver {
-    lateinit var continuation: Continuation<Int>
-    suspend fun doTest(): Int {
-        return suspendCoroutine { c ->
-            continuation = c
-            processes = GuardedProcessPool {
-                Logs.w(it)
-                c.tryResumeWithException(it)
-            }
-            runOnDefaultDispatcher {
-                try {
-                    init()
-                    launch()
-                    if (pluginConfigs.isNotEmpty()) {
-                        delay(500L)
-                    }
-                    c.tryResume(Libexclavecore.urlTest(v2rayPoint, "", link, timeout))
-                } catch (e: Exception) {
-                    c.tryResumeWithException(e)
-                }
-            }
+    private val closeStarted = AtomicBoolean(false)
+
+    suspend fun doTest(): Int = withContext(Dispatchers.IO) {
+        processes = GuardedProcessPool {
+            Logs.w(it)
         }
+        init()
+        launch()
+        if (pluginConfigs.isNotEmpty()) {
+            delay(500L)
+        }
+        Libsagernetcore.urlTest(v2rayPoint, "", link, timeout)
     }
 
     @Volatile
@@ -66,16 +56,37 @@ class V2RayTestInstance(profile: ProxyEntity, val link: String, val timeout: Int
 
     override suspend fun init() {
         super.init()
+        v2rayPoint.withProtect(protectPath)
         v2rayPoint.withLocalResolver(this)
-        v2rayPoint.withAlternativeSystemDialer(protectPath)
         DefaultNetworkListener.start(this) {
             underlyingNetwork = it
         }
     }
 
     override fun close() {
-        runOnDefaultDispatcher {
-            DefaultNetworkListener.stop(this)
+        if (!closeStarted.compareAndSet(false, true)) return
+        runCatching {
+            v2rayPoint.withLocalResolver(null)
+        }.onFailure {
+            if (it !is UninitializedPropertyAccessException) {
+                Logs.w(it)
+            }
+        }
+        runCatching {
+            runBlocking {
+                processes.closeAndJoin()
+            }
+        }.onFailure {
+            if (it !is UninitializedPropertyAccessException) {
+                Logs.w(it)
+            }
+        }
+        runCatching {
+            runBlocking {
+                DefaultNetworkListener.stop(this@V2RayTestInstance)
+            }
+        }.onFailure {
+            Logs.w(it)
         }
         super.close()
     }

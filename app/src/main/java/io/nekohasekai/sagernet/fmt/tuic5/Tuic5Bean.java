@@ -28,8 +28,7 @@ import org.jetbrains.annotations.NotNull;
 
 import io.nekohasekai.sagernet.fmt.AbstractBean;
 import io.nekohasekai.sagernet.fmt.KryoConverters;
-import io.nekohasekai.sagernet.ktx.NetsKt;
-import libexclavecore.Libexclavecore;
+import libsagernetcore.Libsagernetcore;
 
 public class Tuic5Bean extends AbstractBean {
 
@@ -44,14 +43,12 @@ public class Tuic5Bean extends AbstractBean {
     public String sni;
     public Boolean allowInsecure;
     public Boolean echEnabled;
-    public String echConfigList;
-    public String echQueryName;
+    public String echConfig;
     public String pinnedPeerCertificateChainSha256;
     public String pinnedPeerCertificatePublicKeySha256;
     public String pinnedPeerCertificateSha256;
     public String mtlsCertificate;
     public String mtlsCertificatePrivateKey;
-    public String serverNameToVerify;
     public Boolean singUDPOverStream;
 
     @Override
@@ -68,20 +65,18 @@ public class Tuic5Bean extends AbstractBean {
         if (sni == null) sni = "";
         if (allowInsecure == null) allowInsecure = false;
         if (echEnabled == null) echEnabled = false;
-        if (echConfigList == null) echConfigList = "";
-        if (echQueryName == null) echQueryName = "";
+        if (echConfig == null) echConfig = "";
         if (pinnedPeerCertificateChainSha256 == null) pinnedPeerCertificateChainSha256 = "";
         if (pinnedPeerCertificatePublicKeySha256 == null) pinnedPeerCertificatePublicKeySha256 = "";
         if (pinnedPeerCertificateSha256 == null) pinnedPeerCertificateSha256 = "";
         if (mtlsCertificate == null) mtlsCertificate = "";
         if (mtlsCertificatePrivateKey == null) mtlsCertificatePrivateKey = "";
-        if (serverNameToVerify == null) serverNameToVerify = "";
         if (singUDPOverStream == null) singUDPOverStream = false;
     }
 
     @Override
     public void serialize(ByteBufferOutput output) {
-        output.writeInt(7);
+        output.writeInt(5);
         super.serialize(output);
         output.writeString(password);
         output.writeString(certificates);
@@ -93,7 +88,7 @@ public class Tuic5Bean extends AbstractBean {
         output.writeString(sni);
         output.writeString(uuid);
         output.writeBoolean(allowInsecure);
-        output.writeString(echConfigList);
+        output.writeString(echConfig);
         output.writeString(pinnedPeerCertificateChainSha256);
         output.writeString(pinnedPeerCertificatePublicKeySha256);
         output.writeString(pinnedPeerCertificateSha256);
@@ -102,8 +97,6 @@ public class Tuic5Bean extends AbstractBean {
         output.writeBoolean(singUDPOverStream);
 
         output.writeBoolean(echEnabled);
-        output.writeString(serverNameToVerify);
-        output.writeString(echQueryName);
     }
 
     @Override
@@ -126,8 +119,8 @@ public class Tuic5Bean extends AbstractBean {
             allowInsecure = input.readBoolean();
         }
         if (version >= 2) {
-            echConfigList = input.readString();
-            if (version <= 4 && !echConfigList.isEmpty()) {
+            echConfig = input.readString();
+            if (version <= 4 && !echConfig.isEmpty()) {
                 echEnabled = true;
             }
             pinnedPeerCertificateChainSha256 = input.readString();
@@ -142,12 +135,11 @@ public class Tuic5Bean extends AbstractBean {
         if (version >= 5) {
             echEnabled = input.readBoolean();
         }
-        if (version >= 6) {
-            serverNameToVerify = input.readString();
-        }
-        if (version >= 7) {
-            echQueryName = input.readString();
-        }
+    }
+
+    @Override
+    public String network() {
+        return "udp";
     }
 
     @Override
@@ -157,7 +149,6 @@ public class Tuic5Bean extends AbstractBean {
             bean.certificates = certificates;
         }
         bean.zeroRTTHandshake = zeroRTTHandshake;
-        bean.congestionControl = congestionControl;
         if (allowInsecure) {
             bean.allowInsecure = true;
         }
@@ -174,8 +165,7 @@ public class Tuic5Bean extends AbstractBean {
             bean.pinnedPeerCertificateSha256 = pinnedPeerCertificateSha256;
         }
         bean.echEnabled = echEnabled;
-        bean.echConfigList = echConfigList;
-        bean.echQueryName = echQueryName;
+        bean.echConfig = echConfig;
         bean.singUDPOverStream = singUDPOverStream;
     }
 
@@ -200,7 +190,7 @@ public class Tuic5Bean extends AbstractBean {
 
     @Override
     public boolean isInsecure() {
-        if (Libexclavecore.isLoopbackIP(serverAddress) || serverAddress.equals("localhost")) {
+        if (Libsagernetcore.isLoopbackIP(serverAddress) || serverAddress.equals("localhost")) {
             return false;
         }
         if (echEnabled) {
@@ -217,9 +207,6 @@ public class Tuic5Bean extends AbstractBean {
             return false;
         }
         if (!pinnedPeerCertificateSha256.isEmpty()) {
-            return false;
-        }
-        if (!NetsKt.listByLineOrComma(serverNameToVerify).isEmpty()) {
             return false;
         }
         return true;

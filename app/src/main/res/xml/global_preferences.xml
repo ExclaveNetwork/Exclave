@@ -17,16 +17,14 @@
             app:entryValues="@array/int_array_4"
             app:icon="@drawable/ic_baseline_wb_sunny_24"
             app:key="nightTheme"
-            app:singleLineTitle="false"
             app:title="@string/night_mode"
             app:useSimpleSummaryProvider="true" />
-        <io.nekohasekai.sagernet.widget.ReselectableSimpleMenuPreference
+        <io.nekohasekai.sagernet.widget.SimpleMenuPreference
             app:defaultValue=""
             app:entries="@array/language_entry"
             app:entryValues="@array/language_value"
             app:icon="@drawable/baseline_translate_24"
             app:key="appLanguage"
-            app:singleLineTitle="false"
             app:title="@string/language" />
         <io.nekohasekai.sagernet.widget.SimpleMenuPreference
             app:defaultValue="vpn"
@@ -34,7 +32,6 @@
             app:entryValues="@array/service_mode_values"
             app:icon="@drawable/ic_device_developer_mode"
             app:key="serviceMode"
-            app:singleLineTitle="false"
             app:title="@string/service_mode"
             app:useSimpleSummaryProvider="true" />
         <io.nekohasekai.sagernet.widget.SimpleMenuPreference
@@ -43,7 +40,6 @@
             app:entryValues="@array/int_array_2"
             app:icon="@drawable/ic_baseline_flip_camera_android_24"
             app:key="tunImplementation"
-            app:singleLineTitle="false"
             app:title="@string/tun_implementation"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
@@ -83,7 +79,6 @@
             app:entryValues="@array/notification_value"
             app:icon="@drawable/ic_baseline_shutter_speed_24"
             app:key="speedInterval"
-            app:singleLineTitle="false"
             app:title="@string/speed_interval"
             app:useSimpleSummaryProvider="true" />
         <SwitchPreference
@@ -98,7 +93,6 @@
             app:entries="@array/log_level_entry"
             app:entryValues="@array/log_level_value"
             app:key="logLevel"
-            app:singleLineTitle="false"
             app:title="@string/log_level"
             app:useSimpleSummaryProvider="true"/>
         <io.nekohasekai.sagernet.widget.SimpleMenuPreference
@@ -107,7 +101,6 @@
             app:entries="@array/root_ca_provider_entry"
             app:entryValues="@array/int_array_4"
             app:key="providerRootCA"
-            app:singleLineTitle="false"
             app:title="@string/root_ca_provider"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
@@ -141,7 +134,6 @@
             app:entryValues="@array/domain_strategy"
             app:icon="@drawable/ic_action_dns"
             app:key="domainStrategy"
-            app:singleLineTitle="false"
             app:title="@string/domain_strategy"
             app:useSimpleSummaryProvider="true" />
         <SwitchPreference
@@ -166,7 +158,6 @@
             app:entryValues="@array/outbound_domain_strategy_value"
             app:icon="@drawable/baseline_wrap_text_24"
             app:key="outboundDomainStrategy"
-            app:singleLineTitle="false"
             app:title="@string/resolve_destination"
             app:useSimpleSummaryProvider="true" />
         <io.nekohasekai.sagernet.widget.SimpleMenuPreference
@@ -175,7 +166,6 @@
             app:entryValues="@array/outbound_domain_strategy_value"
             app:icon="@drawable/baseline_wrap_text_24"
             app:key="outboundDomainStrategyForDirect"
-            app:singleLineTitle="false"
             app:title="@string/resolve_destination_for_direct"
             app:useSimpleSummaryProvider="true" />
         <io.nekohasekai.sagernet.widget.SimpleMenuPreference
@@ -184,7 +174,6 @@
             app:entryValues="@array/outbound_domain_strategy_value"
             app:icon="@drawable/baseline_wrap_text_24"
             app:key="outboundDomainStrategyForServer"
-            app:singleLineTitle="false"
             app:title="@string/resolve_destination_for_server"
             app:useSimpleSummaryProvider="true" />
         <io.nekohasekai.sagernet.widget.SimpleMenuPreference
@@ -193,7 +182,6 @@
             app:entryValues="@array/rules_dat_provider_value"
             app:icon="@drawable/ic_baseline_rule_folder_24"
             app:key="rulesProvider"
-            app:singleLineTitle="false"
             app:title="@string/route_rules_provider"
             app:useSimpleSummaryProvider="true" />
         <io.nekohasekai.sagernet.widget.LinkOrContentPreference
@@ -214,7 +202,6 @@
             app:entryValues="@array/int_array_3"
             app:icon="@drawable/baseline_wrap_text_24"
             app:key="routeMode"
-            app:singleLineTitle="false"
             app:title="@string/route_mode"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
@@ -225,6 +212,144 @@
             app:icon="@drawable/ic_baseline_cast_connected_24"
             app:key="connectionTestURL"
             app:title="@string/connection_test_url"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="4"
+            app:icon="@drawable/ic_baseline_shutter_speed_24"
+            app:key="connectionTestTimeoutSeconds"
+            app:title="@string/connection_test_timeout_seconds"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="25"
+            app:icon="@drawable/ic_baseline_speed_24"
+            app:key="connectionTestParallel"
+            app:title="@string/connection_test_parallel"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="20"
+            app:icon="@drawable/ic_baseline_running_with_errors_24"
+            app:key="connectionTestQuickFailureCount"
+            app:title="@string/connection_test_quick_failure_count"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="1000"
+            app:icon="@drawable/ic_baseline_timelapse_24"
+            app:key="connectionTestQuickFailureMillis"
+            app:title="@string/connection_test_quick_failure_millis"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="7"
+            app:icon="@drawable/ic_baseline_shutter_speed_24"
+            app:key="connectionTestQuickFailurePauseSeconds"
+            app:title="@string/connection_test_quick_failure_pause_seconds"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="25"
+            app:icon="@drawable/ic_baseline_timelapse_24"
+            app:key="connectionTestBreakAfterCount"
+            app:title="@string/connection_test_break_after_count"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="5"
+            app:icon="@drawable/ic_baseline_shutter_speed_24"
+            app:key="connectionTestBreakSeconds"
+            app:title="@string/connection_test_break_seconds"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="5"
+            app:icon="@drawable/ic_baseline_timelapse_24"
+            app:key="connectionTestProgressIntervalSeconds"
+            app:title="@string/connection_test_progress_interval_seconds"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="10"
+            app:icon="@drawable/ic_baseline_timelapse_24"
+            app:key="connectionTestSortIntervalSeconds"
+            app:title="@string/connection_test_sort_interval_seconds"
+            app:useSimpleSummaryProvider="true" />
+        <SwitchPreference
+            app:defaultValue="false"
+            app:icon="@drawable/ic_baseline_cached"
+            app:key="autoVpnEnabled"
+            app:summary="@string/auto_vpn_enabled_sum"
+            app:title="@string/auto_vpn_enabled" />
+        <SwitchPreference
+            app:defaultValue="true"
+            app:icon="@drawable/ic_baseline_shutter_speed_24"
+            app:key="autoVpnPrecheckEnabled"
+            app:summary="@string/auto_vpn_precheck_enabled_sum"
+            app:title="@string/auto_vpn_precheck_enabled" />
+        <EditTextPreference
+            app:defaultValue="120"
+            app:icon="@drawable/ic_baseline_timelapse_24"
+            app:key="autoVpnCheckIntervalSeconds"
+            app:title="@string/auto_vpn_check_interval_seconds"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="3000"
+            app:icon="@drawable/ic_baseline_shutter_speed_24"
+            app:key="autoVpnBadPingMillis"
+            app:title="@string/auto_vpn_bad_ping_millis"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="2"
+            app:icon="@drawable/ic_baseline_timelapse_24"
+            app:key="autoVpnFailuresBeforeSwitch"
+            app:title="@string/auto_vpn_failures_before_switch"
+            app:useSimpleSummaryProvider="true" />
+        <SwitchPreference
+            app:defaultValue="false"
+            app:icon="@drawable/ic_baseline_cached"
+            app:key="autoVpnLiteMode"
+            app:summary="@string/auto_vpn_lite_mode_sum"
+            app:title="@string/auto_vpn_lite_mode" />
+        <SwitchPreference
+            app:defaultValue="false"
+            app:icon="@drawable/ic_baseline_vpn_key_24"
+            app:key="autoVpnFloatingSwitchEnabled"
+            app:summary="@string/auto_vpn_floating_switch_sum"
+            app:title="@string/auto_vpn_floating_switch" />
+        <EditTextPreference
+            app:defaultValue="10"
+            app:icon="@drawable/ic_baseline_speed_24"
+            app:key="autoVpnWorkingTarget"
+            app:title="@string/auto_vpn_working_target"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="60"
+            app:icon="@drawable/ic_baseline_timelapse_24"
+            app:key="autoVpnInitialSelectionTimeoutSeconds"
+            app:title="@string/auto_vpn_initial_selection_timeout_seconds"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="60"
+            app:icon="@drawable/ic_baseline_timelapse_24"
+            app:key="autoVpnSwitchCooldownSeconds"
+            app:title="@string/auto_vpn_switch_cooldown_seconds"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="45"
+            app:icon="@drawable/ic_baseline_timelapse_24"
+            app:key="autoVpnQuarantineMinutes"
+            app:title="@string/auto_vpn_quarantine_minutes"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="https://gemini.google.com/"
+            app:icon="@drawable/ic_baseline_vpn_key_24"
+            app:key="autoVpnGeminiTestUrl"
+            app:title="@string/auto_vpn_gemini_test_url"
+            app:useSimpleSummaryProvider="true" />
+        <Preference
+            app:icon="@drawable/ic_action_delete"
+            app:key="autoVpnResetGeminiRejected"
+            app:title="@string/auto_vpn_reset_gemini_rejected" />
+        <io.nekohasekai.sagernet.widget.SimpleMenuPreference
+            android:icon="@drawable/baseline_flight_takeoff_24"
+            app:defaultValue="0"
+            app:entries="@array/shadowsocks_2022_implementation"
+            app:entryValues="@array/shadowsocks_2022_implementation_value"
+            app:key="shadowsocks2022Implementation"
+            app:title="@string/shadowsocks_2022_implementation"
             app:useSimpleSummaryProvider="true" />
         <SwitchPreference
             app:icon="@drawable/baseline_construction_24"
@@ -252,7 +377,6 @@
             app:entryValues="@array/tls_fragmentation_value"
             app:icon="@drawable/ic_baseline_texture_24"
             app:key="fragmentMethod"
-            app:singleLineTitle="false"
             app:title="@string/fragment_method"
             app:useSimpleSummaryProvider="true" />
         <SwitchPreference
@@ -265,11 +389,137 @@
             app:key="interruptReusedConnections0"
             app:title="@string/interrupt_reused_connections" />
         <SwitchPreference
-            app:defaultValue="true"
+            app:defaultValue="false"
             app:icon="@drawable/ic_baseline_security_24"
             app:key="profileSecurityAdvisory"
             app:summary="@string/insecure_warn_sum"
             app:title="@string/insecure_warn" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/subscriptions">
+        <SwitchPreference
+            app:defaultValue="true"
+            app:icon="@drawable/ic_baseline_update_24"
+            app:key="subscriptionGlobalAutoUpdate"
+            app:summary="@string/subscription_global_auto_update_sum"
+            app:title="@string/subscription_global_auto_update" />
+        <SwitchPreference
+            app:defaultValue="true"
+            app:icon="@drawable/ic_baseline_update_24"
+            app:key="subscriptionVpnBackgroundUpdate"
+            app:summary="@string/subscription_vpn_background_update_sum"
+            app:title="@string/subscription_vpn_background_update" />
+        <EditTextPreference
+            app:defaultValue="5"
+            app:icon="@drawable/ic_baseline_shutter_speed_24"
+            app:key="subscriptionVpnInitialDelayMinutes"
+            app:title="@string/subscription_vpn_initial_delay_minutes"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="90"
+            app:icon="@drawable/ic_baseline_shutter_speed_24"
+            app:key="subscriptionVpnIntervalMinutes"
+            app:title="@string/subscription_vpn_interval_minutes"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="15"
+            app:icon="@drawable/ic_baseline_shutter_speed_24"
+            app:key="subscriptionVpnRetryIntervalMinutes"
+            app:title="@string/subscription_vpn_retry_interval_minutes"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="3"
+            app:icon="@drawable/ic_baseline_running_with_errors_24"
+            app:key="subscriptionVpnRetryCount"
+            app:title="@string/subscription_vpn_retry_count"
+            app:useSimpleSummaryProvider="true" />
+        <SwitchPreference
+            app:icon="@drawable/ic_baseline_fingerprint_24"
+            app:key="subscriptionSendHwid"
+            app:summary="@string/subscription_send_hwid_sum"
+            app:title="@string/subscription_send_hwid" />
+        <SwitchPreference
+            app:defaultValue="true"
+            app:icon="@drawable/ic_baseline_link_24"
+            app:key="groupSourceSyncEnabled"
+            app:summary="@string/group_source_sync_enabled_sum"
+            app:title="@string/group_source_sync_enabled" />
+        <SwitchPreference
+            app:defaultValue="true"
+            app:icon="@drawable/ic_baseline_update_24"
+            app:key="groupSourceVpnSyncEnabled"
+            app:summary="@string/group_source_vpn_sync_enabled_sum"
+            app:title="@string/group_source_vpn_sync_enabled" />
+        <io.nekohasekai.sagernet.widget.LinkOrContentPreference
+            app:defaultValue="https://github.com/denzikplay48-dot/Sub-ExclaveD/blob/main/Sub"
+            app:icon="@drawable/ic_baseline_link_24"
+            app:key="groupSourceUrl"
+            app:title="@string/group_source_url"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="60"
+            app:icon="@drawable/ic_baseline_shutter_speed_24"
+            app:key="groupSourceSyncIntervalMinutes"
+            app:title="@string/group_source_sync_interval_minutes"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="5"
+            app:icon="@drawable/ic_baseline_shutter_speed_24"
+            app:key="groupSourceVpnInitialDelayMinutes"
+            app:title="@string/group_source_vpn_initial_delay_minutes"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="60"
+            app:icon="@drawable/ic_baseline_shutter_speed_24"
+            app:key="groupSourceVpnIntervalMinutes"
+            app:title="@string/group_source_vpn_interval_minutes"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="15"
+            app:icon="@drawable/ic_baseline_shutter_speed_24"
+            app:key="groupSourceVpnRetryIntervalMinutes"
+            app:title="@string/group_source_vpn_retry_interval_minutes"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="3"
+            app:icon="@drawable/ic_baseline_running_with_errors_24"
+            app:key="groupSourceVpnRetryCount"
+            app:title="@string/group_source_vpn_retry_count"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="90"
+            app:icon="@drawable/ic_baseline_shutter_speed_24"
+            app:key="subscriptionGlobalAutoUpdateDelay"
+            app:title="@string/auto_update_delay"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="60"
+            app:icon="@drawable/ic_baseline_speed_24"
+            app:key="subscriptionUpdateParallel"
+            app:title="@string/subscription_update_parallel"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
+            app:defaultValue="30"
+            app:icon="@drawable/ic_baseline_timelapse_24"
+            app:key="subscriptionUpdateTimeoutSeconds"
+            app:title="@string/subscription_update_timeout_seconds"
+            app:useSimpleSummaryProvider="true" />
+        <SwitchPreference
+            app:defaultValue="true"
+            app:icon="@drawable/baseline_delete_sweep_24"
+            app:key="subscriptionRemoveDuplicates"
+            app:summary="@string/deduplication_global_sum"
+            app:title="@string/deduplication_global" />
+        <SwitchPreference
+            app:icon="@drawable/ic_baseline_low_priority_24"
+            app:key="subscriptionAutoSortGroups"
+            app:summary="@string/subscription_auto_sort_groups_sum"
+            app:title="@string/subscription_auto_sort_groups" />
+        <SwitchPreference
+            app:icon="@drawable/ic_baseline_bug_report_24"
+            app:key="groupHealthCheckStatsEnabled"
+            app:summary="@string/group_health_check_stats_enabled_sum"
+            app:title="@string/group_health_check_stats_enabled" />
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/cag_dns">
@@ -285,7 +535,6 @@
             app:entryValues="@array/dns_query_strategy_value"
             app:icon="@drawable/ic_baseline_manage_search_24"
             app:key="remoteDnsQueryStrategy"
-            app:singleLineTitle="false"
             app:title="@string/remote_dns_query_strategy"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
@@ -300,6 +549,7 @@
             app:key="useLocalDnsAsDirectDns"
             app:title="@string/use_local_dns_as_direct_dns" />
         <io.nekohasekai.sagernet.widget.NonBlackEditTextPreference
+            app:defaultValue="tcp://223.5.5.5"
             app:icon="@drawable/ic_action_dns"
             app:key="directDns"
             app:title="@string/direct_dns"
@@ -310,7 +560,6 @@
             app:entryValues="@array/dns_query_strategy_value"
             app:icon="@drawable/ic_baseline_manage_search_24"
             app:key="directDnsQueryStrategy"
-            app:singleLineTitle="false"
             app:title="@string/direct_dns_query_strategy"
             app:useSimpleSummaryProvider="true" />
         <SwitchPreference
@@ -429,6 +678,7 @@
         app:title="@string/cag_misc"
         app:initialExpandedChildrenCount="0">
         <SwitchPreference
+            app:defaultValue="true"
             app:icon="@drawable/ic_social_emoji_symbols"
             app:key="showGroupName"
             app:title="@string/show_group_name_in_notification" />
@@ -438,6 +688,7 @@
             app:summary="@string/always_show_address_sum"
             app:title="@string/always_show_address" />
         <SwitchPreference
+            app:defaultValue="true"
             app:icon="@drawable/baseline_developer_board_24"
             app:key="acquireWakeLock"
             app:title="@string/acquire_wake_lock" />
@@ -452,7 +703,6 @@
             app:entryValues="@array/int_array_2"
             app:icon="@drawable/baseline_flight_takeoff_24"
             app:key="fabStyle"
-            app:singleLineTitle="false"
             app:title="@string/fab_style"
             app:useSimpleSummaryProvider="true" />
         <SwitchPreference

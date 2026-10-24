@@ -1,7 +1,7 @@
 syntax = "proto3";
 
-package exclave.core.app.observatory;
-option java_package = "com.github.exclavenetwork.exclave.core.app.observatory";
+package v2ray.core.app.observatory;
+option java_package = "com.v2ray.core.app.observatory";
 option java_multiple_files = true;
 
 message HealthPingMeasurementResult {

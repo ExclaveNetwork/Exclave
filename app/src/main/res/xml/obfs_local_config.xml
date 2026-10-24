@@ -9,7 +9,6 @@
             app:entries="@array/simple_obfs_wrapper"
             app:entryValues="@array/simple_obfs_wrapper"
             app:iconSpaceReserved="false"
-            app:singleLineTitle="false"
             app:title="Obfuscation wrapper"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>

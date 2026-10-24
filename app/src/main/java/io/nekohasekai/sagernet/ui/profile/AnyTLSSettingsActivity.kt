@@ -54,8 +54,7 @@ class AnyTLSSettingsActivity: ProfileSettingsActivity<AnyTLSBean>() {
         DataStore.serverPinnedCertificate = pinnedPeerCertificateSha256
         DataStore.serverUTLSFingerprint = utlsFingerprint
         DataStore.serverEchEnabled = echEnabled
-        DataStore.serverEchConfigList = echConfigList
-        DataStore.serverEchQueryName = echQueryName
+        DataStore.serverEchConfig = echConfig
         DataStore.serverRealityPublicKey = realityPublicKey
         DataStore.serverRealityShortId = realityShortId
         DataStore.serverRealityFingerprint = realityFingerprint
@@ -63,8 +62,6 @@ class AnyTLSSettingsActivity: ProfileSettingsActivity<AnyTLSBean>() {
         DataStore.serverAllowInsecure = allowInsecure
         DataStore.serverMtlsCertificate = mtlsCertificate
         DataStore.serverMtlsCertificatePrivateKey = mtlsCertificatePrivateKey
-        DataStore.serverServerNameToVerify = serverNameToVerify
-        DataStore.serverAnyTLSDisableReuse = disableReuse
     }
 
     override fun AnyTLSBean.serialize() {
@@ -84,8 +81,7 @@ class AnyTLSSettingsActivity: ProfileSettingsActivity<AnyTLSBean>() {
         pinnedPeerCertificateSha256 = DataStore.serverPinnedCertificate
         utlsFingerprint = DataStore.serverUTLSFingerprint
         echEnabled = DataStore.serverEchEnabled
-        echConfigList = DataStore.serverEchConfigList
-        echQueryName = DataStore.serverEchQueryName
+        echConfig = DataStore.serverEchConfig
         realityPublicKey = DataStore.serverRealityPublicKey
         realityShortId = DataStore.serverRealityShortId
         realityFingerprint = DataStore.serverRealityFingerprint
@@ -93,8 +89,6 @@ class AnyTLSSettingsActivity: ProfileSettingsActivity<AnyTLSBean>() {
         allowInsecure = DataStore.serverAllowInsecure
         mtlsCertificate = DataStore.serverMtlsCertificate
         mtlsCertificatePrivateKey = DataStore.serverMtlsCertificatePrivateKey
-        serverNameToVerify = DataStore.serverServerNameToVerify
-        disableReuse = DataStore.serverAnyTLSDisableReuse
     }
 
     lateinit var password: EditTextPreference
@@ -110,10 +104,8 @@ class AnyTLSSettingsActivity: ProfileSettingsActivity<AnyTLSBean>() {
     lateinit var utlsFingerprint: ListPreference
     lateinit var mtlsCertificate: EditTextPreference
     lateinit var mtlsCertificatePrivateKey: EditTextPreference
-    lateinit var serverNameToVerify: EditTextPreference
     lateinit var echEnabled: SwitchPreference
-    lateinit var echConfigList: EditTextPreference
-    lateinit var echQueryName: EditTextPreference
+    lateinit var echConfig: EditTextPreference
     lateinit var realityPublicKey: EditTextPreference
     lateinit var realityShortId: EditTextPreference
     lateinit var realityFingerprint: ListPreference
@@ -150,18 +142,14 @@ class AnyTLSSettingsActivity: ProfileSettingsActivity<AnyTLSBean>() {
         allowInsecure = findPreference(Key.SERVER_ALLOW_INSECURE)!!
         utlsFingerprint = findPreference(Key.SERVER_UTLS_FINGERPRINT)!!
         echEnabled = findPreference(Key.SERVER_ECH_ENABLED)!!
-        echConfigList = findPreference(Key.SERVER_ECH_CONFIG_LIST)!!
-        echQueryName = findPreference(Key.SERVER_ECH_QUERY_NAME)!!
-        echConfigList.isEnabled = echEnabled.isChecked
-        echQueryName.isEnabled = echEnabled.isChecked
+        echConfig = findPreference(Key.SERVER_ECH_CONFIG)!!
+        echConfig.isEnabled = echEnabled.isChecked
         echEnabled.setOnPreferenceChangeListener { _, newValue ->
-            echConfigList.isEnabled = newValue as Boolean
-            echQueryName.isEnabled = newValue
+            echConfig.isEnabled = newValue as Boolean
             true
         }
         mtlsCertificate = findPreference(Key.SERVER_MTLS_CERTIFICATE)!!
         mtlsCertificatePrivateKey = findPreference(Key.SERVER_MTLS_CERTIFICATE_PRIVATE_KEY)!!
-        serverNameToVerify = findPreference(Key.SERVER_SERVER_NAME_TO_VERIFY)!!
         realityPublicKey = findPreference(Key.SERVER_REALITY_PUBLIC_KEY)!!
         realityShortId = findPreference(Key.SERVER_REALITY_SHORT_ID)!!
         realityFingerprint = findPreference(Key.SERVER_REALITY_FINGERPRINT)!!
@@ -195,10 +183,8 @@ class AnyTLSSettingsActivity: ProfileSettingsActivity<AnyTLSBean>() {
         alpn.isVisible = security == "tls"
         mtlsCertificate.isVisible = security == "tls"
         mtlsCertificatePrivateKey.isVisible = security == "tls"
-        serverNameToVerify.isVisible = security == "tls"
         echEnabled.isVisible = security == "tls"
-        echConfigList.isVisible = security == "tls"
-        echQueryName.isVisible = security == "tls"
+        echConfig.isVisible = security == "tls"
         realityPublicKey.isVisible = security == "reality"
         realityShortId.isVisible = security == "reality"
         utlsFingerprint.isVisible = security == "tls"

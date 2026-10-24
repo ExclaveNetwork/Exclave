@@ -154,19 +154,3 @@ class SagerDatabase_Migration_31_32 : AutoMigrationSpec
     )
 )
 class SagerDatabase_Migration_33_34 : AutoMigrationSpec
-
-@DeleteColumn.Entries(
-    DeleteColumn(
-        tableName = "proxy_entities",
-        columnName = "shadowtlsBean"
-    ),
-    DeleteColumn(
-        tableName = "rules",
-        columnName = "reverse"
-    ),
-    DeleteColumn(
-        tableName = "rules",
-        columnName = "redirect"
-    ),
-)
-class SagerDatabase_Migration_35_36 : AutoMigrationSpec

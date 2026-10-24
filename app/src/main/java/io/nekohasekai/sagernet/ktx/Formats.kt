@@ -28,16 +28,101 @@ import io.nekohasekai.sagernet.fmt.hysteria2.parseHysteria2
 import io.nekohasekai.sagernet.fmt.juicity.parseJuicity
 import io.nekohasekai.sagernet.fmt.mieru.parseMieru
 import io.nekohasekai.sagernet.fmt.naive.parseNaive
-import io.nekohasekai.sagernet.fmt.parseBackup
-import io.nekohasekai.sagernet.fmt.shadowquic.parseShadowQUIC
+import io.nekohasekai.sagernet.fmt.parseBackupLink
 import io.nekohasekai.sagernet.fmt.shadowsocks.parseShadowsocks
 import io.nekohasekai.sagernet.fmt.shadowsocksr.parseShadowsocksR
 import io.nekohasekai.sagernet.fmt.socks.parseSOCKS
+import io.nekohasekai.sagernet.fmt.ssh.parseSSH
 import io.nekohasekai.sagernet.fmt.trusttunnel.parseTrustTunnel
 import io.nekohasekai.sagernet.fmt.tuic5.parseTuic
 import io.nekohasekai.sagernet.fmt.v2ray.parseV2Ray
 import io.nekohasekai.sagernet.fmt.wireguard.parseWireGuard
+import java.io.ByteArrayOutputStream
+import java.util.zip.Deflater
+import java.util.zip.Inflater
 import kotlin.io.encoding.Base64
+import kotlin.io.use
+
+private val importMarkdownLinkRegex = Regex("""\[([^\]\r\n]+)]\(([^)\s]+)\)""")
+private val importShareConfigRegex = Regex(
+    """(?i)(?:exclave://|socks(?:4a?|5h?)?://|vmess://|vless://|trojan://|ss://|ssr://|naive\+(?:https|quic)\S*|hysteria2://|hy2://|juicity://|tuic://|wireguard://|wg://|mierus://|quic://|anytls://|ssh://|tt://)\S+"""
+)
+private val importHttpLinkRegex = Regex("""(?i)https?://[^\s\])>"']+""")
+
+private fun String.startsWithImportScheme(): Boolean {
+    return startsWith("exclave://", ignoreCase = true) ||
+            startsWith("http://", ignoreCase = true) ||
+            startsWith("https://", ignoreCase = true) ||
+            startsWith("socks://", ignoreCase = true) ||
+            startsWith("socks4://", ignoreCase = true) ||
+            startsWith("socks4a://", ignoreCase = true) ||
+            startsWith("socks5://", ignoreCase = true) ||
+            startsWith("socks5h://", ignoreCase = true) ||
+            startsWith("vmess://", ignoreCase = true) ||
+            startsWith("vless://", ignoreCase = true) ||
+            startsWith("trojan://", ignoreCase = true) ||
+            startsWith("ss://", ignoreCase = true) ||
+            startsWith("ssr://", ignoreCase = true) ||
+            startsWith("naive+https", ignoreCase = true) ||
+            startsWith("naive+quic", ignoreCase = true) ||
+            startsWith("hysteria2://", ignoreCase = true) ||
+            startsWith("hy2://", ignoreCase = true) ||
+            startsWith("juicity://", ignoreCase = true) ||
+            startsWith("tuic://", ignoreCase = true) ||
+            startsWith("wireguard://", ignoreCase = true) ||
+            startsWith("wg://", ignoreCase = true) ||
+            startsWith("mierus://", ignoreCase = true) ||
+            startsWith("quic://", ignoreCase = true) ||
+            startsWith("anytls://", ignoreCase = true) ||
+            startsWith("ssh://", ignoreCase = true) ||
+            startsWith("tt://", ignoreCase = true)
+}
+
+private fun markdownImportReplacement(label: String, url: String): String {
+    val cleanLabel = label.trim()
+    val cleanUrl = url.trim()
+    if (cleanLabel.startsWithImportScheme()) return cleanLabel
+
+    val urlHost = cleanUrl
+        .substringAfter("://", "")
+        .substringBefore('/')
+        .substringBefore(':')
+        .trim()
+    if (urlHost.isNotEmpty() && cleanLabel.equals(urlHost, ignoreCase = true)) {
+        return cleanLabel
+    }
+
+    return cleanUrl
+}
+
+fun normalizeImportText(text: String): String {
+    return importMarkdownLinkRegex.replace(text) {
+        markdownImportReplacement(it.groupValues[1], it.groupValues[2])
+    }
+}
+
+fun extractSubscriptionLinksForImport(text: String): List<String> {
+    val normalized = normalizeImportText(text)
+    val withoutConfigs = importShareConfigRegex.replace(normalized) {
+        " ".repeat(it.value.length)
+    }
+    return importHttpLinkRegex.findAll(withoutConfigs)
+        .map { it.value.trim().trimEnd('.', ',', ';', ':') }
+        .filter { it.isNotEmpty() }
+        .distinct()
+        .toList()
+}
+
+fun isJsonImportDocument(text: String): Boolean {
+    val normalized = normalizeImportText(text).trim()
+    if (!normalized.startsWith("{") && !normalized.startsWith("[")) return false
+    return runCatching {
+        parseJson(normalized, lenient = true)
+        true
+    }.getOrElse {
+        false
+    }
+}
 
 fun String.decodeBase64(): String {
     if (this.lines().size > 1) {
@@ -53,14 +138,18 @@ fun String.decodeBase64(): String {
 }
 
 fun parseShareLinks(text: String): List<AbstractBean> {
-    val linksByLine = text.split('\n').mapNotNull { it.trim().takeIf { !it.startsWith('#') } }
-    val links = linksByLine.flatMap { it.trim().split(' ') }
+    val links = text.split('\n').flatMap { it.trim().split(' ') }
+    val linksByLine = text.split('\n').map { it.trim() }
 
     val entities = ArrayList<AbstractBean>()
     val entitiesByLine = ArrayList<AbstractBean>()
 
     fun String.parseLink(entities: ArrayList<AbstractBean>) {
-        if (startsWith("socks://", ignoreCase = true)
+        if (startsWith("exclave://", ignoreCase = true)) {
+            runCatching {
+                entities.add(parseBackupLink(this))
+            }
+        } else if (startsWith("socks://", ignoreCase = true)
             || startsWith("socks4://", ignoreCase = true)
             || startsWith("socks4a://", ignoreCase = true)
             || startsWith("socks5://", ignoreCase = true)
@@ -121,13 +210,13 @@ fun parseShareLinks(text: String): List<AbstractBean> {
             runCatching {
                 entities.add(parseAnyTLS(this))
             }
+        } else if (startsWith("ssh://", ignoreCase = true)) {
+            runCatching {
+                entities.add(parseSSH(this))
+            }
         } else if (startsWith("tt://", ignoreCase = true)) {
             runCatching {
                 entities.addAll(parseTrustTunnel(this))
-            }
-        } else if (startsWith("sq://", ignoreCase = true) || startsWith("shadowquic://", ignoreCase = true)) {
-            runCatching {
-                entities.add(parseShadowQUIC(this))
             }
         }
     }
@@ -142,20 +231,40 @@ fun parseShareLinks(text: String): List<AbstractBean> {
     return if (entities.size > entitiesByLine.size) entities else entitiesByLine
 }
 
-fun parseBackupLines(text: String): List<AbstractBean> {
-    val lines = text.split('\n')
-    val entities = ArrayList<AbstractBean>()
-    for (line in lines) {
-        try {
-            entities.add(parseBackup(line))
-        } catch (_: Exception) {
-            return listOf()
-        }
-    }
-    return entities
-}
-
 fun <T : Serializable> T.applyDefaultValues(): T {
     initializeDefaultValues()
     return this
+}
+
+fun ByteArray.zlibCompress(level: Int): ByteArray {
+    // Compress the bytes
+    // 1 to 4 bytes/char for UTF-8
+    val output = ByteArray(size * 4)
+    val compressor = Deflater(level).apply {
+        setInput(this@zlibCompress)
+        finish()
+    }
+    val compressedDataLength: Int = compressor.deflate(output)
+    compressor.end()
+    return output.copyOfRange(0, compressedDataLength)
+}
+
+fun ByteArray.zlibDecompress(): ByteArray {
+    val inflater = Inflater()
+    val outputStream = ByteArrayOutputStream()
+
+    return outputStream.use {
+        val buffer = ByteArray(1024)
+
+        inflater.setInput(this)
+
+        var count = -1
+        while (count != 0) {
+            count = inflater.inflate(buffer)
+            outputStream.write(buffer, 0, count)
+        }
+
+        inflater.end()
+        outputStream.toByteArray()
+    }
 }

@@ -23,6 +23,8 @@ package io.nekohasekai.sagernet.group
 import androidx.core.net.toUri
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
+import io.nekohasekai.sagernet.bg.SubscriptionRequestHeaders
+import io.nekohasekai.sagernet.bg.SubscriptionUpdater
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.GroupManager
 import io.nekohasekai.sagernet.database.ProxyEntity
@@ -30,10 +32,11 @@ import io.nekohasekai.sagernet.database.ProxyGroup
 import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.database.SubscriptionBean
 import io.nekohasekai.sagernet.fmt.AbstractBean
+import io.nekohasekai.sagernet.fmt.internal.ConfigBean
 import io.nekohasekai.sagernet.fmt.shadowsocks.parseShadowsocksConfig
 import io.nekohasekai.sagernet.fmt.wireguard.parseWireGuardConfig
 import io.nekohasekai.sagernet.ktx.*
-import libexclavecore.Libexclavecore
+import libsagernetcore.Libsagernetcore
 import org.yaml.snakeyaml.DumperOptions
 import org.yaml.snakeyaml.LoaderOptions
 import org.yaml.snakeyaml.Yaml
@@ -67,7 +70,7 @@ object RawUpdater : GroupUpdater() {
             proxies = contentText?.let { parseRaw(contentText) }
                 ?: error(app.getString(R.string.no_proxies_found_in_subscription))
         } else {
-            val response = Libexclavecore.newHttpClient().apply {
+            val response = Libsagernetcore.newHttpClient().apply {
                 if (SagerNet.started && DataStore.startedProfile > 0) {
                     useUDS(SagerNet.deviceStorage.noBackupFilesDir.toString() + "/ipc.sock")
                 }
@@ -78,13 +81,7 @@ object RawUpdater : GroupUpdater() {
                 } else {
                     setUserAgent(USER_AGENT)
                 }
-                if (subscription.httpHeaders.isNotEmpty()) {
-                    for (header in subscription.httpHeaders.replace("\r\n", "\n").split("\n")) {
-                        if (header.isEmpty()) continue
-                        if (!header.contains(":")) error("invalid http header")
-                        setHeader(header.substringBefore(":"), header.substringAfter(":").trimStart())
-                    }
-                }
+                SubscriptionRequestHeaders.applyTo { key, value -> setHeader(key, value) }
             }.execute()
 
             proxies = parseRaw(response.contentString)
@@ -157,7 +154,7 @@ object RawUpdater : GroupUpdater() {
 
         val exists = SagerDatabase.proxyDao.getByGroup(proxyGroup.id)
         val duplicate = ArrayList<String>()
-        if (subscription.deduplication) {
+        if (DataStore.subscriptionRemoveDuplicates && subscription.deduplication) {
             val uniqueProxies = LinkedHashSet<Protocols.Deduplication>()
             val uniqueNames = HashMap<Protocols.Deduplication, String>()
             for (p in proxies) {
@@ -233,8 +230,9 @@ object RawUpdater : GroupUpdater() {
         SagerDatabase.proxyDao.updateProxy(toUpdate)
         SagerDatabase.proxyDao.deleteProxy(toDelete)
 
-        subscription.lastUpdated = System.currentTimeMillis() / 1000
+        SubscriptionUpdater.markSuccess(proxyGroup)
         SagerDatabase.groupDao.updateGroup(proxyGroup)
+        GroupUpdater.lastResults[proxyGroup.id] = GroupUpdater.UpdateResult(success = true, duplicateCount = duplicate.size)
         finishUpdate(proxyGroup)
 
         if (byUser && userInterface != null) {
@@ -244,6 +242,11 @@ object RawUpdater : GroupUpdater() {
 
     @Suppress("UNCHECKED_CAST")
     fun parseRaw(text: String): List<AbstractBean>? {
+        val parsed = ArrayList<AbstractBean>()
+        fun addParsed(proxies: List<AbstractBean>) {
+            if (proxies.isNotEmpty()) parsed.addAll(proxies)
+        }
+
         try {
             val options = DumperOptions()
             val yaml = Yaml(YAMLConstructor(LoaderOptions()), Representer(options), options, object : Resolver() {
@@ -262,31 +265,98 @@ object RawUpdater : GroupUpdater() {
             }.loadAs(text, Map::class.java)
             (yaml["proxies"] as? List<Map<String, Any?>>)?.let { proxies ->
                 parseClashProxies(proxies).takeIf { it.isNotEmpty() }?.let {
-                    return it
+                    addParsed(it)
                 }
             }
         } catch (_: Exception) {}
+        var parsedJson = false
         try {
             parseJSONConfig(text).takeIf { it.isNotEmpty() }?.let {
-                return it
+                addParsed(it)
+                parsedJson = true
             }
         } catch (_: Exception) {}
+        if (!parsedJson) {
+            try {
+                parseCustomJSONConfig(text).takeIf { it.isNotEmpty() }?.let {
+                    addParsed(it)
+                }
+            } catch (_: Exception) {}
+        }
+        val normalizedText = normalizeImportText(text)
         try {
             parseShareLinks(text.decodeBase64()).takeIf { it.isNotEmpty() }?.let {
-                return it
+                addParsed(it)
             }
         } catch (_: Exception) {}
         try {
             parseShareLinks(text).takeIf { it.isNotEmpty() }?.let {
-                return it
+                addParsed(it)
             }
         } catch (_: Exception) {}
+        if (normalizedText != text) {
+            try {
+                parseShareLinks(normalizedText).takeIf { it.isNotEmpty() }?.let {
+                    addParsed(it)
+                }
+            } catch (_: Exception) {}
+            try {
+                parseShareLinks(normalizedText.decodeBase64()).takeIf { it.isNotEmpty() }?.let {
+                    addParsed(it)
+                }
+            } catch (_: Exception) {}
+        }
         try {
             parseWireGuardConfig(text).takeIf { it.isNotEmpty() }?.let {
-                return it
+                addParsed(it)
             }
         } catch (_: Exception) {}
-        return null
+        if (normalizedText != text) {
+            try {
+                parseWireGuardConfig(normalizedText).takeIf { it.isNotEmpty() }?.let {
+                    addParsed(it)
+                }
+            } catch (_: Exception) {}
+        }
+        if (parsed.isEmpty()) return null
+
+        val unique = ArrayList<AbstractBean>(parsed.size)
+        val seen = LinkedHashSet<String>()
+        parsed.forEach { bean ->
+            val key = listOf(
+                bean.javaClass.name,
+                bean.serverAddress,
+                bean.serverPort,
+                bean.displayName(),
+            ).joinToString("\u0000")
+            if (seen.add(key)) {
+                unique.add(bean)
+            }
+        }
+        return unique
+    }
+
+    private fun parseCustomJSONConfig(text: String): List<AbstractBean> {
+        val content = stripJson(text, stripTrailingCommas = true)
+        val jsonElement = parseJson(content, lenient = true)
+        if (!jsonElement.isJsonObject) return listOf()
+
+        val jsonObject = jsonElement.asJsonObject
+        val type = when {
+            jsonObject.contains("outbounds", ignoreCase = true) ||
+                    jsonObject.contains("inbounds", ignoreCase = true) -> "v2ray"
+            jsonObject.contains("protocol", ignoreCase = true) -> "v2ray_outbound"
+            else -> return listOf()
+        }
+
+        val name = jsonObject.getString("remarks", ignoreCase = true)
+            ?: jsonObject.getString("tag", ignoreCase = true)
+            ?: "JSON Config"
+        return listOf(ConfigBean().applyDefaultValues().apply {
+            this.name = name
+            this.type = type
+            this.content = content
+        })
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -376,7 +446,7 @@ object RawUpdater : GroupUpdater() {
     }
 }
 
-class YAMLConstructor(
+private class YAMLConstructor(
     options: LoaderOptions,
 ) : Constructor(options) {
     override fun constructObject(node: Node): Any? {

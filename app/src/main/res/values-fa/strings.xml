@@ -245,6 +245,8 @@
     <string name="route_rules_provider">قانون ارائه دهنده دارایی</string>
     <string name="route_assets">دارایی ها</string>
     <string name="route_manage_assets">مدیریت دارایی های مسیر</string>
+    <string name="route_reverse_redirect">تغییر مسیر وارونه</string>
+    <string name="route_reverse">وارونه کردن پروکسی</string>
     <string name="route_reset">تنظیم مجدد</string>
     <string name="route_bypass_ip">قانون IP برای %s</string>
     <string name="route_bypass_domain">قانون دامنه برای %s</string>
@@ -394,7 +396,7 @@
     <string name="flow">الگوریتم کنترل جریان</string>
     <string name="udp_over_tcp">UDP بیش از TCP</string>
     <string name="tuic_udp_relay_mode">حالت رله UDP</string>
-    <string name="congestion_control">کنترل تراکم</string>
+    <string name="congestion_control">کنترل کننده ازدحام</string>
     <string name="tuic_disable_sni">غیر فعال کردن SNI</string>
     <string name="action_flash_on">روشن کردن فلاش</string>
     <string name="action_camera_switch">عوض کردن دوربین</string>
@@ -437,6 +439,7 @@
     <string name="reality_short_id">شناسه‌ی کوتاه REALITY</string>
     <string name="reality_fingerprint">اثر انگشت uTLS در REALITY</string>
     <string name="wireguard_reserved">فیلد رزرو‌شده</string>
+    <string name="shadowsocks_2022_implementation">پیاده‌سازی Shadowsocks 2022</string>
     <string name="bootstrap_dns">DNS راه‌انداز (Bootstrap DNS)</string>
     <string name="use_local_dns_as_bootstrap_dns">استفاده از DNS سیستم به‌عنوان DNS راه‌انداز (Bootstrap DNS)</string>
     <string name="brook_fragment">قطعه (Fragment)</string>
@@ -471,6 +474,8 @@
     <string name="edns_client_ip">EDNS 客户端 IP</string>
     <string name="allow_apps_bypass_vpn_sum">اجازه بده برنامه‌ها با استفاده از روش‌های ارائه‌شده توسط سیستم، VPN را دور بزنند</string>
     <string name="cag_splithttp">تنظیمات XHTTP</string>
+    <string name="ech_config">پیکربندی ECH</string>
+    <string name="ech_doh_server">سرور DoH با پشتیبانی از ECH</string>
     <string name="splithttp_mode">حالت</string>
     <string name="backup_all_profiles">پشتیبان‌گیری از همه‌‎ی تنظیمات</string>
     <string name="browser_forwarder_hint">لطفاً از بخش انتشار v2ray-core فایل v2ray-extra.zip را دانلود کنید و index.html و index.js را در مسیر Android/data/%s/files قرار دهید، یا این دو فایل را به‌عنوان منبع مسیریابی (Routing Resource) وارد کنید.</string>
@@ -561,30 +566,4 @@
     <string name="insecure_warn_sum">نمایش هشدار برای پروفایل‌هایی با امنیت مشابه متن ساده.</string>
     <string name="ech">ECH (سلام اولیه رمزنگاری‌شده)</string>
     <string name="require_socks">فعال کردن ورودی SOCKS5</string>
-    <string name="mieru_traffic_pattern">الگوی ترافیک</string>
-    <string name="balancer_use_landing_proxy">گروه پیشکار مبدأ</string>
-    <string name="balancer_use_front_proxy">استفاده از گروه پیشکار پیش‌فرض</string>
-    <string name="insecure_warning_detail">امنیت این پروفایل معادل متن ساده (بدون رمزنگاری) است.\nاین هشدار به دلیل فعال بودن «نکات امنیتی» نمایش داده می‌شود.</string>
-    <string name="hysteria_hop_interval_min">حداقل فاصله زمانی تغییر پورت (ثانیه)</string>
-    <string name="hysteria_hop_interval_max">حداکثر فاصله زمانی تغییر پورت (ثانیه)</string>
-    <string name="hysteria_bbr_profile">پروفایل کنترل ازدحام BBR</string>
-    <string name="custom_package_name_or_uid">نام بسته یا شناسهٔ کاربر (UID) سفارشی</string>
-    <string name="socks5_udp_authentication_warning">پروتکل SOCKS5 UDP با نام کاربری و رمز عبور محافظت نمی‌شود. در صورت فعال بودن UDP، ترافیک آن می‌تواند به‌راحتی احراز هویت را دور بزند.</string>
-    <string name="enable_hysteria2_omit_max_datagram_frame_size">فعال‌سازی حذف حداکثر اندازه فریم داده (OmitMaxDatagramFrameSize) در هیستریا ۲</string>
-    <string name="hysteria2_omit_max_datagram_frame_size_sum">اگر سرور هیستریا ۲ (Hysteria 2) از این تغییر ناسازگار پشتیبانی نکند، UDP غیرقابل‌استفاده خواهد شد. این یک گزینه موقت است و ممکن است در آینده حذف شود.</string>
-    <string name="ssh_keepalive_interval">فاصله زمانی ارسال سیگنال زنده ماندن (ثانیه)</string>
-    <string name="custom_outbound">خروجی سفارشی</string>
-    <string name="hysteria2_gecko_max_packet_size">حداکثر اندازهٔ بسته</string>
-    <string name="hysteria2_gecko_min_packet_size">حداقل اندازهٔ بسته</string>
-    <string name="nearby_devices_permission_notice">این قابلیت نیازمند مجوز «دستگاه‌های نزدیک» است، اما این مجوز داده نشده است.</string>
-    <string name="snell_reuse">استفادهٔ مجدد از اتصال</string>
-    <string name="pre_shared_key">کلید پیش‌اشتراک‌گذاری‌شده</string>
-    <string name="snell_obfs_mode">حالت دستکاری و پنهان‌سازی ترافیک</string>
-    <string name="snell_obfs_host">هاست پنهان‌سازی</string>
-    <string name="snell_mode">حالت</string>
-    <string name="anytls_disable_reuse">غیرفعال‌سازی استفاده مجدد از اتصال</string>
-    <string name="chrome_parrot_summary">شبیه‌سازی پیام اولیه کلاینت کوئیک کروم</string>
-    <string name="chrome_parrot_omit_max_datagram_frame_size_datagram_warning">این گزینه برای هماهنگی با رفتار کروم غیرفعال شده است.</string>
-    <string name="option_globally_enabled">این گزینه به صورت سراسری فعال شده و مقدار آن حذف خواهد شد.</string>
-    <string name="snell_obfs_uri">نشانی پنهان‌سازی</string>
 </resources>

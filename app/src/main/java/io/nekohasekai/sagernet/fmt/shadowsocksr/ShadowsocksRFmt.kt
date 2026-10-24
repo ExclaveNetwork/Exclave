@@ -19,7 +19,7 @@
 
 package io.nekohasekai.sagernet.fmt.shadowsocksr
 import io.nekohasekai.sagernet.ktx.queryParameter
-import libexclavecore.Libexclavecore
+import libsagernetcore.Libsagernetcore
 import java.util.Locale
 import kotlin.io.encoding.Base64
 
@@ -47,8 +47,8 @@ fun parseShadowsocksR(url: String): ShadowsocksRBean {
     if (params.size < 6) error("invalid url")
 
     val bean = ShadowsocksRBean().apply {
-        serverAddress = params.subList(0, params.size - 5).joinToString(":") // serverAddress contains `:` if it is IPv6
-        serverPort = params[params.size - 5].takeIf { it.all { it.isDigit() } }?.toIntOrNull() ?: error("invalid port")
+        serverAddress = params.subList(0, params.size - 5).joinToString(":").ifEmpty { error("empty host") } // serverAddress contains `:` if it is IPv6
+        serverPort = params[params.size - 5].toIntOrNull() ?: error("invalid port")
         protocol = params[params.size - 4].takeIf { it in supportedShadowsocksRProtocol } ?: error("unsupported protocol")
         method = params[params.size - 3].takeIf { it in supportedShadowsocksRMethod } ?: error("unsupported method")
         obfs = when (val it = params[params.size - 2]) {
@@ -58,7 +58,7 @@ fun parseShadowsocksR(url: String): ShadowsocksRBean {
         password = String(Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).decode(params[params.size - 1].substringBefore("/")))
     }
 
-    val httpUrl = Libexclavecore.parseURL("https://localhost" + params[params.size - 1].substringAfter("/", ""))
+    val httpUrl = Libsagernetcore.parseURL("https://localhost" + params[params.size - 1].substringAfter("/", ""))
 
     httpUrl.queryParameter("obfsparam")?.let {
         bean.obfsParam = String(Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).decode(it))
@@ -79,7 +79,7 @@ fun ShadowsocksRBean.toUri(): String {
     return "ssr://" + Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).encode(
         "%s:%d:%s:%s:%s:%s/?obfsparam=%s&protoparam=%s&remarks=%s".format(
             Locale.ENGLISH,
-            serverAddress,
+            serverAddress.ifEmpty { error("empty server address") },
             serverPort,
             protocol,
             method,

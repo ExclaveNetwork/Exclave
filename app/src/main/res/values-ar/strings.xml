@@ -125,6 +125,8 @@
     <string name="route_rules_provider">مزود أصول القاعدة</string>
     <string name="route_assets">الأصول</string>
     <string name="route_manage_assets">إدارة أصول الطريق</string>
+    <string name="route_reverse_redirect">إعادة التوجيه العكسي</string>
+    <string name="route_reverse">عكس البروکسی</string>
     <string name="route_reset">إعادة تعيين</string>
     <string name="route_bypass_ip">قاعدة IP ل %s</string>
     <string name="route_bypass_domain">قاعدة المجال ل %s</string>

@@ -9,6 +9,12 @@
         app:showAsAction="always"
         tools:ignore="AlwaysShowAction" />
     <item
+        android:id="@+id/action_send_diagnostic_log"
+        android:icon="@drawable/ic_baseline_bug_report_24"
+        android:title="@string/diagnostic_log"
+        app:showAsAction="always"
+        tools:ignore="AlwaysShowAction" />
+    <item
         android:id="@+id/action_clear_logcat"
         android:icon="@drawable/baseline_delete_sweep_24"
         android:title="@string/clear_logcat"

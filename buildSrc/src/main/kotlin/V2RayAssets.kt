@@ -17,61 +17,57 @@
  *                                                                            *
  ******************************************************************************/
 
-import com.google.gson.JsonParser.parseReader
-import com.google.gson.stream.JsonReader
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.gradle.api.Project
+import org.kohsuke.github.GitHubBuilder
 import java.io.File
-import java.io.StringReader
 import java.security.MessageDigest
 
-fun Project.downloadAssets(update: Boolean = false) {
+fun Project.downloadAssets(update: Boolean) {
     val assetsDir = File(projectDir, "src/main/assets")
     val downloader = OkHttpClient.Builder().followRedirects(true).followSslRedirects(true).build()
 
-    val geoipVersionFile = File(assetsDir, "exclave-core/geoip.version.txt")
-    var geoipVersion: String
-    var geoipDat: String
-    var geoipDatSha256sum: String
-    if (update) {
-        val body = downloader.newCall(
-            Request.Builder().url("https://api.github.com/repos/v2fly/geoip/releases/latest").build()
-        ).execute().body
-        val jsonObject = parseReader(JsonReader(StringReader(body.string())))?.asJsonObject
-        body.close()
-        jsonObject ?: error("unable to list geoip release")
-        geoipVersion = jsonObject.get("tag_name")?.asString
-            ?: error("unable to list geoip release")
-        val assets = jsonObject.getAsJsonArray("assets")
-        geoipDat = assets.find { it?.asJsonObject?.get("name")?.asString == "geoip.dat" }
-            ?.asJsonObject?.get("browser_download_url")?.asString
-            ?: error("unable to list geoip release")
-        geoipDatSha256sum = assets.find { it?.asJsonObject?.get("name")?.asString == "geoip.dat.sha256sum" }
-            ?.asJsonObject?.get("browser_download_url")?.asString
-            ?: error("unable to list geoip release")
-    } else {
-        geoipVersion = geoipVersionFile.readText()
-        geoipDat = "https://github.com/v2fly/geoip/releases/download/${geoipVersion}/geoip.dat"
-        geoipDatSha256sum = "https://github.com/v2fly/geoip/releases/download/${geoipVersion}/geoip.dat.sha256sum"
-    }
+    val github = GitHubBuilder().build()
 
-    val geoipFile = File(assetsDir, "exclave-core/geoip.dat")
+    val geoipVersion = File(assetsDir, "v2ray/geoip.version.txt")
+    val geoipRelease = if (update) {
+        github.getRepository("v2fly/geoip").latestRelease
+    } else {
+        github.getRepository("v2fly/geoip").listReleases().find {
+            it.tagName == geoipVersion.readText()
+        }
+    } ?: error("unable to list geoip release")
+
+    val geoipFile = File(assetsDir, "v2ray/geoip.dat")
+
+    if (update) {
+        geoipVersion.deleteRecursively()
+    }
+    geoipFile.parentFile.mkdirs()
+
+    val geoipDat = (geoipRelease.listAssets().toSet().find { it.name == "geoip.dat" }
+        ?: error("geoip.dat not found in ${geoipRelease.assetsUrl}")).browserDownloadUrl
+
+    val geoipDatSha256sum = (geoipRelease.listAssets().toSet().find { it.name == "geoip.dat.sha256sum" }
+        ?: error("geoip.dat.sha256sum not found in ${geoipRelease.assetsUrl}")).browserDownloadUrl
 
     println("Downloading $geoipDatSha256sum ...")
 
-    var body = downloader.newCall(Request.Builder().url(geoipDatSha256sum).build()).execute().body
-    val geoipChecksum = body.string().trim().substringBefore(" ")
-    body.close()
+    val geoipChecksum = downloader.newCall(
+        Request.Builder().url(geoipDatSha256sum).build()
+    ).execute().body.string().trim().substringBefore(" ")
 
     var count = 0
+
     while (true) {
         count++
 
         println("Downloading $geoipDat ...")
 
-        body = downloader.newCall(Request.Builder().url(geoipDat).build()).execute().body
-        body.byteStream().use {
+        downloader.newCall(
+            Request.Builder().url(geoipDat).build()
+        ).execute().body.byteStream().use {
             geoipFile.outputStream().use { out -> it.copyTo(out) }
         }
 
@@ -83,9 +79,8 @@ fun Project.downloadAssets(update: Boolean = false) {
                 messageDigest.update(buffer, 0, bytesRead)
             }
         }
-        body.close()
+        val fileSha256 = messageDigest.digest().joinToString("") { "%02x".format(it) }
 
-        val fileSha256 = messageDigest.digest().toHexString()
         if (fileSha256 != geoipChecksum.lowercase()) {
             System.err.println(
                 "Error verifying ${geoipFile.name}: \nLocal: $fileSha256\nRemote: ${geoipChecksum.lowercase()}"
@@ -96,56 +91,48 @@ fun Project.downloadAssets(update: Boolean = false) {
         }
 
         if (update) {
-            geoipVersionFile.writeText(geoipVersion)
+            geoipVersion.writeText(geoipRelease.tagName)
         }
-
         break
     }
 
-    val geositeVersionFile = File(assetsDir, "exclave-core/geosite.version.txt")
-    var geositeVersion: String
-    var geositeDat: String
-    var geositeDatSha256sum: String
-    if (update) {
-        val body = downloader.newCall(
-            Request.Builder().url("https://api.github.com/repos/v2fly/domain-list-community/releases/latest").build()
-        ).execute().body
-        val jsonObject = parseReader(JsonReader(StringReader(body.string())))?.asJsonObject
-        body.close()
-        jsonObject ?: error("unable to list geosite release")
-        geositeVersion = jsonObject.get("tag_name")?.asString
-            ?: error("unable to list geosite release")
-        val assets = jsonObject.getAsJsonArray("assets")
-        geositeDat = assets.find { it?.asJsonObject?.get("name")?.asString == "dlc.dat" }
-            ?.asJsonObject?.get("browser_download_url")?.asString
-            ?: error("unable to list geosite release")
-        geositeDatSha256sum = assets.find { it?.asJsonObject?.get("name")?.asString == "dlc.dat.sha256sum" }
-            ?.asJsonObject?.get("browser_download_url")?.asString
-            ?: error("unable to list geosite release")
+    val geositeVersion = File(assetsDir, "v2ray/geosite.version.txt")
+    val geositeRelease = if (update) {
+        github.getRepository("v2fly/domain-list-community").latestRelease
     } else {
-        geositeVersion = geositeVersionFile.readText()
-        geositeDat = "https://github.com/v2fly/domain-list-community/releases/download/${geositeVersion}/dlc.dat"
-        geositeDatSha256sum = "https://github.com/v2fly/domain-list-community/releases/download/${geositeVersion}/dlc.dat.sha256sum"
+        github.getRepository("v2fly/domain-list-community").listReleases().find {
+            it.tagName == geositeVersion.readText()
+        }
+    } ?: error("unable to list geosite release")
+
+    val geositeFile = File(assetsDir, "v2ray/geosite.dat")
+
+    if (update) {
+        geositeVersion.deleteRecursively()
     }
 
-    val geositeFile = File(assetsDir, "exclave-core/geosite.dat")
+    val geositeDat = (geositeRelease.listAssets().toSet().find { it.name == "dlc.dat" }
+        ?: error("dlc.dat not found in ${geositeRelease.assetsUrl}")).browserDownloadUrl
+
+    val geositeDatSha256sum = (geositeRelease.listAssets().toSet().find { it.name == "dlc.dat.sha256sum" }
+        ?: error("dlc.dat.sha256sum not found in ${geositeRelease.assetsUrl}")).browserDownloadUrl
 
     println("Downloading $geositeDatSha256sum ...")
 
-    body = downloader.newCall(
+    val geositeChecksum = downloader.newCall(
         Request.Builder().url(geositeDatSha256sum).build()
-    ).execute().body
-    val geositeChecksum = body.string().trim().substringBefore(" ")
-    body.close()
+    ).execute().body.string().trim().substringBefore(" ")
 
     count = 0
+
     while (true) {
         count++
 
         println("Downloading $geositeDat ...")
 
-        body = downloader.newCall(Request.Builder().url(geositeDat).build()).execute().body
-        body.byteStream().use {
+        downloader.newCall(
+            Request.Builder().url(geositeDat).build()
+        ).execute().body.byteStream().use {
             geositeFile.outputStream().use { out -> it.copyTo(out) }
         }
 
@@ -157,9 +144,8 @@ fun Project.downloadAssets(update: Boolean = false) {
                 messageDigest.update(buffer, 0, bytesRead)
             }
         }
-        body.close()
+        val fileSha256 = messageDigest.digest().joinToString("") { "%02x".format(it) }
 
-        val fileSha256 = messageDigest.digest().toHexString()
         if (fileSha256 != geositeChecksum.lowercase()) {
             System.err.println(
                 "Error verifying ${geositeFile.name}: \nLocal: $fileSha256\nRemote: ${geositeChecksum.lowercase()}"
@@ -170,9 +156,8 @@ fun Project.downloadAssets(update: Boolean = false) {
         }
 
         if (update) {
-            geositeVersionFile.writeText(geositeVersion)
+            geositeVersion.writeText(geositeRelease.tagName)
         }
-
         break
     }
 

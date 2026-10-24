@@ -29,13 +29,23 @@ import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 class SwitchActivity : ThemedActivity(R.layout.layout_empty),
     ConfigurationFragment.SelectCallback {
 
+    companion object {
+        const val EXTRA_SHOW_ALL = "showAll"
+    }
+
     override val type = Type.Dialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         supportFragmentManager.beginTransaction().replace(
-            R.id.fragment_holder, ConfigurationFragment(true, null, R.string.quick_toggle)
+            R.id.fragment_holder,
+            ConfigurationFragment(
+                true,
+                null,
+                R.string.quick_toggle,
+                showAllGroupInSelect = intent.getBooleanExtra(EXTRA_SHOW_ALL, false)
+            )
         ).commitAllowingStateLoss()
     }
 

@@ -29,7 +29,6 @@
             app:entryValues="@array/int_array_3"
             app:icon="@drawable/ic_baseline_compare_arrows_24"
             app:key="serverAuthType"
-            app:singleLineTitle="false"
             app:title="@string/hysteria_auth_type"
             app:useSimpleSummaryProvider="true" />
 
@@ -57,7 +56,7 @@
         <EditTextPreference
             app:icon="@drawable/ic_action_copyright"
             app:key="serverCertificates"
-            app:title="@string/ssh_host_key"
+            app:title="@string/ssh_public_key"
             app:useSimpleSummaryProvider="true" />
 
         <EditTextPreference

@@ -46,6 +46,10 @@ class ShadowQUICSettingsActivity : ProfileSettingsActivity<ShadowQUICBean>() {
         DataStore.serverCongestionController = congestionControl
         DataStore.serverReduceRTT = zeroRTT
         DataStore.serverBrookUdpOverStream = udpOverStream
+        DataStore.serverShadowQUICDisableALPN = disableALPN
+        DataStore.serverShadowQUICUseSunnyQUIC = useSunnyQUIC
+        DataStore.serverCertificates = certificate
+        DataStore.serverUploadSpeed = brutalUploadBandwidth
     }
 
     override fun ShadowQUICBean.serialize() {
@@ -59,6 +63,10 @@ class ShadowQUICSettingsActivity : ProfileSettingsActivity<ShadowQUICBean>() {
         congestionControl = DataStore.serverCongestionController
         zeroRTT = DataStore.serverReduceRTT
         udpOverStream = DataStore.serverBrookUdpOverStream
+        disableALPN = DataStore.serverShadowQUICDisableALPN
+        useSunnyQUIC = DataStore.serverShadowQUICUseSunnyQUIC
+        certificate = DataStore.serverCertificates
+        brutalUploadBandwidth = DataStore.serverUploadSpeed
     }
 
     override fun PreferenceFragmentCompat.createPreferences(
@@ -72,6 +80,29 @@ class ShadowQUICSettingsActivity : ProfileSettingsActivity<ShadowQUICBean>() {
         }
         findPreference<EditTextPreference>(Key.SERVER_PASSWORD)!!.apply {
             summaryProvider = PasswordSummaryProvider
+        }
+
+        val disableALPN = findPreference<SwitchPreference>(Key.SERVER_SHADOWQUIC_DISABLE_ALPN)!!
+        val alpn = findPreference<EditTextPreference>(Key.SERVER_ALPN)!!
+        alpn.isEnabled = !disableALPN.isChecked
+        disableALPN.setOnPreferenceChangeListener { _, newValue ->
+            alpn.isEnabled = !(newValue as Boolean)
+            true
+        }
+
+        val useSunnyQUIC = findPreference<SwitchPreference>(Key.SERVER_SHADOWQUIC_USE_SUNNYQUIC)!!
+        val certificate = findPreference<EditTextPreference>(Key.SERVER_CERTIFICATES)!!
+        certificate.isEnabled = useSunnyQUIC.isChecked
+        useSunnyQUIC.setOnPreferenceChangeListener { _, newValue ->
+            certificate.isEnabled = newValue as Boolean
+            true
+        }
+        val congestionControl = findPreference<ListPreference>(Key.SERVER_CONGESTION_CONTROLLER)!!
+        val brutalUploadBandwidth = findPreference<EditTextPreference>(Key.SERVER_UPLOAD_SPEED)!!
+        brutalUploadBandwidth.isEnabled = congestionControl.value == "brutal"
+        congestionControl.setOnPreferenceChangeListener { _, newValue ->
+            brutalUploadBandwidth.isEnabled = (newValue as String) == "brutal"
+            true
         }
     }
 

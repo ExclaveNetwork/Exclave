@@ -58,33 +58,59 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/nat_stun_server_hint"
-                        android:textAppearance="?attr/textAppearanceSubtitle2"
-                        android:textDirection="locale" />
+                        android:textAppearance="?attr/textAppearanceSubtitle2"/>
 
                     <EditText
-                        android:id="@+id/stun_server_address"
+                        android:id="@+id/nat_stun_server"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:singleLine="false"
                         android:inputType="text|textMultiLine"
                         tools:ignore="LabelFor" />
 
-                    <Spinner
-                        android:id="@+id/stun_test_type"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingBottom="8dp"
-                        android:paddingTop="8dp"
-                        android:entries="@array/stun_test_type" />
-
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <LinearLayout
                 android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginRight="16dp"
+                android:gravity="start"
+                android:orientation="vertical">
+
+                <RadioGroup
+                    android:id="@+id/radioGroup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <RadioButton
+                        android:id="@+id/stunRB"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/stun_test"
+                        android:textAppearance="?attr/textAppearanceSubtitle2"
+                        android:tooltipText="@string/stun_test_summary" />
+
+                    <RadioButton
+                        android:id="@+id/stunLegacyRB"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/stun_legacy_test"
+                        android:textAppearance="?attr/textAppearanceSubtitle2"
+                        android:tooltipText="@string/stun_legacy_test_summary" />
+
+                </RadioGroup>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginRight="16dp"
                 android:gravity="end"
                 android:orientation="horizontal">
 
@@ -120,8 +146,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/nat_mapping_behaviour"
-                        android:textAppearance="?attr/textAppearanceSubtitle2"
-                        android:textDirection="locale" />
+                        android:textAppearance="?attr/textAppearanceSubtitle2" />
 
                     <TextView
                         android:id="@+id/natMappingBehaviour"
@@ -129,16 +154,15 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:textAppearance="?attr/textAppearanceBody2"
-                        android:textColor="?android:textColorSecondary"
-                        android:textDirection="locale" />
+                        android:textColor="?android:textColorSecondary" />
                 </LinearLayout>
-
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/natFilteringBehaviourCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
                 android:layout_marginLeft="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginRight="16dp"
@@ -156,8 +180,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/nat_filtering_behaviour"
-                        android:textAppearance="?attr/textAppearanceSubtitle2"
-                        android:textDirection="locale" />
+                        android:textAppearance="?attr/textAppearanceSubtitle2" />
 
                     <TextView
                         android:id="@+id/nat_filtering_behaviour"
@@ -165,8 +188,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:textAppearance="?attr/textAppearanceBody2"
-                        android:textColor="?android:textColorSecondary"
-                        android:textDirection="locale" />
+                        android:textColor="?android:textColorSecondary" />
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
@@ -192,8 +214,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/nat_type"
-                        android:textAppearance="?attr/textAppearanceSubtitle2"
-                        android:textDirection="locale" />
+                        android:textAppearance="?attr/textAppearanceSubtitle2" />
 
                     <TextView
                         android:id="@+id/natType"
@@ -201,10 +222,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:textAppearance="?attr/textAppearanceBody2"
-                        android:textColor="?android:textColorSecondary"
-                        android:textDirection="locale" />
+                        android:textColor="?android:textColorSecondary" />
                 </LinearLayout>
-
             </com.google.android.material.card.MaterialCardView>
 
             <com.google.android.material.card.MaterialCardView
@@ -229,8 +248,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/nat_external_address"
-                        android:textAppearance="?attr/textAppearanceSubtitle2"
-                        android:textDirection="locale" />
+                        android:textAppearance="?attr/textAppearanceSubtitle2" />
 
                     <TextView
                         android:id="@+id/nat_external_address"
@@ -238,8 +256,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:textAppearance="?attr/textAppearanceBody2"
-                        android:textColor="?android:textColorSecondary"
-                        android:textDirection="locale" />
+                        android:textColor="?android:textColorSecondary" />
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>

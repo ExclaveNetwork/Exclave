@@ -25,37 +25,34 @@ import io.nekohasekai.sagernet.LogLevel
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.fmt.LOCALHOST
 import io.nekohasekai.sagernet.ktx.*
-import libexclavecore.Libexclavecore
+import libsagernetcore.Libsagernetcore
 
 fun parseNaive(link: String): NaiveBean {
     // This format may be https://github.com/klzgrad/naiveproxy/issues/86.
-    val url = Libexclavecore.parseURL(link)
+    val url = Libsagernetcore.parseURL(link)
     return NaiveBean().apply {
         proto = when (url.scheme) {
             "naive+https" -> "https"
             "naive+quic" -> "quic"
             else -> error("impossible")
         }
-        serverAddress = url.host
-        serverPort = when {
-            !url.hasPort() -> 443
-            else -> url.port
-        }
+        serverAddress = url.host.ifEmpty { error("empty host") }
+        serverPort = url.port.takeIf { it > 0 } ?: 443
         username = url.username
         password = url.password
         sni = url.queryParameter("sni")
-        // TODO: validate extraHeaders
         extraHeaders = url.queryParameter("extra-headers")?.replace("\r\n", "\n")
+        insecureConcurrency = url.queryParameter("insecure-concurrency")?.toIntOrNull()
         name = url.fragment
     }
 }
 
 fun NaiveBean.toUri(proxyOnly: Boolean = false): String {
-    val builder = Libexclavecore.newURL(if (proxyOnly) proto else "naive+$proto")
+    val builder = Libsagernetcore.newURL(if (proxyOnly) proto else "naive+$proto")
     val host = if (sni.isNotEmpty() && proxyOnly) {
         sni
     } else {
-        serverAddress
+        serverAddress.ifEmpty { error("empty server address") }
     }
     val port = if (proxyOnly) {
         finalPort
@@ -71,11 +68,13 @@ fun NaiveBean.toUri(proxyOnly: Boolean = false): String {
     }
     if (!proxyOnly) {
         if (extraHeaders.isNotEmpty()) {
-            // TODO: validate extraHeaders
             builder.addQueryParameter("extra-headers", extraHeaders.listByLine().joinToString("\r\n"))
         }
         if (name.isNotEmpty()) {
             builder.fragment = name
+        }
+        if (insecureConcurrency > 0) {
+            builder.addQueryParameter("insecure-concurrency", "$insecureConcurrency")
         }
         if (sni.isNotEmpty()) {
             builder.addQueryParameter("sni", sni)
@@ -86,7 +85,7 @@ fun NaiveBean.toUri(proxyOnly: Boolean = false): String {
 
 fun NaiveBean.buildNaiveConfig(port: Int, username: String = "", password: String = ""): String {
     return GsonBuilder().setPrettyPrinting().create().toJson(JsonObject().apply {
-        val url = Libexclavecore.newURL("socks").apply {
+        val url = Libsagernetcore.newURL("socks").apply {
             setHostPort(LOCALHOST, port)
             if (username.isNotEmpty() && password.isNotEmpty()) {
                 this.username = username
@@ -115,12 +114,6 @@ fun NaiveBean.buildNaiveConfig(port: Int, username: String = "", password: Strin
         }
         if (noPostQuantum) {
             addProperty("no-post-quantum", true)
-        }
-        if (tunnelTimeout > 0) {
-            addProperty("tunnel-timeout", tunnelTimeout)
-        }
-        if (idleTimeout > 0) {
-            addProperty("idle-timeout", idleTimeout)
         }
     })
 }

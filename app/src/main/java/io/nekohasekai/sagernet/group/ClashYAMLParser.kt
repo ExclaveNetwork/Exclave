@@ -28,8 +28,6 @@ import io.nekohasekai.sagernet.fmt.anytls.AnyTLSBean
 import io.nekohasekai.sagernet.fmt.http.HttpBean
 import io.nekohasekai.sagernet.fmt.hysteria2.Hysteria2Bean
 import io.nekohasekai.sagernet.fmt.mieru.MieruBean
-import io.nekohasekai.sagernet.fmt.shadowquic.ShadowQUICBean
-import io.nekohasekai.sagernet.fmt.shadowquic.supportedShadowQUICCongestionControl
 import io.nekohasekai.sagernet.fmt.shadowsocks.ShadowsocksBean
 import io.nekohasekai.sagernet.fmt.shadowsocks.supportedShadowsocksMethod
 import io.nekohasekai.sagernet.fmt.shadowsocksr.ShadowsocksRBean
@@ -40,20 +38,17 @@ import io.nekohasekai.sagernet.fmt.socks.SOCKSBean
 import io.nekohasekai.sagernet.fmt.ssh.SSHBean
 import io.nekohasekai.sagernet.fmt.trojan.TrojanBean
 import io.nekohasekai.sagernet.fmt.trusttunnel.TrustTunnelBean
-import io.nekohasekai.sagernet.fmt.snell.SnellBean
 import io.nekohasekai.sagernet.fmt.tuic5.Tuic5Bean
 import io.nekohasekai.sagernet.fmt.tuic5.supportedTuic5CongestionControl
 import io.nekohasekai.sagernet.fmt.tuic5.supportedTuic5RelayMode
 import io.nekohasekai.sagernet.fmt.v2ray.VLESSBean
 import io.nekohasekai.sagernet.fmt.v2ray.VMessBean
-import io.nekohasekai.sagernet.fmt.v2ray.supportedKcpQuicHeaderType
 import io.nekohasekai.sagernet.fmt.v2ray.supportedVmessMethod
 import io.nekohasekai.sagernet.fmt.v2ray.supportedXhttpMode
 import io.nekohasekai.sagernet.fmt.wireguard.WireGuardBean
 import io.nekohasekai.sagernet.ktx.*
 import kotlin.io.encoding.Base64
-import libexclavecore.Libexclavecore
-import kotlin.uuid.Uuid
+import libsagernetcore.Libsagernetcore
 
 fun parseClashProxies(proxies: List<Map<String, Any?>>): List<AbstractBean> {
     val beans = mutableListOf<AbstractBean>()
@@ -77,7 +72,7 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                     if (proxy.getBoolean("skip-cert-verify") == true) {
                         allowInsecure = true
                     }
-                    proxy.getString("fingerprint")?.replace(":", "")?.trim()?.takeIf { it.isNotEmpty() }?.also {
+                    proxy.getString("fingerprint")?.replace(":", "")?.trim()?.also {
                         pinnedPeerCertificateSha256 = it
                         allowInsecure = true
                     }
@@ -91,7 +86,6 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                         mtlsCertificate = cert
                         mtlsCertificatePrivateKey = key
                     }
-                    serverNameToVerify = proxy.getString("name-cert-verify")
                 }
                 name = proxy.getString("name")
             })
@@ -109,7 +103,7 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                     if (proxy.getBoolean("skip-cert-verify") == true) {
                         allowInsecure = true
                     }
-                    proxy.getString("fingerprint")?.replace(":", "")?.trim()?.takeIf { it.isNotEmpty() }?.also {
+                    proxy.getString("fingerprint")?.replace(":", "")?.trim()?.also {
                         pinnedPeerCertificateSha256 = it
                         allowInsecure = true
                     }
@@ -123,7 +117,6 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                         mtlsCertificate = cert
                         mtlsCertificatePrivateKey = key
                     }
-                    serverNameToVerify = proxy.getString("name-cert-verify")
                 }
                 name = proxy.getString("name")
             })
@@ -144,10 +137,6 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                         when (val host = opts?.getString("host")) {
                             // https://github.com/MetaCubeX/mihomo/blob/903371719021d74cbec9cd24efb66e386c8b7595/adapter/outbound/shadowsocks.go#L307
                             null -> pluginOpts["obfs-host"] = "bing.com"
-                            "" -> {
-                                // https://github.com/shadowsocks/simple-obfs does not support "obfs-host="
-                                pluginOpts["obfs-host"] = "bing.com"
-                            }
                             else -> pluginOpts["obfs-host"] = host
                         }
                     }
@@ -216,19 +205,7 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                     "ws", "grpc" -> bean.type = network
                     else -> bean.type = "tcp"
                 }
-            } else if (bean is VMessBean) {
-                when (val network = proxy.getString("network")) {
-                    "h2" -> bean.type = "http"
-                    "http" -> {
-                        bean.type = "tcp"
-                        bean.headerType = "http"
-                    }
-                    "ws", "grpc", "mekya" -> bean.type = network
-                    "kcp", "mkcp" -> bean.type = "kcp"
-                    "tlsmirror" -> return listOf() // TODO
-                    else -> bean.type = "tcp"
-                }
-            } else { // bean is VLESSBean
+            } else {
                 when (val network = proxy.getString("network")) {
                     "h2" -> bean.type = "http"
                     "http" -> {
@@ -236,7 +213,7 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                         bean.headerType = "http"
                     }
                     "ws", "grpc" -> bean.type = network
-                    "xhttp" -> bean.type = "splithttp"
+                    "xhttp" -> if (bean is VLESSBean) bean.type = "splithttp"
                     else -> bean.type = "tcp"
                 }
             }
@@ -250,17 +227,14 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                 if (bean.security == "tls") {
                     bean.sni = proxy.getString("servername")
                 }
-                // https://github.com/MetaCubeX/mihomo/blob/68ec4fae652318bb1474bdfca3918191b167806d/transport/vless/vless.go#L60
-                // https://github.com/MetaCubeX/mihomo/blob/68ec4fae652318bb1474bdfca3918191b167806d/transport/vmess/vmess.go#L87
-                // https://github.com/MetaCubeX/mihomo/blob/68ec4fae652318bb1474bdfca3918191b167806d/common/utils/uuid.go#L46-L52
-                proxy.getString("uuid").orEmpty().also {
-                    bean.uuid = parseUUID(it)?.toHexDashString() ?: uuid5(it)
+                proxy.getString("uuid")?.also {
+                    bean.uuid = uuidOrGenerate(it)
                 }
             }
             if (bean.security == "tls") {
                 bean.alpn = proxy.getStringArray("alpn")?.joinToString("\n")
                 bean.allowInsecure = proxy.getBoolean("skip-cert-verify") == true
-                proxy.getString("fingerprint")?.replace(":", "")?.trim()?.takeIf { it.isNotEmpty() }?.also {
+                proxy.getString("fingerprint")?.replace(":", "")?.trim()?.also {
                     bean.pinnedPeerCertificateSha256 = it
                     bean.allowInsecure = true
                 }
@@ -274,11 +248,12 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                     bean.mtlsCertificate = cert
                     bean.mtlsCertificatePrivateKey = key
                 }
-                bean.serverNameToVerify = proxy.getString("name-cert-verify")
-                proxy.getObject("ech-opts")?.also {
-                    bean.echEnabled = it.getBoolean("enable")
-                    bean.echConfigList = it.getString("config")
-                    bean.echQueryName = it.getString("query-server-name")
+                if (bean is VLESSBean || bean is TrojanBean) {
+                    // Only parse ECH for shit VLESS or Trojan free nodes
+                    proxy.getObject("ech-opts")?.also {
+                        bean.echEnabled = it.getBoolean("enable")
+                        bean.echConfig = it.getString("config")
+                    }
                 }
             }
 
@@ -363,24 +338,17 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                 }
             }
 
-            proxy.getObject("shadowtls-opts")?.also { return listOf() }
-            proxy.getObject("restls-opts")?.also { return listOf() }
-            proxy.getObject("jls-opts")?.also { return listOf() }
-
             proxy.getObject("reality-opts")?.also {
                 bean.security = "reality"
-                bean.realityPublicKey = it.getString("public-key")?.ifEmpty { return listOf() }
+                bean.realityPublicKey = it.getString("public-key")
                 bean.realityShortId = it.getString("short-id")
             }
 
             if (bean.type == "tcp" && bean.headerType != null && bean.headerType == "http") {
                 proxy.getObject("http-opts")?.also {
                     bean.path = it.getStringArray("path")?.joinToString("\n")
-                    // https://github.com/MetaCubeX/mihomo/blob/3f27ef39f8c96bbfbc8b0b9bb10f5c9ef60149d8/adapter/outbound/vmess.go#L253-L255
-                    // https://github.com/MetaCubeX/mihomo/blob/3f27ef39f8c96bbfbc8b0b9bb10f5c9ef60149d8/transport/vmess/http.go#L61-L64
                     val headers = it.getObject("headers") as? Map<String, List<String>>
                     bean.host = headers?.getStringArray("host")?.joinToString("\n")
-                        ?: bean.serverAddress
                 }
             }
             if (bean.type == "ws") {
@@ -391,16 +359,19 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                     bean.host = bean.sni
                 }
                 proxy.getObject("ws-opts")?.also { wsOpts ->
+                    bean.path = wsOpts.getString("path")
                     bean.maxEarlyData = wsOpts.getInt("max-early-data")
                     bean.earlyDataHeaderName = wsOpts.getString("early-data-header-name")
                     bean.path = wsOpts.getString("path")
                     if (!bean.path.isNullOrEmpty()) {
                         try {
-                            val u = Libexclavecore.parseURL(bean.path)
-                            u.queryParameter("ed")?.takeIf { it.isNotEmpty() }?.toIntOrNull()?.takeIf { it > 0 }?.also {
+                            val u = Libsagernetcore.parseURL(bean.path)
+                            u.queryParameter("ed")?.also { ed ->
                                 u.deleteQueryParameter("ed")
                                 bean.path = u.string
-                                bean.maxEarlyData = it
+                                (ed.toIntOrNull())?.also {
+                                    bean.maxEarlyData = it
+                                }
                                 bean.earlyDataHeaderName = "Sec-WebSocket-Protocol"
                             }
                         } catch (_: Exception) {}
@@ -445,37 +416,37 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                         opts.getBoolean("no-grpc-header")?.also {
                             addProperty("noGRPCHeader", it)
                         }
-                        opts.getXHTTPRange("x-padding-bytes")?.also {
+                        opts.getString("x-padding-bytes")?.also {
                             addProperty("xPaddingBytes", it)
                         }
-                        opts.getXHTTPRange("sc-max-each-post-bytes")?.also {
+                        opts.getString("sc-max-each-post-bytes")?.also {
                             addProperty("scMaxEachPostBytes", it)
                         }
-                        opts.getXHTTPRange("sc-min-posts-interval-ms")?.also {
+                        opts.getString("sc-min-posts-interval-ms")?.also {
                             addProperty("scMinPostsIntervalMs", it)
                         }
                         opts.getObject("reuse-settings")?.also { xmux ->
                             JsonObject().apply {
-                                xmux.getXHTTPRange("max-connections")?.also {
+                                xmux.getString("max-connections")?.also {
                                     addProperty("maxConnections", it)
                                 }
-                                xmux.getXHTTPRange("max-concurrency")?.also {
+                                xmux.getString("max-concurrency")?.also {
                                     addProperty("maxConcurrency", it)
                                 }
-                                xmux.getXHTTPRange("c-max-reuse-times")?.also {
+                                xmux.getString("c-max-reuse-times")?.also {
                                     addProperty("cMaxReuseTimes", it)
                                 }
-                                xmux.getXHTTPRange("h-max-request-times")?.also {
+                                xmux.getString("h-max-request-times")?.also {
                                     addProperty("hMaxRequestTimes", it)
                                 }
-                                xmux.getXHTTPRange("h-max-reusable-secs")?.also {
+                                xmux.getString("h-max-reusable-secs")?.also {
                                     addProperty("hMaxReusableSecs", it)
                                 }
                             }.takeIf { !it.isEmpty }?.also {
                                 add("xmux", it)
                             }
                         }
-                        opts.getXHTTPRange("x-padding-bytes")?.also {
+                        opts.getString("x-padding-bytes")?.also {
                             addProperty("xPaddingBytes", it)
                         }
                         opts.getBoolean("x-padding-obfs-mode")?.also {
@@ -497,16 +468,10 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                             addProperty("uplinkHTTPMethod", it)
                         }
                         opts.getString("session-placement")?.also {
-                            addProperty("sessionIDPlacement", it)
+                            addProperty("sessionPlacement", it)
                         }
                         opts.getString("session-key")?.also {
-                            addProperty("sessionIDKey", it)
-                        }
-                        opts.getString("session-table")?.also {
-                            addProperty("sessionIDTable", it)
-                        }
-                        opts.getXHTTPRange("session-length")?.also {
-                            addProperty("sessionIDLength", it)
+                            addProperty("sessionKey", it)
                         }
                         opts.getString("seq-placement")?.also {
                             addProperty("seqPlacement", it)
@@ -520,40 +485,11 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                         opts.getString("uplink-data-key")?.also {
                             addProperty("uplinkDataKey", it)
                         }
-                        opts.getXHTTPRange("uplink-chunk-size")?.also {
+                        opts.getString("uplink-chunk-size")?.also {
                             addProperty("uplinkChunkSize", it)
                         }
                     }.takeIf { !it.isEmpty }?.also {
                         bean.splithttpExtra = GsonBuilder().setPrettyPrinting().create().toJson(it)
-                    }
-                }
-            }
-            if (bean.type == "kcp") {
-                proxy.getObject("mkcp-opts")?.also {
-                    bean.mKcpSeed = it.getString("seed")
-                    it.getString("type")?.let { type ->
-                        when (type) {
-                            in supportedKcpQuicHeaderType -> bean.headerType = type
-                            "", "noop" -> bean.headerType = "none"
-                            "wechat" -> bean.headerType = "wechat-video"
-                            else -> bean.headerType = "none"
-                        }
-                    }
-                }
-            }
-            if (bean.type == "mekya") {
-                proxy.getObject("mekya-opts")?.also {
-                    bean.mekyaUrl = it.getString("url")
-                    it.getObject("kcp")?.let { kcp ->
-                        bean.mekyaKcpSeed = it.getString("seed")
-                        kcp.getString("type")?.let { type ->
-                            when (type) {
-                                in supportedKcpQuicHeaderType -> bean.headerType = type
-                                "", "noop" -> bean.headerType = "none"
-                                "wechat" -> bean.headerType = "wechat-video"
-                                else -> bean.headerType = "none"
-                            }
-                        }
                     }
                 }
             }
@@ -565,19 +501,6 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                     }
                 }
             }
-
-            if (bean.security == "reality") {
-                when (bean.type) {
-                    "tcp", "http", "grpc", "splithttp" -> {}
-                    else -> return listOf()
-                }
-            }
-
-            if (bean is VLESSBean && bean.security != "none" && bean.flow == "xtls-rprx-vision-udp443"
-                && bean.type != "tcp" && bean.encryption == "none") {
-                return listOf()
-            }
-
             return listOf(bean)
         }
         "ssr" -> {
@@ -630,7 +553,7 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
             return listOf(Hysteria2Bean().apply {
                 serverAddress = proxy.getString("server") ?: return listOf()
                 val port = proxy.getInt("port")?.takeIf { it > 0 }
-                val ports = proxy.getString("ports")?.takeIf { it.isNotEmpty() }?.toIntRanges()
+                val ports = proxy.getString("ports")?.toIntRanges()
                 if (port == null && ports == null) return listOf()
                 serverPorts = ports?.joinToString(",") {
                     if (it.third) it.first.toString() else "${it.first}-${it.second}"
@@ -638,7 +561,7 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                 auth = proxy.getString("password")
                 sni = proxy.getString("sni")
                 allowInsecure = proxy.getBoolean("skip-cert-verify") == true
-                proxy.getString("fingerprint")?.replace(":", "")?.trim()?.takeIf { it.isNotEmpty() }?.also {
+                proxy.getString("fingerprint")?.replace(":", "")?.trim()?.also {
                     pinnedPeerCertificateSha256 = it
                     allowInsecure = true
                 }
@@ -658,24 +581,15 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                     mtlsCertificate = cert
                     mtlsCertificatePrivateKey = key
                 }
-                serverNameToVerify = proxy.getString("name-cert-verify")
-                proxy.getObject("ech-opts")?.also {
+                /*proxy.getObject("ech-opts")?.also {
                     echEnabled = it.getBoolean("enable")
-                    echConfigList = it.getString("config")
-                    echQueryName = it.getString("query-server-name")
-                }
+                    echConfig = it.getString("config")
+                }*/
                 (proxy.getString("obfs"))?.also {
                     when (it) {
                         "" -> {}
                         "salamander" -> {
-                            obfsType = "salamander"
-                            obfsPassword = proxy.getString("obfs-password")
-                        }
-                        "gecko" -> {
-                            obfsType = "gecko"
-                            obfsPassword = proxy.getString("obfs-password")
-                            geckoMinPacketSize = proxy.getInt("obfs-min-packet-size")?.takeIf { it > 0 }
-                            geckoMaxPacketSize = proxy.getInt("obfs-max-packet-size")?.takeIf { it > 0 }
+                            obfs = proxy.getString("obfs-password")
                         }
                         else -> return listOf()
                     }
@@ -717,10 +631,7 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                 return listOf(Tuic5Bean().apply {
                     serverAddress = proxy.getString("ip") ?: proxy.getString("server") ?: return listOf()
                     serverPort = proxy.getInt("port")?.takeIf { it > 0 } ?: return listOf()
-                    // https://github.com/MetaCubeX/mihomo/blob/68ec4fae652318bb1474bdfca3918191b167806d/adapter/outbound/tuic.go#L289
-                    proxy.getString("uuid").orEmpty().also {
-                        uuid = parseUUID(it)?.toHexDashString() ?: Uuid.NIL.toHexDashString()
-                    }
+                    uuid = proxy.getString("uuid")
                     password = proxy.getString("password")
                     udpRelayMode = when (val mode = proxy.getString("udp-relay-mode")) {
                         in supportedTuic5RelayMode -> mode
@@ -737,7 +648,7 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                         ?: (if (proxy.getString("ip") != null) proxy.getString("server") else null)
                     // https://github.com/MetaCubeX/mihomo/blob/d5243adf8911563677d3bd190b82623c93e554b7/adapter/outbound/tuic.go#L174-L178
                     alpn = if (!proxy.contains("alpn")) "h3" else proxy.getStringArray("alpn")?.joinToString("\n")
-                    proxy.getString("fingerprint")?.replace(":", "")?.trim()?.takeIf { it.isNotEmpty() }?.also {
+                    proxy.getString("fingerprint")?.replace(":", "")?.trim()?.also {
                         pinnedPeerCertificateSha256 = it
                         allowInsecure = true
                     }
@@ -757,11 +668,9 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                         mtlsCertificate = cert
                         mtlsCertificatePrivateKey = key
                     }
-                    serverNameToVerify = proxy.getString("name-cert-verify")
                     /*proxy.getObject("ech-opts")?.also {
                         echEnabled = it.getBoolean("enable")
                         echConfig = it.getString("config")
-                        echQueryName = it.getString("query-server-name")
                     }*/
                     name = proxy.getString("name")
                 })
@@ -771,12 +680,9 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
             return listOf(MieruBean().apply {
                 serverAddress = proxy.getString("server") ?: return listOf()
                 serverPort = proxy.getInt("port")
-                portRange = proxy.getString("port-range")
+                portRange = proxy.getStringArray("port-range")?.joinToString("\n")
                 if (serverPort == null && portRange == null) {
                     return listOf()
-                }
-                if (!portRange.isNullOrEmpty()) {
-                    serverPort = 0
                 }
                 username = proxy.getString("username")
                 password = proxy.getString("password")
@@ -804,41 +710,10 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                         else -> MieruBean.HANDSHAKE_DEFAULT
                     }
                 }
-                proxy.getString("traffic-pattern")?.also {
+                /*proxy.getString("traffic-pattern")?.also {
                     // How to validate its validity?
                     trafficPattern = it
-                }
-                name = proxy.getString("name")
-            })
-        }
-        "snell" -> {
-            return listOf(SnellBean().apply {
-                serverAddress = proxy.getString("server") ?: return listOf()
-                serverPort = proxy.getInt("port")?.takeIf { it > 0 } ?: return listOf()
-                psk = proxy.getString("psk")
-                version = proxy.getInt("version")
-                if (version != 4) return listOf()
-                proxy.getObject("obfs-opts")?.also { opts ->
-                     when (opts.getString("mode")) {
-                        "tls" -> {
-                            obfsMode = SnellBean.OBFS_TLS
-                            obfsHost = when (val host = opts.getString("host")) {
-                                // null -> "bing.com"
-                                else ->  host
-                            }
-                        }
-                         "http" -> {
-                             obfsMode = SnellBean.OBFS_HTTP
-                             obfsHost = when (val host = opts.getString("host")) {
-                                 null -> "bing.com" // https://github.com/MetaCubeX/mihomo/blob/75eeba429292d915691f61d89fc5e57a612c8844/adapter/outbound/snell.go#L158
-                                 else ->  host
-                             }
-                         }
-                         null, "" -> SnellBean.OBFS_NONE
-                         else -> return listOf()
-                    }
-                }
-                reuse = proxy.getBoolean("reuse") ?: false
+                }*/
                 name = proxy.getString("name")
             })
         }
@@ -851,7 +726,7 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                 sni = proxy.getString("sni")
                 alpn = proxy.getStringArray("alpn")?.joinToString("\n")
                 allowInsecure = proxy.getBoolean("skip-cert-verify") == true
-                proxy.getString("fingerprint")?.replace(":", "")?.trim()?.takeIf { it.isNotEmpty() }?.also {
+                proxy.getString("fingerprint")?.replace(":", "")?.trim()?.also {
                     pinnedPeerCertificateSha256 = it
                     allowInsecure = true
                 }
@@ -865,15 +740,10 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                     mtlsCertificate = cert
                     mtlsCertificatePrivateKey = key
                 }
-                serverNameToVerify = proxy.getString("name-cert-verify")
                 /*proxy.getObject("ech-opts")?.also {
                     echEnabled = it.getBoolean("enable")
                     echConfig = it.getString("config")
-                    echQueryName = it.getString("query-server-name")
                 }*/
-                proxy.getObject("shadowtls-opts")?.also { return listOf() }
-                proxy.getObject("restls-opts")?.also { return listOf() }
-                proxy.getObject("jls-opts")?.also { return listOf() }
                 name = proxy.getString("name")
             })
         }
@@ -886,7 +756,7 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                 sni = proxy.getString("sni")
                 allowInsecure = proxy.getBoolean("skip-cert-verify") == true
                 protocol = if (proxy.getBoolean("quic") == true) "quic" else "https"
-                proxy.getString("fingerprint")?.replace(":", "")?.trim()?.takeIf { it.isNotEmpty() }?.also {
+                proxy.getString("fingerprint")?.replace(":", "")?.trim()?.also {
                     pinnedPeerCertificateSha256 = it
                     allowInsecure = true
                 }
@@ -900,11 +770,9 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                     mtlsCertificate = cert
                     mtlsCertificatePrivateKey = key
                 }
-                serverNameToVerify = proxy.getString("name-cert-verify")
                 /*proxy.getObject("ech-opts")?.also {
                     echEnabled = it.getBoolean("enable")
                     echConfig = it.getString("config")
-                    echQueryName = it.getString("query-server-name")
                 }*/
                 name = proxy.getString("name")
             })
@@ -982,24 +850,6 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                 }
             }
             return beanList
-        }
-        "shadowquic" -> {
-            return listOf(ShadowQUICBean().apply {
-                serverAddress = proxy.getString("server") ?: return listOf()
-                serverPort = proxy.getInt("port")?.takeIf { it > 0 } ?: return listOf()
-                username = proxy.getString("username")
-                password = proxy.getString("password")
-                sni = proxy.getString("sni")
-                // https://github.com/MetaCubeX/mihomo/blob/8453e589df956192fbdd713ad1e1c239d3d805ac/adapter/outbound/shadowquic.go#L99-L103
-                alpn = proxy.getStringArray("alpn")?.joinToString("\n") ?: "h3"
-                udpOverStream = proxy.getBoolean("udp-over-stream")
-                zeroRTT = proxy.getBoolean("zero-rtt")
-                congestionControl = when (val controller = proxy.getString("congestion-controller")) {
-                    in supportedShadowQUICCongestionControl -> controller
-                    else -> "cubic"
-                }
-                name = proxy.getString("name")
-            })
         }
         else -> return listOf()
     }
@@ -1194,23 +1044,4 @@ private fun String.toIntRange(): Triple<Int, Int, Boolean>? {
             return null
         }
     }
-}
-
-// https://github.com/MetaCubeX/mihomo/blob/d5f57a5e290eafd77a2b28d8db36e3bd70071398/transport/xhttp/config.go#L327-L359
-private fun Map<String, Any?>.getXHTTPRange(key: String): String? {
-    val value = this.getString(key) ?: return null
-    if (value.trim().isEmpty()) {
-        return null // fallback to default value
-    }
-    val parts = value.trim().split("-")
-    if (parts.size == 1) {
-        val v = parts[0].toIntOrNull()
-        return if (v != null) "$v-$v" else null
-    }
-    if (parts.size != 2) {
-        return null
-    }
-    val from = parts[0].trim().toIntOrNull()
-    val to = parts[0].trim().toIntOrNull()
-    return if (from != null && to != null && from in 0..to) "$from-$to" else null
 }

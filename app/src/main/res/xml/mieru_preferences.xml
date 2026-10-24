@@ -28,7 +28,6 @@
             app:entryValues="@array/int_array_2"
             app:icon="@drawable/ic_baseline_compare_arrows_24"
             app:key="serverProtocol"
-            app:singleLineTitle="false"
             app:title="@string/protocol"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
@@ -52,7 +51,6 @@
             app:entryValues="@array/mieru_mux_level_value"
             app:icon="@drawable/ic_baseline_compare_arrows_24"
             app:key="serverMieruMuxLevel"
-            app:singleLineTitle="false"
             app:title="@string/mieru_multiplexing_level"
             app:useSimpleSummaryProvider="true" />
         <io.nekohasekai.sagernet.widget.SimpleMenuPreference
@@ -61,7 +59,6 @@
             app:entryValues="@array/mieru_handshake_mode_value"
             app:icon="@drawable/baseline_flight_takeoff_24"
             app:key="serverMieruHandshakeMode"
-            app:singleLineTitle="false"
             app:title="@string/mieru_handshake_mode"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference

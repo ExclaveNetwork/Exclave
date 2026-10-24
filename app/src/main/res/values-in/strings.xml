@@ -117,6 +117,7 @@
     <string name="route_asset_no_update">Sudah terbaru</string>
     <string name="route_asset_status">Versi lokal: %s</string>
     <string name="route_rules_official">Resmi</string>
+    <string name="route_reverse">Proksi terbalik</string>
     <string name="route_reset">Reset</string>
     <string name="empty_route">Rute kosong</string>
     <string name="route_profile">Pilih profil…</string>
@@ -155,6 +156,7 @@
     <string name="route_opt_bypass_lan">Lewati alamat privat</string>
     <string name="route_not_asset">Bukan file aset: diharapkan .dat, tetapi %s</string>
     <string name="route_rules_provider">Penyedia aset rute</string>
+    <string name="route_reverse_redirect">Alamat proksi terbalik</string>
     <string name="route_bypass_domain">Aturan domain untuk %s</string>
     <string name="empty_route_notice">Konfigurasikan beberapa aturan sebelum menyimpan</string>
     <string name="delete_route_prompt">Apakah Anda yakin ingin menghapus rute ini?</string>
@@ -418,6 +420,7 @@
     <string name="reality_short_id">ID Pendek REALITY</string>
     <string name="reality_fingerprint">Sidik jari uTLS REALITY</string>
     <string name="wireguard_reserved">Cadangan</string>
+    <string name="shadowsocks_2022_implementation">Implementasi Shadowsocks 2022</string>
     <string name="bootstrap_dns">DNS bootstrap</string>
     <string name="use_local_dns_as_bootstrap_dns">Gunakan DNS sistem sebagai DNS bootstrap</string>
     <string name="brook_fragment">Fragmentasi</string>
@@ -460,6 +463,8 @@
     <string name="allow_apps_bypass_vpn_sum">Izinkan aplikasi melewati VPN menggunakan metode yang disediakan sistem secara mandiri</string>
     <string name="update_all_subscriptions">Perbarui semua langganan</string>
     <string name="cag_splithttp">Pengaturan XHTTP</string>
+    <string name="ech_config">Konfigurasi ECH</string>
+    <string name="ech_doh_server">Server DoH ECH</string>
     <string name="splithttp_mode">Mode</string>
     <string name="backup_all_profiles">Cadangkan semua profil</string>
     <string name="browser_forwarder_hint">Silakan unduh v2ray-extra.zip dari rilis v2ray-core dan tempatkan index.html serta index.js di Android/data/%s/files atau impor index.html dan index.js sebagai aset rute.</string>
@@ -547,27 +552,11 @@
     <string name="discard_icmp_sum">Buang ICMP dan ICMPv6</string>
     <string name="insecure_warn_sum">Tampilkan peringatan untuk profil dengan keamanan yang setara dengan teks biasa.</string>
     <string name="ech">ECH</string>
+    <string name="server_name_to_verify">ServerNameToVerify</string>
     <string name="mieru_traffic_pattern">Pola lalu lintas</string>
     <string name="insecure_warning_detail">Keamanan profil ini setara dengan teks biasa.\n\nPeringatan ini ditampilkan karena \"tips keamanan\" diaktifkan.</string>
     <string name="hysteria_hop_interval_min">Interval lompat port minimum (d)</string>
     <string name="hysteria_hop_interval_max">Interval lompat port maksimum (d)</string>
     <string name="hysteria_bbr_profile">Profil BBR</string>
     <string name="custom_package_name_or_uid">Nama paket atau UID kustom</string>
-    <string name="socks5_udp_authentication_warning">SOCKS5 UDP tidak di proteksi otentifikasi nama dan Sandi. jika UDP di aktifkan, otentifikasi dapat di lewati dengan mudah.</string>
-    <string name="enable_hysteria2_omit_max_datagram_frame_size">Aktifkan Hysteria 2 OmitMaxDatagramFrameSize</string>
-    <string name="hysteria2_omit_max_datagram_frame_size_sum">Jika server Hysteria 2 tidak mendukung perubahan merusak ini, UDP tidak akan dapat digunakan. Ini adalah opsi sementara dan dapat dihapus di masa mendatang.</string>
-    <string name="ssh_keepalive_interval">Interval keepalive (d)</string>
-    <string name="custom_outbound">Outbound kustom</string>
-    <string name="hysteria2_gecko_max_packet_size">Ukuran paket maksimum</string>
-    <string name="hysteria2_gecko_min_packet_size">Ukuran paket minimum</string>
-    <string name="nearby_devices_permission_notice">Opsi ini memerlukan izin “perangkat di sekitar” agar berfungsi, tetapi izin tersebut belum diberikan.</string>
-    <string name="snell_reuse">Penggunaan ulang koneksi</string>
-    <string name="pre_shared_key">Kunci pra-bagi</string>
-    <string name="snell_obfs_mode">Mode obfuskasi</string>
-    <string name="snell_obfs_host">Host obfuskasi</string>
-    <string name="snell_mode">Mode</string>
-    <string name="anytls_disable_reuse">Nonaktifkan penggunaan ulang koneksi</string>
-    <string name="chrome_parrot_summary">Tiru QUIC Client Hello Chrome</string>
-    <string name="chrome_parrot_omit_max_datagram_frame_size_datagram_warning">Opsi ini dinonaktifkan agar sesuai dengan perilaku Chrome.</string>
-    <string name="option_globally_enabled">Opsi ini telah diaktifkan secara global dan nilainya akan diabaikan.</string>
 </resources>

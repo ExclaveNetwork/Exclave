@@ -19,27 +19,25 @@
 
 package io.nekohasekai.sagernet.database
 
-import android.content.res.Resources
 import android.database.sqlite.SQLiteCantOpenDatabaseException
-import android.icu.util.ULocale
-import android.os.Build
-import android.os.LocaleList
-import androidx.appcompat.app.AppCompatDelegate
-import io.nekohasekai.sagernet.R
-import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.aidl.TrafficStats
 import io.nekohasekai.sagernet.fmt.AbstractBean
 import io.nekohasekai.sagernet.ktx.Logs
-import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.applyDefaultValues
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.io.IOException
 import java.sql.SQLException
-import java.util.*
+
 
 object ProfileManager {
 
     interface Listener {
         suspend fun onAdd(profile: ProxyEntity)
+        suspend fun onAdded(profiles: List<ProxyEntity>) {
+            profiles.forEach { onAdd(it) }
+        }
         suspend fun onUpdated(profileId: Long, trafficStats: TrafficStats)
         suspend fun onUpdated(profile: ProxyEntity)
         suspend fun onRemoved(groupId: Long, profileId: Long)
@@ -54,6 +52,7 @@ object ProfileManager {
 
     private val listeners = ArrayList<Listener>()
     private val ruleListeners = ArrayList<RuleListener>()
+    private val displayCacheLock = Mutex()
 
     suspend fun iterator(what: suspend Listener.() -> Unit) {
         synchronized(listeners) {
@@ -109,12 +108,80 @@ object ProfileManager {
         return profile
     }
 
+    suspend fun createProfiles(groupId: Long, beans: List<AbstractBean>): List<ProxyEntity> {
+        if (beans.isEmpty()) return emptyList()
+
+        var userOrder = SagerDatabase.proxyDao.nextOrder(groupId) ?: 1
+        val profiles = beans.map { bean ->
+            bean.applyDefaultValues()
+            ProxyEntity(groupId = groupId).apply {
+                id = 0
+                putBean(bean)
+                this.userOrder = userOrder++
+            }
+        }
+        val ids = SagerDatabase.proxyDao.insert(profiles)
+        profiles.forEachIndexed { index, profile ->
+            profile.id = ids.getOrNull(index) ?: profile.id
+        }
+        iterator { onAdded(profiles) }
+        return profiles
+    }
+
+    suspend fun rebuildDisplayCacheIfNeeded() {
+        if (SagerDatabase.proxyDao.countMissingDisplayCache(ProxyEntity.DISPLAY_CACHE_VERSION) == 0L) return
+        displayCacheLock.withLock {
+            while (true) {
+                val profiles = SagerDatabase.proxyDao.getMissingDisplayCache(
+                    ProxyEntity.DISPLAY_CACHE_VERSION,
+                    300
+                )
+                if (profiles.isEmpty()) break
+                profiles.forEach { profile ->
+                    try {
+                        profile.refreshCache()
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Logs.w("Failed to refresh profile display cache: ${profile.id}", e)
+                        profile.profileNameCache = profile.profileNameCache.ifBlank { "" }
+                        profile.displayNameCache = profile.displayNameCache.ifBlank {
+                            profile.profileNameCache.ifBlank { "Profile ${profile.id}" }
+                        }
+                        profile.displayTypeCache = profile.displayTypeCache.ifBlank { "Invalid" }
+                        profile.displayAddressCache = profile.displayAddressCache.ifBlank { "" }
+                        profile.importKeyCache = ""
+                        profile.searchCache = listOf(
+                            profile.displayNameCache,
+                            profile.displayTypeCache,
+                            profile.displayAddressCache
+                        ).joinToString("\n").lowercase()
+                        profile.displayCacheVersion = ProxyEntity.DISPLAY_CACHE_VERSION
+                    }
+                }
+                SagerDatabase.proxyDao.updateProxy(profiles)
+            }
+        }
+    }
+
+    suspend fun importKeys(): Set<String> {
+        rebuildDisplayCacheIfNeeded()
+        return SagerDatabase.proxyDao.getImportKeys().toSet()
+    }
+
     suspend fun updateProfile(profile: ProxyEntity) {
+        profile.refreshCache()
         SagerDatabase.proxyDao.updateProxy(profile)
         iterator { onUpdated(profile) }
     }
 
+    suspend fun updateProfileTestResult(profile: ProxyEntity) {
+        SagerDatabase.proxyDao.updateTestResult(profile.id, profile.status, profile.ping, profile.error)
+        iterator { onUpdated(profile) }
+    }
+
     suspend fun updateProfile(profiles: List<ProxyEntity>) {
+        profiles.forEach { it.refreshCache() }
         SagerDatabase.proxyDao.updateProxy(profiles)
         profiles.forEach {
             iterator { onUpdated(it) }
@@ -207,89 +274,182 @@ object ProfileManager {
         var rules = SagerDatabase.rulesDao.allRules()
         if (rules.isEmpty() && !DataStore.rulesFirstCreate) {
             DataStore.rulesFirstCreate = true
-            val systemLocale = when {
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> SagerNet.locale.systemLocales[0]!!
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> LocaleList.getDefault()[0]
-                else -> Locale.getDefault()
-            }
-            val appLocales = AppCompatDelegate.getApplicationLocales()
-            val appLocale = when {
-                appLocales.size() > 0 -> appLocales[0]!!
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> Resources.getSystem().configuration.locales[0]!!
-                else -> @Suppress("DEPRECATION") Resources.getSystem().configuration.locale
-            }
-            val country = systemLocale.country
-            val displayCountry = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                ULocale.getDisplayCountry(systemLocale.toLanguageTag(), appLocale.toLanguageTag())
-            } else {
-                systemLocale.getDisplayCountry(appLocale)
-            }
-            when (country) {
-                "CN" -> {
-                    createRule(
-                        RuleEntity(
-                            name = app.getString(R.string.route_play_store, displayCountry),
-                            domains = "domain:googleapis.cn",
-                        ), false
-                    )
-                    createRule(
-                        RuleEntity(
-                            name = app.getString(R.string.route_bypass_domain, displayCountry),
-                            domains = "geosite:cn",
-                            outbound = -1
-                        ), false
-                    )
-                }
-                "IR" -> {
-                    createRule(
-                        RuleEntity(
-                            name = app.getString(R.string.route_bypass_domain, displayCountry),
-                            domains = "geosite:category-ir",
-                            outbound = -1
-                        ), false
-                    )
-                }
-                "RU" -> {
-                    createRule(
-                        RuleEntity(
-                            name = app.getString(R.string.route_bypass_domain, displayCountry),
-                            domains = "geosite:category-ru",
-                            outbound = -1
-                        ), false
-                    )
-                }
-            }
-            if (country.length == 2) {
-                createRule(
-                    RuleEntity(
-                        name = app.getString(R.string.route_bypass_ip, displayCountry),
-                        ip = "geoip:${country.lowercase()}",
-                        outbound = -1
-                    ), false
-                )
-            }
-            createRule(
-                RuleEntity(
-                    enabled = true,
-                    name = app.getString(R.string.route_opt_bypass_lan),
-                    ip = "geoip:private",
-                    outbound = -1
-                ), false
-            )
+            defaultRules().forEach { createRule(it, false) }
             rules = SagerDatabase.rulesDao.allRules()
         }
         return rules
     }
 
+    private fun defaultRules(): List<RuleEntity> {
+        return listOf(
+            RuleEntity(
+                name = "Правило домена для Ru",
+                domains = "geosite:category-ru\ngeosite:tld-ru",
+                outbound = -1L,
+            ),
+            RuleEntity(
+                name = "IP правило для Ru",
+                ip = "geoip:ru",
+                outbound = -1L,
+            ),
+            RuleEntity(
+                enabled = true,
+                name = "QUIC",
+                port = "443",
+                network = "udp",
+                outbound = -2L,
+            ),
+            RuleEntity(
+                enabled = true,
+                name = "Аналитика и телеметрия",
+                domains = "geosite:category-ads-all",
+                outbound = -2L,
+            ),
+            RuleEntity(
+                enabled = true,
+                name = "Реклама",
+                domains = "category-ads-all",
+                outbound = -2L,
+            ),
+            RuleEntity(
+                enabled = true,
+                name = "Белый список",
+                domains = defaultWhitelistDomains.joinToString("\n"),
+                outbound = -1L,
+            ),
+            RuleEntity(
+                enabled = true,
+                name = "Обход LAN",
+                ip = "geoip:private",
+                outbound = -1L,
+            ),
+        )
+    }
+
+    private val defaultWhitelistDomains = listOf(
+        "domain:avito.ru",
+        "domain:*.avito.ru",
+        "domain:avito.st",
+        "domain:*.avito.st",
+        "domain:mail.ru",
+        "domain:*.mail.ru",
+        "domain:2gis.com",
+        "domain:*.2gis.com",
+        "domain:2gis.ru",
+        "domain:*.2gis.ru",
+        "domain:ya.ru",
+        "domain:*.ya.ru",
+        "domain:yandex.ru",
+        "domain:*.yandex.ru",
+        "domain:yandex.com",
+        "domain:*.yandex.com",
+        "domain:yastatic.net",
+        "domain:*.yastatic.net",
+        "domain:yandex.net",
+        "domain:*.yandex.net",
+        "domain:ok.ru",
+        "domain:*.ok.ru",
+        "domain:vk.ru",
+        "domain:*.vk.ru",
+        "domain:vk.com",
+        "domain:*.vk.com",
+        "domain:vk-portal.net",
+        "domain:*.vk-portal.net",
+        "domain:userapi.com",
+        "domain:*.userapi.com",
+        "domain:rutube.ru",
+        "domain:*.rutube.ru",
+        "domain:rutubelist.ru",
+        "domain:*.rutubelist.ru",
+        "domain:wb.ru",
+        "domain:*.wb.ru",
+        "domain:wildberries.ru",
+        "domain:*.wildberries.ru",
+        "domain:ozon.ru",
+        "domain:*.ozon.ru",
+        "domain:ozone.ru",
+        "domain:*.ozone.ru",
+        "domain:rzd.ru",
+        "domain:*.rzd.ru",
+        "domain:alfabank.ru",
+        "domain:*.alfabank.ru",
+        "domain:vtb.ru",
+        "domain:*.vtb.ru",
+        "domain:gosuslugi.ru",
+        "domain:*.gosuslugi.ru",
+        "domain:gu-st.ru",
+        "domain:*.gu-st.ru",
+        "domain:gov.ru",
+        "domain:*.gov.ru",
+        "domain:kremlin.ru",
+        "domain:*.kremlin.ru",
+        "domain:government.ru",
+        "domain:*.government.ru",
+        "domain:izbirkom.ru",
+        "domain:*.izbirkom.ru",
+        "domain:cikrf.ru",
+        "domain:*.cikrf.ru",
+        "domain:nalog.ru",
+        "domain:*.nalog.ru",
+        "domain:dobro.ru",
+        "domain:*.dobro.ru",
+        "domain:hrlink.ru",
+        "domain:*.hrlink.ru",
+        "domain:lizaalert.org",
+        "domain:*.lizaalert.org",
+        "domain:evotor.ru",
+        "domain:*.evotor.ru",
+        "domain:roskachestvo.gov.ru",
+        "domain:sirius.online",
+        "domain:*.sirius.online",
+        "domain:sochisirius.ru",
+        "domain:*.sochisirius.ru",
+        "domain:max.ru",
+        "domain:*.max.ru",
+        "domain:auto.ru",
+        "domain:*.auto.ru",
+        "domain:dzen.ru",
+        "domain:*.dzen.ru",
+        "domain:kinopoisk.ru",
+        "domain:*.kinopoisk.ru",
+        "domain:t2.ru",
+        "domain:*.t2.ru",
+        "domain:taximaxim.ru",
+        "domain:*.taximaxim.ru",
+        "domain:lemanapro.ru",
+        "domain:*.lemanapro.ru",
+        "domain:lmru.tech",
+        "domain:*.lmru.tech",
+        "domain:oneme.ru",
+        "domain:*.oneme.ru",
+        "domain:ofd.ru",
+        "domain:*.ofd.ru",
+        "domain:pochta.ru",
+        "domain:*.pochta.ru",
+        "domain:rambler.ru",
+        "domain:*.rambler.ru",
+        "domain:rbc.ru",
+        "domain:*.rbc.ru",
+        "domain:gazeta.ru",
+        "domain:*.gazeta.ru",
+        "domain:lenta.ru",
+        "domain:*.lenta.ru",
+        "domain:kp.ru",
+        "domain:*.kp.ru",
+        "domain:tutu.ru",
+        "domain:*.tutu.ru",
+        "domain:47news.ru",
+        "domain:*.47news.ru",
+        "domain:onf.ru",
+        "domain:*.onf.ru",
+        "domain:res-nsdi.ru",
+        "domain:*.res-nsdi.ru",
+        "domain:auth-nsdi.ru",
+        "domain:*.auth-nsdi.ru",
+        "domain:xn--80ajghhoc2aj1c8b.xn--p1ai",
+    )
+
 }
-
-
-
-
-
-
-
-
 
 
 

@@ -12,7 +12,6 @@
         app:entryValues="@array/int_array_2"
         app:icon="@drawable/ic_baseline_nfc_24"
         app:key="balancerType"
-        app:singleLineTitle="false"
         app:title="@string/balancer_type"
         app:useSimpleSummaryProvider="true" />
 
@@ -21,7 +20,6 @@
         app:entryValues="@array/balancer_strategy_value"
         app:icon="@drawable/ic_baseline_compare_arrows_24"
         app:key="balancerStrategy"
-        app:singleLineTitle="false"
         app:title="@string/balancer_strategy"
         app:useSimpleSummaryProvider="true" />
 
@@ -29,7 +27,6 @@
         app:icon="@drawable/ic_baseline_view_list_24"
         app:key="balancerGroup"
         app:title="@string/menu_group"
-        app:singleLineTitle="false"
         app:useSimpleSummaryProvider="true" />
 
     <SwitchPreference

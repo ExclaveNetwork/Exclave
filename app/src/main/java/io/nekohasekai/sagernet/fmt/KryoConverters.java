@@ -37,7 +37,6 @@ import io.nekohasekai.sagernet.fmt.internal.BalancerBean;
 import io.nekohasekai.sagernet.fmt.internal.ChainBean;
 import io.nekohasekai.sagernet.fmt.internal.ConfigBean;
 import io.nekohasekai.sagernet.fmt.juicity.JuicityBean;
-import io.nekohasekai.sagernet.fmt.masque.MASQUEBean;
 import io.nekohasekai.sagernet.fmt.mieru.MieruBean;
 import io.nekohasekai.sagernet.fmt.naive.NaiveBean;
 import io.nekohasekai.sagernet.fmt.shadowquic.ShadowQUICBean;
@@ -47,8 +46,8 @@ import io.nekohasekai.sagernet.fmt.socks.SOCKSBean;
 import io.nekohasekai.sagernet.fmt.ssh.SSHBean;
 import io.nekohasekai.sagernet.fmt.trojan.TrojanBean;
 import io.nekohasekai.sagernet.fmt.trusttunnel.TrustTunnelBean;
-import io.nekohasekai.sagernet.fmt.snell.SnellBean;
 import io.nekohasekai.sagernet.fmt.tuic5.Tuic5Bean;
+import io.nekohasekai.sagernet.fmt.shadowtls.ShadowTLSBean;
 import io.nekohasekai.sagernet.fmt.v2ray.VLESSBean;
 import io.nekohasekai.sagernet.fmt.v2ray.VMessBean;
 import io.nekohasekai.sagernet.fmt.wireguard.WireGuardBean;
@@ -162,6 +161,12 @@ public class KryoConverters {
     }
 
     @TypeConverter
+    public static ShadowTLSBean shadowtlsDeserialize(byte[] bytes) {
+        if (bytes == null || bytes.length == 0) return null;
+        return deserialize(new ShadowTLSBean(), bytes);
+    }
+
+    @TypeConverter
     public static JuicityBean juicityDeserialize(byte[] bytes) {
         if (bytes == null || bytes.length == 0) return null;
         return deserialize(new JuicityBean(), bytes);
@@ -189,18 +194,6 @@ public class KryoConverters {
     public static TrustTunnelBean trusttunnelDeserialize(byte[] bytes) {
         if (bytes == null || bytes.length == 0) return null;
         return deserialize(new TrustTunnelBean(), bytes);
-    }
-
-    @TypeConverter
-    public static SnellBean snellDeserialize(byte[] bytes) {
-        if (bytes == null || bytes.length == 0) return null;
-        return deserialize(new SnellBean(), bytes);
-    }
-
-    @TypeConverter
-    public static MASQUEBean masqueDeserialize(byte[] bytes) {
-        if (bytes == null || bytes.length == 0) return null;
-        return deserialize(new MASQUEBean(), bytes);
     }
 
     @TypeConverter

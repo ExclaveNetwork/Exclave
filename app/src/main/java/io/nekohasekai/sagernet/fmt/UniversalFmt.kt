@@ -20,56 +20,31 @@
 package io.nekohasekai.sagernet.fmt
 
 import io.nekohasekai.sagernet.database.ProxyEntity
-import java.io.ByteArrayOutputStream
-import java.util.zip.Deflater
-import java.util.zip.Inflater
+import io.nekohasekai.sagernet.database.ProxyGroup
+import io.nekohasekai.sagernet.ktx.zlibCompress
+import io.nekohasekai.sagernet.ktx.zlibDecompress
 import kotlin.io.encoding.Base64
 
-fun parseBackup(text: String): AbstractBean {
-    val typeString = text.substringBefore("?")
-    val type = TypeMap[typeString] ?: error("Type $typeString not found")
-    val data = text.substringAfter("?")
-    if (data.isEmpty()) {
-        error("data is empty")
-    }
-    return ProxyEntity(type = type).apply {
-        putByteArray(Base64.decode(data).zlibDecompress())
+fun parseBackupLink(link: String): AbstractBean {
+    val type = link.substring("exclave://".length).substringBefore("?")
+    return ProxyEntity(type = TypeMap[type.lowercase()] ?: error("Type $type not found")).apply {
+        putByteArray(Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).decode(link.substringAfter("?")).zlibDecompress())
     }.requireBean()
 }
 
 fun AbstractBean.exportBackup(): String {
-    return TypeMap.reversed[ProxyEntity().putBean(this).type] + "?" + Base64.encode(KryoConverters.serialize(this).zlibCompress(9))
+    var link = "exclave://"
+    link += TypeMap.reversed[ProxyEntity().putBean(this).type]
+    link += "?"
+    link += Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).encode(KryoConverters.serialize(this).zlibCompress(9))
+    return link
 }
 
-fun ByteArray.zlibCompress(level: Int): ByteArray {
-    // Compress the bytes
-    // 1 to 4 bytes/char for UTF-8
-    val output = ByteArray(size * 4)
-    val compressor = Deflater(level).apply {
-        setInput(this@zlibCompress)
-        finish()
-    }
-    val compressedDataLength: Int = compressor.deflate(output)
-    compressor.end()
-    return output.copyOfRange(0, compressedDataLength)
-}
 
-fun ByteArray.zlibDecompress(): ByteArray {
-    val inflater = Inflater()
-    val outputStream = ByteArrayOutputStream()
-
-    return outputStream.use {
-        val buffer = ByteArray(1024)
-
-        inflater.setInput(this)
-
-        var count = -1
-        while (count != 0) {
-            count = inflater.inflate(buffer)
-            outputStream.write(buffer, 0, count)
-        }
-
-        inflater.end()
-        outputStream.toByteArray()
-    }
+fun ProxyGroup.exportBackup(): String {
+    var link = "exclave://subscription?"
+    export = true
+    link += Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).encode(KryoConverters.serialize(this).zlibCompress(9))
+    export = false
+    return link
 }

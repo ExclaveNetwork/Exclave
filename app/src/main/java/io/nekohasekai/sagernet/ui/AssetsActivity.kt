@@ -36,14 +36,12 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import io.nekohasekai.sagernet.R
-import io.nekohasekai.sagernet.SagerNet
-import io.nekohasekai.sagernet.database.DataStore
+import io.nekohasekai.sagernet.bg.RouteAssetUpdater
 import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.databinding.LayoutAssetItemBinding
 import io.nekohasekai.sagernet.databinding.LayoutAssetsBinding
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.widget.UndoSnackbarManager
-import libexclavecore.Libexclavecore
 import java.io.File
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
@@ -123,7 +121,7 @@ class AssetsActivity : ThemedActivity() {
         return Snackbar.make(layout.coordinator, text, Snackbar.LENGTH_LONG)
     }
 
-    val internalFiles = arrayOf("geoip.dat", "geosite.dat")
+    val internalFiles = RouteAssetUpdater.internalFiles
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.import_asset_menu, menu)
@@ -275,10 +273,17 @@ class AssetsActivity : ThemedActivity() {
                 binding.rulesUpdate.isInvisible = true
                 runOnDefaultDispatcher {
                     runCatching {
-                        if (file.name in internalFiles) {
-                            updateAsset(file, versionFile, localVersion)
+                        val updated = if (file.name in internalFiles) {
+                            RouteAssetUpdater.updateAsset(file, versionFile, localVersion)
                         } else {
-                            updateCustomAsset(file, assetEntity!!.url)
+                            RouteAssetUpdater.updateCustomAsset(file, assetEntity!!.url)
+                        }
+                        adapter.reloadAssets()
+                        onMainDispatcher {
+                            snackbar(
+                                if (updated) R.string.route_asset_updated
+                                else R.string.route_asset_no_update
+                            ).show()
                         }
                     }.onFailure {
                         onMainDispatcher {
@@ -306,109 +311,6 @@ class AssetsActivity : ThemedActivity() {
 
         }
 
-    }
-
-    suspend fun updateAsset(file: File, versionFile: File, localVersion: String) {
-        val repo: String
-        var fileName = file.name
-        when (DataStore.rulesProvider) {
-            3 -> return updateGeoAsset(file, versionFile)
-            0 -> {
-                if (file.name == internalFiles[0]) {
-                    repo = "v2fly/geoip"
-                } else {
-                    repo = "v2fly/domain-list-community"
-                    fileName = "dlc.dat"
-                }
-            }
-            1 -> repo = "Loyalsoldier/v2ray-rules-dat"
-            2 -> repo = "Chocolate4U/Iran-v2ray-rules"
-            4 -> repo = "runetfreedom/russia-v2ray-rules-dat"
-            else -> error("invalid asset provider")
-        }
-
-        val client = Libexclavecore.newHttpClient().apply {
-            keepAlive()
-            if (SagerNet.started && DataStore.startedProfile > 0) {
-                useUDS(SagerNet.deviceStorage.noBackupFilesDir.toString() + "/ipc.sock")
-            }
-        }
-
-        try {
-            var response = client.newRequest().apply {
-                setURL("https://api.github.com/repos/$repo/releases/latest")
-            }.execute()
-
-            val release = parseJson(response.contentString).asJsonObject
-            val tagName = release.getString("tag_name")?: error("tag_name not found in release ${release["url"]}")
-
-            if (tagName == localVersion) {
-                onMainDispatcher {
-                    snackbar(R.string.route_asset_no_update).show()
-                }
-                return
-            }
-
-            val releaseAssets = release.getArray("assets")
-            val assetToDownload = releaseAssets?.find { it.getString("name") == fileName }
-                ?: error("File $fileName not found in release ${release["url"]}")
-            val browserDownloadUrl = assetToDownload.getString("browser_download_url")
-
-            response = client.newRequest().apply {
-                setURL(browserDownloadUrl)
-            }.execute()
-
-            val cacheFile = File(file.parentFile, file.name + ".tmp")
-            cacheFile.parentFile?.mkdirs()
-
-            response.writeTo(cacheFile.canonicalPath)
-
-            cacheFile.renameTo(file)
-
-            versionFile.writeText(tagName)
-
-            adapter.reloadAssets()
-
-            onMainDispatcher {
-                snackbar(R.string.route_asset_updated).show()
-            }
-        } finally {
-            client.close()
-        }
-    }
-
-    suspend fun updateGeoAsset(file: File, versionFile: File) {
-        try {
-            updateCustomAsset(file, if (file.name == internalFiles[0]) DataStore.rulesGeoipUrl else DataStore.rulesGeositeUrl)
-        } finally {
-            if (versionFile.isFile) {
-                versionFile.delete()
-            }
-        }
-    }
-
-    suspend fun updateCustomAsset(file: File, url: String) {
-        val client = Libexclavecore.newHttpClient().apply {
-            keepAlive()
-            if (SagerNet.started && DataStore.startedProfile > 0) {
-                useUDS(SagerNet.deviceStorage.noBackupFilesDir.toString() + "/ipc.sock")
-            }
-        }
-        try {
-            val response = client.newRequest().apply {
-                setURL(url)
-            }.execute()
-            val cacheFile = File(file.parentFile, file.name + ".tmp")
-            cacheFile.parentFile?.mkdirs()
-            response.writeTo(cacheFile.canonicalPath)
-            cacheFile.renameTo(file)
-            adapter.reloadAssets()
-            onMainDispatcher {
-                snackbar(R.string.route_asset_updated).show()
-            }
-        } finally {
-            client.close()
-        }
     }
 
     override fun onSupportNavigateUp(): Boolean {

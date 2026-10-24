@@ -54,18 +54,25 @@ import io.nekohasekai.sagernet.aidl.AppStats
 import io.nekohasekai.sagernet.aidl.ISagerNetService
 import io.nekohasekai.sagernet.aidl.TrafficStats
 import io.nekohasekai.sagernet.bg.BaseService
+import io.nekohasekai.sagernet.bg.ProfileTestRunner
 import io.nekohasekai.sagernet.bg.SagerConnection
 import io.nekohasekai.sagernet.database.*
 import io.nekohasekai.sagernet.database.preference.OnPreferenceDataStoreChangeListener
 import io.nekohasekai.sagernet.databinding.LayoutMainBinding
 import io.nekohasekai.sagernet.fmt.AbstractBean
 import io.nekohasekai.sagernet.fmt.Alerts
+import io.nekohasekai.sagernet.fmt.KryoConverters
 import io.nekohasekai.sagernet.fmt.PluginEntry
 import io.nekohasekai.sagernet.group.GroupInterfaceAdapter
+import io.nekohasekai.sagernet.group.GroupUpdater
+import io.nekohasekai.sagernet.group.RawUpdater
 import io.nekohasekai.sagernet.ktx.*
+import io.nekohasekai.sagernet.utils.DiagnosticLog
 import io.nekohasekai.sagernet.utils.PackageCache
 import io.noties.markwon.Markwon
-import libexclavecore.Libexclavecore
+import libsagernetcore.Libsagernetcore
+import kotlin.io.encoding.Base64
+import java.util.Locale
 
 class MainActivity : ThemedActivity(),
     SagerConnection.Callback,
@@ -85,6 +92,11 @@ class MainActivity : ThemedActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        DiagnosticLog.critical(
+            "ui",
+            "MainActivity.onCreate savedState=${savedInstanceState != null} " +
+                    "intent=${intent?.action.orEmpty()} ${DiagnosticLog.stateSummary()}"
+        )
 
         binding = LayoutMainBinding.inflate(layoutInflater)
         when (DataStore.fabStyle) {
@@ -147,9 +159,22 @@ class MainActivity : ThemedActivity(),
         }
 
         binding.fab.setOnClickListener {
-            if (state.canStop) SagerNet.stopService() else connect.launch(
-                null
-            )
+            if (state.canStop) {
+                DiagnosticLog.critical(
+                    "ui",
+                    "fab-stop-click state=$state ${DiagnosticLog.stateSummary()}"
+                )
+                SagerNet.stopService()
+            } else {
+                DiagnosticLog.critical(
+                    "ui",
+                    "fab-start-click state=$state selected=${DataStore.selectedProxy} " +
+                            "autoEnabled=${DataStore.autoVpnEnabled} autoMode=${DataStore.autoVpnMode} " +
+                            "${DiagnosticLog.stateSummary()}"
+                )
+                vpnStartRequestedFromUi = true
+                connect.launch(null)
+            }
         }
         binding.stats.setOnClickListener { if (state == BaseService.State.Connected) binding.stats.testConnection() }
 
@@ -163,39 +188,62 @@ class MainActivity : ThemedActivity(),
             onNewIntent(intent)
         }
 
-        runOnMainDispatcher {
-            fun getLicenseKeyName(only: Boolean): String {
-                return if (only) "gplv3OnlyAccepted" else "gplv3OrLaterAccepted"
-            }
-            val only = Libexclavecore.buildWithClash()
-            if (DataStore.configurationStore.getBoolean(getLicenseKeyName(only)) != true) {
-                DataStore.configurationStore.putBoolean(getLicenseKeyName(only), true)
-                DataStore.configurationStore.remove(getLicenseKeyName(!only))
+        if (!licenseAccepted()) {
+            runOnMainDispatcher {
                 AlertDialog.Builder(this@MainActivity).apply {
                     setTitle(R.string.license)
                     setView(
                         TextView(this@MainActivity).apply {
                             setPadding(dp2px(16))
-                            text = getString(if (only) {
-                                R.string.license_gpl_v3_only
-                            } else {
-                                R.string.license_gpl_v3_or_later
-                            })
+                            text = getString(
+                                if (Libsagernetcore.buildWithClash()) {
+                                    R.string.license_gpl_v3_only
+                                } else {
+                                    R.string.license_gpl_v3_or_later
+                                }
+                            )
                             setTextIsSelectable(true)
                             Linkify.addLinks(this, Linkify.EMAIL_ADDRESSES or Linkify.WEB_URLS)
                         }
                     )
                     setPositiveButton(android.R.string.ok) { _, _ ->
-                        requestPermissions()
+                        DataStore.configurationStore.putBoolean(
+                            if (Libsagernetcore.buildWithClash()) "gplv3OnlyAccepted"
+                            else "gplv3OrLaterAccepted", true)
+                        if (DataStore.configurationStore.getBoolean("permissionRequested") != true) {
+                            DataStore.configurationStore.putBoolean("permissionRequested", true)
+                            PackageCache.awaitLoadSync()
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                if (app.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                                    ActivityCompat.requestPermissions(this@MainActivity, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 0)
+                                }
+                            }
+                        }
                     }
                     setOnCancelListener { _ ->
-                        requestPermissions()
+                        DataStore.configurationStore.putBoolean(
+                            if (Libsagernetcore.buildWithClash()) "gplv3OnlyAccepted"
+                            else "gplv3OrLaterAccepted", true)
+                        if (DataStore.configurationStore.getBoolean("permissionRequested") != true) {
+                            DataStore.configurationStore.putBoolean("permissionRequested", true)
+                            PackageCache.awaitLoadSync()
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                if (app.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                                    ActivityCompat.requestPermissions(this@MainActivity, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 0)
+                                }
+                            }
+                        }
                     }
                 }.show()
-            } else {
-                requestPermissions()
             }
         }
+    }
+
+    private fun licenseAccepted(): Boolean {
+        return DataStore.configurationStore.getBoolean(
+            if (Libsagernetcore.buildWithClash()) "gplv3OnlyAccepted"
+            else "gplv3OrLaterAccepted"
+        ) == true
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -204,44 +252,115 @@ class MainActivity : ThemedActivity(),
         val uri = intent.data ?: return
 
         runOnDefaultDispatcher {
-            if (uri.scheme == "exclave" && uri.host == "subscription") {
-                uri.getQueryParameter("url")?.let {
-                    importSubscription(it)
-                }
+            if (isImportFileUri(uri)) {
+                importProfileFile(uri)
+            } else if ((uri.scheme?.lowercase() == "exclave" || uri.scheme?.lowercase() == "sn") && uri.host == "subscription") {
+                importSubscription(uri)
             } else {
                 importProfile(uri)
             }
         }
     }
 
-    private fun requestPermissions() {
-        if (!DataStore.getInstalledPackagesInited) {
-            // For bullshit Chinese OEMs
-            DataStore.getInstalledPackagesInited = true
-            runOnDefaultDispatcher {
-                PackageCache.register()
+    private fun isImportFileUri(uri: Uri): Boolean {
+        return uri.scheme?.lowercase(Locale.ROOT) in setOf("content", "file")
+    }
+
+    private fun profileImportKey(bean: AbstractBean): String? {
+        return ProxyEntity().apply { putBean(bean) }.importKeyCache.takeIf { it.isNotBlank() }
+    }
+
+    private fun normalizeSubscriptionImportLink(link: String): String {
+        val trimmed = link.trim()
+        return runCatching {
+            Uri.parse(trimmed).buildUpon().fragment(null).build().toString()
+        }.getOrElse {
+            trimmed.substringBefore("#")
+        }
+    }
+
+    private suspend fun importProfileFile(uri: Uri) {
+        val text = try {
+            contentResolver.openInputStream(uri)?.use {
+                it.bufferedReader().readText()
+            } ?: error(getString(R.string.no_proxies_found_in_file))
+        } catch (e: Exception) {
+            onMainDispatcher {
+                alert(e.readableMessage).show()
+            }
+            return
+        }
+
+        val normalizedText = normalizeImportText(text)
+        val parsed = RawUpdater.parseRaw(text).orEmpty()
+        val normalizedParsed = if (normalizedText != text) {
+            RawUpdater.parseRaw(normalizedText).orEmpty()
+        } else {
+            emptyList()
+        }
+        val proxies = if (normalizedParsed.size > parsed.size) normalizedParsed else parsed
+        val subscriptions = if (isJsonImportDocument(text)) {
+            emptyList()
+        } else {
+            extractSubscriptionLinksForImport(text)
+        }
+
+        var addedProfiles = 0
+        if (proxies.isNotEmpty()) {
+            addedProfiles = finishImportProfilesFromFile(proxies)
+        }
+        val addedSubscriptions = if (subscriptions.isNotEmpty()) {
+            finishImportSubscriptionsFromFile(subscriptions)
+        } else {
+            emptyList()
+        }
+
+        if (addedProfiles == 0 && addedSubscriptions.isEmpty()) {
+            onMainDispatcher {
+                snackbar(R.string.no_proxies_found_in_file).show()
+            }
+            return
+        }
+
+        onMainDispatcher {
+            if (addedSubscriptions.isNotEmpty()) {
+                displayFragmentWithId(R.id.nav_group)
+                SubscriptionUpdateDialog.showManual(this@MainActivity, addedSubscriptions)
+            } else {
+                displayFragmentWithId(R.id.nav_configuration)
+                snackbar(resources.getQuantityString(R.plurals.added, addedProfiles, addedProfiles)).show()
             }
         }
-        val permissions = mutableListOf<String>()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (!DataStore.postNotificationsPermissionRequested) {
-                DataStore.postNotificationsPermissionRequested = true
-                if (app.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                    permissions.add(Manifest.permission.POST_NOTIFICATIONS)
+    }
+
+    private suspend fun finishImportProfilesFromFile(proxies: List<AbstractBean>): Int {
+        val existingKeys = ProfileManager.importKeys().toMutableSet()
+        val fresh = proxies.filter { bean ->
+            val key = profileImportKey(bean)
+            key == null || existingKeys.add(key)
+        }
+        if (fresh.isEmpty()) return 0
+        val created = ProfileManager.createProfiles(DataStore.selectedGroupForImport(), fresh)
+        return created.size
+    }
+
+    private suspend fun finishImportSubscriptionsFromFile(links: List<String>): List<ProxyGroup> {
+        val existingGroups = SagerDatabase.groupDao.allGroups()
+        val existingNames = existingGroups.mapTo(mutableSetOf()) { it.displayName() }
+        val existingLinks = existingGroups.mapNotNullTo(mutableSetOf()) {
+            it.subscription?.link?.takeIf(String::isNotBlank)?.let(::normalizeSubscriptionImportLink)
+        }
+        val groups = links.mapNotNull { link ->
+            val normalized = normalizeSubscriptionImportLink(link)
+            if (!existingLinks.add(normalized)) return@mapNotNull null
+            ProxyGroup(type = GroupType.SUBSCRIPTION).apply {
+                name = SubscriptionNames.next(existingNames)
+                subscription = SubscriptionBean().apply {
+                    this.link = link
                 }
             }
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN) {
-            if (!DataStore.accessLocalNetworkPermissionRequested) {
-                DataStore.accessLocalNetworkPermissionRequested = true
-                if (app.checkSelfPermission(Manifest.permission.ACCESS_LOCAL_NETWORK) != PackageManager.PERMISSION_GRANTED) {
-                    permissions.add(Manifest.permission.ACCESS_LOCAL_NETWORK)
-                }
-            }
-        }
-        if (permissions.isNotEmpty()) {
-            ActivityCompat.requestPermissions(this@MainActivity, permissions.toTypedArray(), 0)
-        }
+        return groups.map { GroupManager.createGroup(it) }
     }
 
     fun urlTest(): Int {
@@ -251,20 +370,59 @@ class MainActivity : ThemedActivity(),
         return connection.service!!.urlTest()
     }
 
-    suspend fun importSubscription(uri: String) {
-        val group = ProxyGroup(type = GroupType.SUBSCRIPTION).apply {
-            subscription = SubscriptionBean().apply {
-                link = uri
-                name = getString(R.string.subscription)
+    suspend fun importSubscription(uri: Uri) {
+        val group: ProxyGroup
+
+        val url = uri.getQueryParameter("url")
+        if (!url.isNullOrBlank()) {
+            group = ProxyGroup(type = GroupType.SUBSCRIPTION)
+            val subscription = SubscriptionBean()
+            group.subscription = subscription
+
+            // human-readable cleartext format
+            subscription.link = url
+            group.name = uri.getQueryParameter("name")
+
+            val type = uri.getQueryParameter("type")
+            when (type?.lowercase()) {
+                "sip008" -> {
+                    subscription.type = SubscriptionType.SIP008
+                }
+            }
+
+        } else {
+            // private binary format derived from SagerNet
+            if (uri.scheme?.lowercase() != "exclave") {
+                // do not be compatible with the private binary format from other software
+                return
+            }
+            val data = uri.encodedQuery.takeIf { !it.isNullOrBlank() } ?: return
+            try {
+                group = KryoConverters.deserialize(
+                    ProxyGroup().apply { export = true }, Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).decode(data).zlibDecompress()
+                ).apply {
+                    export = false
+                }
+            } catch (e: Exception) {
+                onMainDispatcher {
+                    alert(e.readableMessage).show()
+                }
+                return
             }
         }
+
+        val name = group.name.takeIf { !it.isNullOrEmpty() } ?: group.subscription?.link
+        if (name.isNullOrEmpty()) return
+
+        group.name = group.name.takeIf { !it.isNullOrEmpty() }
+            ?: SubscriptionNames.next()
 
         onMainDispatcher {
 
             displayFragmentWithId(R.id.nav_group)
 
             MaterialAlertDialogBuilder(this@MainActivity).setTitle(R.string.subscription_import)
-                .setMessage(getString(R.string.subscription_import_message, uri))
+                .setMessage(getString(R.string.subscription_import_message, name))
                 .setPositiveButton(android.R.string.ok) { _, _ ->
                     runOnDefaultDispatcher {
                         finishImportSubscription(group)
@@ -278,8 +436,10 @@ class MainActivity : ThemedActivity(),
     }
 
     private suspend fun finishImportSubscription(subscription: ProxyGroup) {
-        GroupManager.createGroup(subscription)
-        // GroupUpdater.startUpdate(subscription, true)
+        val group = GroupManager.createGroup(subscription)
+        onMainDispatcher {
+            SubscriptionUpdateDialog.showManual(this@MainActivity, listOf(group))
+        }
     }
 
     suspend fun importProfile(uri: Uri) {
@@ -319,6 +479,7 @@ class MainActivity : ThemedActivity(),
     }
 
     override fun missingPlugin(profileName: String, pluginName: String) {
+        if (pluginName.startsWith("shadowsocks-")) pluginName.substringAfter("shadowsocks-") else pluginName
         val pluginEntity = PluginEntry.find(pluginName)
         if (pluginEntity == null) {
             snackbar(getString(R.string.plugin_unknown, pluginName)).show()
@@ -373,6 +534,31 @@ class MainActivity : ThemedActivity(),
         return true
     }
 
+    fun stopVpnAndStartProfileTest() {
+        profileTestAfterVpnStopPending = true
+        SagerNet.stopService()
+        displayFragmentWithId(R.id.nav_configuration)
+        if (state == BaseService.State.Stopped || state == BaseService.State.Idle) {
+            scheduleProfileTestAfterVpnStop()
+        }
+    }
+
+    private fun scheduleProfileTestAfterVpnStop() {
+        if (!profileTestAfterVpnStopPending) return
+        profileTestAfterVpnStopPending = false
+        binding.root.postDelayed({
+            if (isFinishing || isDestroyed) return@postDelayed
+            if (!ConfigurationFragment.startProfileTestFromActiveFragment()) {
+                displayFragmentWithId(R.id.nav_configuration)
+                binding.root.postDelayed({
+                    if (!isFinishing && !isDestroyed) {
+                        ConfigurationFragment.startProfileTestFromActiveFragment()
+                    }
+                }, 500L)
+            }
+        }, 5_000L)
+    }
+
     fun ruleCreated() {
         navigation.menu.findItem(R.id.nav_route).isChecked = true
         supportFragmentManager.beginTransaction()
@@ -386,12 +572,20 @@ class MainActivity : ThemedActivity(),
     }
 
     var state = BaseService.State.Idle
+    private var vpnStartRequestedFromUi = false
+    private var profileTestAfterVpnStopPending = false
 
     private fun changeState(
         state: BaseService.State,
         msg: String? = null,
         animate: Boolean = false,
     ) {
+        val previousState = this.state
+        DiagnosticLog.critical(
+            "ui",
+            "MainActivity.changeState from=$previousState to=$state msg=${msg.orEmpty()} " +
+                    "animate=$animate ${DiagnosticLog.stateSummary()}"
+        )
         val started = state == BaseService.State.Connected
 
         if (!started) {
@@ -402,6 +596,14 @@ class MainActivity : ThemedActivity(),
         binding.stats.changeState(state)
         if (msg != null) snackbar(msg).show()
         this.state = state
+        if (state == BaseService.State.Connected &&
+            (vpnStartRequestedFromUi || previousState == BaseService.State.Connecting)
+        ) {
+            vpnStartRequestedFromUi = false
+        } else if (state == BaseService.State.Stopped || state == BaseService.State.Idle) {
+            vpnStartRequestedFromUi = false
+            scheduleProfileTestAfterVpnStop()
+        }
 
         when (state) {
             BaseService.State.Connected, BaseService.State.Stopped -> {
@@ -422,10 +624,11 @@ class MainActivity : ThemedActivity(),
     }
 
     override fun stateChanged(state: BaseService.State, profileName: String?, msg: String?) {
+        DiagnosticLog.critical(
+            "ui",
+            "service-callback-stateChanged state=$state profile=${profileName.orEmpty()} msg=${msg.orEmpty()}"
+        )
         changeState(state, msg, true)
-
-        (supportFragmentManager.findFragmentById(R.id.fragment_holder) as? ConfigurationFragment)
-            ?.refreshAllSelections()
     }
 
     override fun statsUpdated(stats: List<AppStats>) {
@@ -523,13 +726,19 @@ class MainActivity : ThemedActivity(),
     override fun onServiceConnected(service: ISagerNetService) = changeState(try {
         BaseService.State.entries[service.state].also {
             SagerNet.started = it.canStop
+            DiagnosticLog.critical("ui", "service-connected state=$it ${DiagnosticLog.stateSummary()}")
         }
-    } catch (_: RemoteException) {
+    } catch (e: RemoteException) {
+        DiagnosticLog.warn("ui", "service-connected-state-read-failed", e)
         BaseService.State.Idle
     })
 
-    override fun onServiceDisconnected() = changeState(BaseService.State.Idle)
+    override fun onServiceDisconnected() {
+        DiagnosticLog.critical("ui", "service-disconnected ${DiagnosticLog.stateSummary()}")
+        changeState(BaseService.State.Idle)
+    }
     override fun onBinderDied() {
+        DiagnosticLog.critical("ui", "service-binder-died ${DiagnosticLog.stateSummary()}")
         connection.disconnect(this)
         connection.connect(this, this)
     }
@@ -577,17 +786,38 @@ class MainActivity : ThemedActivity(),
 
     override fun onStart() {
         super.onStart()
+        DiagnosticLog.critical(
+            "ui",
+            "MainActivity.onStart state=$state profileTest=${ProfileTestRunner.diagnosticStateSummary()} " +
+                    "${DiagnosticLog.stateSummary()}"
+        )
         connection.bandwidthTimeout = 1000
         GroupManager.userInterface = userInterface
     }
 
+    override fun onResume() {
+        super.onResume()
+        DiagnosticLog.critical(
+            "ui",
+            "MainActivity.onResume state=$state profileTest=${ProfileTestRunner.diagnosticStateSummary()} " +
+                    "${DiagnosticLog.stateSummary()}"
+        )
+    }
+
+    override fun onPause() {
+        DiagnosticLog.event("ui", "MainActivity.onPause state=$state ${DiagnosticLog.stateSummary()}")
+        super.onPause()
+    }
+
     override fun onStop() {
+        DiagnosticLog.event("ui", "MainActivity.onStop state=$state ${DiagnosticLog.stateSummary()}")
         connection.bandwidthTimeout = 0
         GroupManager.userInterface = null
         super.onStop()
     }
 
     override fun onDestroy() {
+        DiagnosticLog.critical("ui", "MainActivity.onDestroy state=$state ${DiagnosticLog.stateSummary()}")
         super.onDestroy()
         DataStore.configurationStore.unregisterChangeListener(this)
         connection.disconnect(this)

@@ -37,7 +37,6 @@
             app:entryValues="@array/naive_proto_value"
             app:icon="@drawable/ic_baseline_layers_24"
             app:key="serverProtocol"
-            app:singleLineTitle="false"
             app:title="@string/protocol"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
@@ -65,16 +64,6 @@
             app:icon="@drawable/baseline_construction_24"
             app:key="serverNaiveNoPostQuantum"
             app:title="@string/naive_no_post_quantum"
-            app:useSimpleSummaryProvider="true" />
-        <EditTextPreference
-            app:icon="@drawable/ic_baseline_cached"
-            app:key="serverNaiveTunnelTimeout"
-            app:title="@string/naiveproxy_tunnel_timeout"
-            app:useSimpleSummaryProvider="true" />
-        <EditTextPreference
-            app:icon="@drawable/ic_baseline_cached"
-            app:key="serverNaiveIdleTimeout"
-            app:title="@string/naiveproxy_idle_timeout"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 

@@ -67,11 +67,7 @@ fun Project.requireLocalProperties(): Properties {
 fun Project.setupCommon(projectName: String = "") {
     android.apply {
         buildToolsVersion = "37.0.0"
-        compileSdk {
-            version = release(37) {
-                minorApiLevel = 2
-            }
-        }
+        compileSdk = 37
         defaultConfig.minSdk = if (projectName.lowercase() == "naive") 24 else 21
         compileOptions.sourceCompatibility = JavaVersion.VERSION_21
         compileOptions.targetCompatibility = JavaVersion.VERSION_21
@@ -79,6 +75,8 @@ fun Project.setupCommon(projectName: String = "") {
         lint.checkAllWarnings = true
         lint.checkReleaseBuilds = false
         lint.warningsAsErrors = true
+        lint.textOutput = project.file("build/lint.txt")
+        lint.htmlOutput = project.file("build/lint.html")
         packaging.jniLibs.useLegacyPackaging = true
         // Do not strip symbols by AGP to improve reproducibility. Symbols are manually stripped in advanced.
         packaging.jniLibs.keepDebugSymbols.add("**/*.so")
@@ -90,7 +88,6 @@ fun Project.setupCommon(projectName: String = "") {
                 "/META-INF/native/**",
                 "/META-INF/native-image/**",
                 "/META-INF/INDEX.LIST",
-                "/META-INF/LICENSE.md",
                 "DebugProbesKt.bin",
                 "com/**",
                 "org/**",
@@ -120,9 +117,8 @@ fun Project.setupAppCommon(projectName: String = "") {
             }
         }
 
-        defaultConfig.targetSdk = 37
+        defaultConfig.targetSdk = 36
         buildTypes.getByName("release") {
-            @Suppress("UnstableApiUsage")
             vcsInfo.include = false
             signingConfigs.findByName("release")?.let {
                 signingConfig = it
@@ -136,10 +132,7 @@ fun Project.setupAppCommon(projectName: String = "") {
         }
         dependenciesInfo.includeInApk = false
         dependenciesInfo.includeInBundle = false
-        @Suppress("UnstableApiUsage")
         bundle.language.enableSplit = false
-        @Suppress("UnstableApiUsage")
-        bundle.abi.enableSplit = false
         if (gradle.startParameter.taskNames.isNotEmpty() && gradle.startParameter.taskNames.any { it.lowercase().contains("assemble") }) {
             splits.abi.apply {
                 isEnable = true
@@ -149,6 +142,16 @@ fun Project.setupAppCommon(projectName: String = "") {
             }
         }
     }
+    val cleanTask = tasks.register("cleanAboutLibrariesGenerated") {
+        delete(layout.buildDirectory.dir("generated/aboutLibraries"))
+    }
+
+    tasks.configureEach {
+        if (name.contains("preBuild")) {
+            dependsOn(cleanTask)
+        }
+    }
+    dependencies.add("implementation", project(":plugin:api"))
 }
 
 fun Project.setupPlugin(projectName: String) {
@@ -202,20 +205,18 @@ fun Project.setupApp() {
         buildFeatures.viewBinding = true
         compileOptions.isCoreLibraryDesugaringEnabled = true
         flavorDimensions.add("vendor")
-        productFlavors.create("oss") {
-            minSdk = 24
-        }
-        productFlavors.create("legacy") {
-            minSdk = 21
-            proguardFiles("proguard-rules-legacy.pro")
+        productFlavors.create("oss")
+        productFlavors.create("clone") {
+            applicationIdSuffix = "test"
         }
         tasks.register("downloadAssets") {
-            downloadAssets()
+            downloadAssets(update = false)
         }
         tasks.register("updateAssets") {
             downloadRootCAList()
             downloadAssets(update = true)
         }
+
     }
     androidComponents.apply {
         onVariants { variant ->
@@ -228,25 +229,15 @@ fun Project.setupApp() {
                 }
                 (output as? VariantOutputImpl)?.let { variantOutputImpl ->
                     val versionName = variantOutputImpl.versionName.orNull.orEmpty()
+                    val appName = if (variant.flavorName == "clone") "TestExclaveD" else "ExclaveD"
                     variantOutputImpl.outputFileName.set(variantOutputImpl.outputFileName.get()
-                        .replace(project.name, "Exclave-$versionName")
+                        .replace(project.name, "$appName-$versionName")
                         .replace("-release", "")
                         .replace("-oss", "")
+                        .replace("-clone", "")
                     )
                 }
             }
-        }
-    }
-    tasks.configureEach {
-        if (name.contains("preBuild")) {
-            dependsOn(":app:exportLibraryDefinitionsOssRelease")
-            dependsOn(":app:exportLibraryDefinitionsLegacyRelease")
-        }
-    }
-    if (tasks.findByPath(":app:exportLibraryDefinitionsLegacyRelease") != null
-        && tasks.findByPath(":app:exportLibraryDefinitionsOssRelease") != null) {
-        tasks.named(":app:exportLibraryDefinitionsLegacyRelease") {
-            mustRunAfter(":app:exportLibraryDefinitionsOssRelease")
         }
     }
 }

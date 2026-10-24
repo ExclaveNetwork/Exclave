@@ -86,6 +86,71 @@ object Key {
     const val TRANSPROXY_PORT = "transproxyPort"
 
     const val CONNECTION_TEST_URL = "connectionTestURL"
+    const val CONNECTION_TEST_TIMEOUT_SECONDS = "connectionTestTimeoutSeconds"
+    const val CONNECTION_TEST_PARALLEL = "connectionTestParallel"
+    const val CONNECTION_TEST_QUICK_FAILURE_COUNT = "connectionTestQuickFailureCount"
+    const val CONNECTION_TEST_QUICK_FAILURE_MILLIS = "connectionTestQuickFailureMillis"
+    const val CONNECTION_TEST_QUICK_FAILURE_PAUSE_SECONDS = "connectionTestQuickFailurePauseSeconds"
+    const val CONNECTION_TEST_BREAK_AFTER_COUNT = "connectionTestBreakAfterCount"
+    const val CONNECTION_TEST_BREAK_SECONDS = "connectionTestBreakSeconds"
+    const val CONNECTION_TEST_PROGRESS_INTERVAL_SECONDS = "connectionTestProgressIntervalSeconds"
+    const val CONNECTION_TEST_SORT_INTERVAL_SECONDS = "connectionTestSortIntervalSeconds"
+    const val MANUAL_GEMINI_TEST_FILTER_ENABLED = "manualGeminiTestFilterEnabled"
+    const val AUTO_VPN_ENABLED = "autoVpnEnabled"
+    const val AUTO_VPN_PRECHECK_ENABLED = "autoVpnPrecheckEnabled"
+    const val AUTO_VPN_MODE = "autoVpnMode"
+    const val AUTO_VPN_CHECK_INTERVAL_SECONDS = "autoVpnCheckIntervalSeconds"
+    const val AUTO_VPN_BAD_PING_MILLIS = "autoVpnBadPingMillis"
+    const val AUTO_VPN_FAILURES_BEFORE_SWITCH = "autoVpnFailuresBeforeSwitch"
+    const val AUTO_VPN_CANDIDATE_LIMIT = "autoVpnCandidateLimit"
+    const val AUTO_VPN_WORKING_TARGET = "autoVpnWorkingTarget"
+    const val AUTO_VPN_INITIAL_SELECTION_TIMEOUT_SECONDS = "autoVpnInitialSelectionTimeoutSeconds"
+    const val AUTO_VPN_LITE_MODE = "autoVpnLiteMode"
+    const val AUTO_VPN_SWITCH_COOLDOWN_SECONDS = "autoVpnSwitchCooldownSeconds"
+    const val AUTO_VPN_QUARANTINE_MINUTES = "autoVpnQuarantineMinutes"
+    const val AUTO_VPN_GEMINI_TEST_URL = "autoVpnGeminiTestUrl"
+    const val AUTO_VPN_GEMINI_REJECTED_KEYS = "autoVpnGeminiRejectedKeys"
+    const val AUTO_VPN_PROFILE_SCORE_STATS = "autoVpnProfileScoreStats"
+    const val AUTO_VPN_STATUS_TEXT = "autoVpnStatusText"
+    const val AUTO_VPN_DETAIL_STATUS_TEXT = "autoVpnDetailStatusText"
+    const val AUTO_VPN_NOTIFICATION_TEXT = "autoVpnNotificationText"
+    const val AUTO_VPN_PROGRESS_RUNNING = "autoVpnProgressRunning"
+    const val AUTO_VPN_PROGRESS_TOTAL = "autoVpnProgressTotal"
+    const val AUTO_VPN_PROGRESS_FINISHED = "autoVpnProgressFinished"
+    const val AUTO_VPN_PROGRESS_WORKING = "autoVpnProgressWorking"
+    const val AUTO_VPN_PROGRESS_SNAPSHOT = "autoVpnProgressSnapshot"
+    const val AUTO_VPN_PROGRESS_GENERATION = "autoVpnProgressGeneration"
+    const val AUTO_VPN_LAST_PING_MILLIS = "autoVpnLastPingMillis"
+    const val AUTO_VPN_LAST_PING_FAILED = "autoVpnLastPingFailed"
+    const val AUTO_VPN_RESULTS_RESET_GENERATION = "autoVpnResultsResetGeneration"
+    const val AUTO_VPN_STATUS_UPDATED_AT = "autoVpnStatusUpdatedAt"
+    const val AUTO_VPN_RESERVE_COUNT_ANY = "autoVpnReserveCountAny"
+    const val AUTO_VPN_RESERVE_COUNT_NON_RU = "autoVpnReserveCountNonRu"
+    const val AUTO_VPN_RESERVE_COUNT_GEMINI = "autoVpnReserveCountGemini"
+    const val AUTO_VPN_RESERVE_IDS_ANY = "autoVpnReserveIdsAny"
+    const val AUTO_VPN_RESERVE_IDS_NON_RU = "autoVpnReserveIdsNonRu"
+    const val AUTO_VPN_RESERVE_IDS_GEMINI = "autoVpnReserveIdsGemini"
+    const val AUTO_VPN_SERVICE_START_REQUESTED = "autoVpnServiceStartRequested"
+    const val AUTO_VPN_RESET_GEMINI_REJECTED = "autoVpnResetGeminiRejected"
+    const val AUTO_VPN_FLOATING_SWITCH_ENABLED = "autoVpnFloatingSwitchEnabled"
+    const val AUTO_VPN_FLOATING_SWITCH_X = "autoVpnFloatingSwitchX"
+    const val AUTO_VPN_FLOATING_SWITCH_Y = "autoVpnFloatingSwitchY"
+    const val SUBSCRIPTION_VPN_BACKGROUND_UPDATE = "subscriptionVpnBackgroundUpdate"
+    const val SUBSCRIPTION_VPN_INITIAL_DELAY_MINUTES = "subscriptionVpnInitialDelayMinutes"
+    const val SUBSCRIPTION_VPN_INTERVAL_MINUTES = "subscriptionVpnIntervalMinutes"
+    const val SUBSCRIPTION_VPN_RETRY_INTERVAL_MINUTES = "subscriptionVpnRetryIntervalMinutes"
+    const val SUBSCRIPTION_VPN_RETRY_COUNT = "subscriptionVpnRetryCount"
+    const val SUBSCRIPTION_SEND_HWID = "subscriptionSendHwid"
+    const val SUBSCRIPTION_HWID = "subscriptionHwid"
+    const val GROUP_HEALTH_CHECK_STATS_ENABLED = "groupHealthCheckStatsEnabled"
+    const val GROUP_SOURCE_SYNC_ENABLED = "groupSourceSyncEnabled"
+    const val GROUP_SOURCE_VPN_SYNC_ENABLED = "groupSourceVpnSyncEnabled"
+    const val GROUP_SOURCE_VPN_INITIAL_DELAY_MINUTES = "groupSourceVpnInitialDelayMinutes"
+    const val GROUP_SOURCE_VPN_INTERVAL_MINUTES = "groupSourceVpnIntervalMinutes"
+    const val GROUP_SOURCE_VPN_RETRY_INTERVAL_MINUTES = "groupSourceVpnRetryIntervalMinutes"
+    const val GROUP_SOURCE_VPN_RETRY_COUNT = "groupSourceVpnRetryCount"
+    const val GROUP_SOURCE_URL = "groupSourceUrl"
+    const val GROUP_SOURCE_MANAGED_KEYS = "groupSourceManagedKeys"
     const val PROBE_URL = "probeUrl"
     const val PROBE_INTERVAL = "probeInterval"
 
@@ -94,6 +159,7 @@ object Key {
     const val RULES_PROVIDER = "rulesProvider"
     const val RULES_GEOSITE_URL = "rulesGeositeUrl"
     const val RULES_GEOIP_URL = "rulesGeoipUrl"
+    const val ROUTE_ASSETS_INITIAL_UPDATE_DONE = "routeAssetsInitialUpdateDone"
     const val LOG_LEVEL = "logLevel"
 
     const val LOG_LEVEL_DEBUG_WARNING_DISABLE = "logLevelDebugWarningDisable"
@@ -103,6 +169,7 @@ object Key {
     const val ALWAYS_SHOW_ADDRESS = "alwaysShowAddress"
     const val SHOW_GROUP_NAME = "showGroupName"
 
+    const val SHADOWSOCKS_2022_IMPLEMENTATION = "shadowsocks2022Implementation"
     const val PROVIDER_ROOT_CA = "providerRootCA"
 
     const val INTERRUPT_REUSED_CONNECTIONS = "interruptReusedConnections0"
@@ -133,6 +200,8 @@ object Key {
     const val PROFILE_ID = "profileId"
     const val PROFILE_NAME = "profileName"
     const val PROFILE_GROUP = "profileGroup"
+    const val PROFILE_DISABLED_GROUPS = "profileDisabledGroups"
+    const val PROFILE_ALL_GROUP_ORDER = "profileAllGroupOrder"
     const val PROFILE_STARTED = "profileStarted"
     const val PROFILE_CURRENT = "profileCurrent"
 
@@ -178,8 +247,7 @@ object Key {
     const val SERVER_PACKET_ENCODING = "serverPacketEncoding"
     const val SERVER_UTLS_FINGERPRINT = "serverUTLSFingerprint"
     const val SERVER_ECH_ENABLED = "serverEchEnabled"
-    const val SERVER_ECH_CONFIG_LIST = "serverEchConfig" // FIXME: should be "serverEchConfigList"
-    const val SERVER_ECH_QUERY_NAME = "serverEchQueryName"
+    const val SERVER_ECH_CONFIG = "serverEchConfig"
     const val SERVER_MTLS_CERTIFICATE = "serverMtlsCertificate"
     const val SERVER_MTLS_CERTIFICATE_PRIVATE_KEY = "serverMtlsCertificatePrivateKey"
 
@@ -227,6 +295,7 @@ object Key {
     const val SERVER_DISABLE_SNI = "serverDisableSNI"
     const val SERVER_REDUCE_RTT= "serverReduceRTT"
 
+    const val SERVER_SHADOWTLS_PROTOCOL_VERSION = "serverShadowTLSProtocolVersion"
     const val SERVER_MIERU_MUX_LEVEL = "serverMieruMuxLevel"
     const val SERVER_MIERU_HANDSHAKE_MODE = "serverMieruHandshakeMode"
     const val SERVER_MIERU_TRAFFIC_PATTERN = "serverMieruTrafficPattern"
@@ -235,40 +304,19 @@ object Key {
     const val SERVER_ANYTLS_IDLE_SESSION_CHECK_INTERVAL = "serverAnyTLSIdleSessionCheckInterval"
     const val SERVER_ANYTLS_IDLE_SESSION_TIMEOUT = "serverAnyTLSIdleSessionTimeout"
     const val SERVER_ANYTLS_MIN_IDLE_SESSION = "serverAnyTLSMinIdleSession"
-    const val SERVER_ANYTLS_DISABLE_REUSE = "serverAnyTLSDisableReuse"
-    const val SERVER_SERVER_NAME_TO_VERIFY = "serverServerNameToVerify"
+    const val SERVER_TRUSTTUNNEL_SERVER_NAME_TO_VERIFY = "serverTrustTunnelServerNameToVerify"
     const val SERVER_HYSTERIA2_OMIT_MAX_DATAGRAM_FRAME_SIZE = "serverHysteria2OmitMaxDatagramFrameSize"
     const val SERVER_SSH_KEEPALIVE_INTERVAL = "serverSSHKeepaliveInterval"
-    const val SERVER_HTTP_CONNECT_UDP_CATEGORY = "serverHTTPConnectUDPCategory"
-    const val SERVER_HTTP_CONNECT_UDP = "serverHTTPConnectUDP"
-    const val SERVER_HTTP_CONNECT_UDP_URI_TEMPLATE = "serverHTTPConnectUDPURITemplate"
-    const val SERVER_MASQUE_URI_TEMPLATE = "serverMASQUEURITemplate"
-    const val SERVER_MASQUE_MTU = "serverMASQUEMTU"
-    const val SERVER_MASQUE_HTTP3 = "serverMASQUEHTTP3"
 
     const val SERVER_PORTS = "serverPorts"
     const val SERVER_HOP_INTERVAL = "serverHopInterval"
     const val SERVER_HOP_INTERVAL_MIN = "serverHopIntervalMin"
     const val SERVER_HOP_INTERVAL_MAX = "serverHopIntervalMax"
     const val SERVER_HYSTERIA2_BBR_PROFILE = "serverHysteria2BBRProfile"
-    const val SERVER_HYSTERIA2_OBFS_TYPE = "serverHysteria2ObfsType"
-    const val SERVER_HYSTERIA2_GECKO_MIN_PACKET_SIZE = "serverHysteria2GeckoMinPacketSize"
-    const val SERVER_HYSTERIA2_GECKO_MAX_PACKET_SIZE = "serverHysteria2GeckoMaxPacketSize"
-    const val SERVER_HYSTERIA2_CHROME_PARROT = "serverHysteria2ChromeParrot"
-
-    const val SERVER_SNELL_VERSION = "serverSnellVersion"
-    const val SERVER_SNELL_REUSE = "serverSnellReuse"
-    const val SERVER_SNELL_PSK = "serverSnellPSK"
-    const val SERVER_SNELL_USER_KEY = "serverSnellUserKey"
-
-    const val SERVER_SNELL_OBFS_MODE = "serverSnellObfsMode"
-    const val SERVER_SNELL_OBFS_HOST = "serverSnellObfsHost"
-    const val SERVER_SNELL_OBFS_URI = "serverSnellObfsUri"
-    const val SERVER_SNELL_MODE = "serverSnellMode"
 
     const val SERVER_NAIVE_NO_POST_QUANTUM = "serverNaiveNoPostQuantum"
-    const val SERVER_NAIVE_TUNNEL_TIMEOUT = "serverNaiveTunnelTimeout"
-    const val SERVER_NAIVE_IDLE_TIMEOUT = "serverNaiveIdleTimeout"
+    const val SERVER_SHADOWQUIC_DISABLE_ALPN = "serverShadowQUICDisableALPN"
+    const val SERVER_SHADOWQUIC_USE_SUNNYQUIC = "serverShadowQUICUseSunnyQUIC"
 
     const val SERVER_SING_UOT_CATEGORY = "serverSingUotCategory"
     const val SERVER_SING_MUX_CATEGORY = "serverSingMuxCategory"
@@ -279,7 +327,7 @@ object Key {
     const val SERVER_SING_MUX_MIN_STREAMS = "serverSingMuxMinStreams"
     const val SERVER_SING_MUX_MAX_STREAMS = "serverSingMuxMaxStreams"
     const val SERVER_SING_MUX_PADDING = "serverSingMuxPadding"
-    const val SERVER_SING_SNELL_CATEGORY = "serverSingSnellCategory"
+
     const val EXPERIMENTAL_FLAGS = "experimentalFlags"
 
     const val BALANCER_TYPE = "balancerType"
@@ -301,6 +349,8 @@ object Key {
     const val ROUTE_ATTRS = "routeAttrs"
     const val ROUTE_OUTBOUND = "routeOutbound"
     const val ROUTE_OUTBOUND_RULE = "routeOutboundRule"
+    const val ROUTE_REVERSE = "routeReverse"
+    const val ROUTE_REDIRECT = "routeRedirect"
     const val ROUTE_PACKAGES = "routePackages"
     const val ROUTE_CUSTOM_PACKAGE_NAME_OR_UID = "routeCustomPackageNameOrUid"
     const val ROUTE_NETWORK_TYPE = "routeNetworkType"
@@ -324,14 +374,30 @@ object Key {
     const val SUBSCRIPTION_USER_AGENT = "subscriptionUserAgent"
     const val SUBSCRIPTION_AUTO_UPDATE = "subscriptionAutoUpdate"
     const val SUBSCRIPTION_AUTO_UPDATE_DELAY = "subscriptionAutoUpdateDelay"
+    const val SUBSCRIPTION_GLOBAL_AUTO_UPDATE = "subscriptionGlobalAutoUpdate"
+    const val SUBSCRIPTION_GLOBAL_AUTO_UPDATE_DELAY = "subscriptionGlobalAutoUpdateDelay"
+    const val GROUP_SOURCE_SYNC_INTERVAL_MINUTES = "groupSourceSyncIntervalMinutes"
+    const val SUBSCRIPTION_REMOVE_DUPLICATES = "subscriptionRemoveDuplicates"
+    const val SUBSCRIPTION_AUTO_SORT_GROUPS = "subscriptionAutoSortGroups"
+    const val SUBSCRIPTION_UPDATE_PARALLEL = "subscriptionUpdateParallel"
+    const val SUBSCRIPTION_UPDATE_TIMEOUT_SECONDS = "subscriptionUpdateTimeoutSeconds"
     const val SUBSCRIPTION_LAST_UPDATED = "subscriptionLastUpdated"
     const val SUBSCRIPTION_BYTES_USED = "subscriptionBytesUsed"
     const val SUBSCRIPTION_BYTES_REMAINING = "subscriptionBytesRemaining"
     const val SUBSCRIPTION_EXPIRY_DATE = "subscriptionExpiryDate"
     const val SUBSCRIPTION_NAME_FILTER = "subscriptionNameFilter"
     const val SUBSCRIPTION_NAME_FILTER1 = "subscriptionNameFilter1"
-    const val SUBSCRIPTION_HTTP_HEADERS = "subscriptionHTTPHeaders"
-    const val SUBSCRIPTION_AGE_PRIVATE_KEY = "subscriptionAgePrivateKey"
+    const val PROFILE_TEST_PENDING_IDS = "profileTestPendingIds"
+    const val PROFILE_TEST_TOTAL = "profileTestTotal"
+    const val PROFILE_TEST_FINISHED = "profileTestFinished"
+    const val PROFILE_TEST_WORKING = "profileTestWorking"
+    const val PROFILE_TEST_RUNNING = "profileTestRunning"
+    const val PROFILE_TEST_REFRESH_DEFERRED = "profileTestRefreshDeferred"
+    const val PROFILE_TEST_RESUME_AVAILABLE = "profileTestResumeAvailable"
+    const val PROFILE_TEST_UPDATED_AT = "profileTestUpdatedAt"
+    const val PROFILE_TEST_RUN_ID = "profileTestRunId"
+    const val PROFILE_TEST_URL = "profileTestUrl"
+    const val PROFILE_TEST_GEMINI_FILTER = "profileTestGeminiFilter"
 
     const val EDITING_ASSET_NAME = "editingAssetName"
     const val ASSET_NAME = "assetName"
@@ -344,24 +410,16 @@ object Key {
     const val RULES_FIRST_CREATE = "rulesFirstCreate"
     const val DO_NOT_SHOW_RULE_EXPORT_WARNING = "doNotShowRuleExportWarning"
 
-    const val GET_INSTALLED_PACKAGES_INITED = "getInstalledPackagesInited"
-    const val POST_NOTIFICATION_PERMISSION_REQUESTED = "postNotificationsPermissionRequested"
-    const val ACCESS_LOCAL_NETWORK_PERMISSION_REQUESTED = "accessLocalNetworkPermissionRequested"
-
-    const val STUN_SERVER_ADDRESS = "stunServerAddress"
-    const val STUN_TEST_TYPE = "stunTestType"
-    const val CERT_PROBER_SERVER_ADDRESS = "certProberServerAddress"
-    const val CERT_PROBER_SERVER_PORT = "certProberServerPort"
-    const val CERT_PROBER_SNI = "certProberSNI"
-    const val CERT_PROBER_ALPN = "certProberALPN"
-    const val CERT_PROBER_PROTOCOL = "certProberProtocol"
-    const val CERT_PROBER_CERT_HASH_TYPE = "certProberCertHashType"
-
 }
 
 object TunImplementation {
     const val GVISOR = 0
     const val SYSTEM = 1
+}
+
+object Shadowsocks2022Implementation {
+    const val SAGERNET_SING_SHADOWSOCKS2 = 0
+    const val V2FLY_V2RAY_CORE = 1
 }
 
 object RootCAProvider {
@@ -380,7 +438,6 @@ object SubscriptionType {
     const val RAW = 0
     const val OOCv1 = 1 // removed
     const val SIP008 = 2
-    const val AGE = 3
 }
 
 object ExtraType {
@@ -400,6 +457,11 @@ object Action {
     const val CLOSE = "io.nekohasekai.sagernet.CLOSE"
     const val RELOAD = "io.nekohasekai.sagernet.RELOAD"
     const val ABORT = "io.nekohasekai.sagernet.ABORT"
+    const val AUTO_SWITCH = "io.nekohasekai.sagernet.AUTO_SWITCH"
+    const val AUTO_SWITCH_GEMINI_SOFT = "io.nekohasekai.sagernet.AUTO_SWITCH_GEMINI_SOFT"
+    const val AUTO_SCAN_STOP = "io.nekohasekai.sagernet.AUTO_SCAN_STOP"
+    const val AUTO_SCAN_RESUME = "io.nekohasekai.sagernet.AUTO_SCAN_RESUME"
+    const val AUTO_STATUS_CHANGED = "io.nekohasekai.sagernet.AUTO_STATUS_CHANGED"
 
     const val THEME_CHANGED = "io.nekohasekai.sagernet.THEME_CHANGED"
 

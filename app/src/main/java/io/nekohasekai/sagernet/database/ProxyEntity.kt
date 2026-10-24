@@ -22,6 +22,7 @@ package io.nekohasekai.sagernet.database
 import android.content.Context
 import android.content.Intent
 import androidx.room.*
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.esotericsoftware.kryo.io.ByteBufferInput
 import com.esotericsoftware.kryo.io.ByteBufferOutput
 import io.nekohasekai.sagernet.R
@@ -43,26 +44,24 @@ import io.nekohasekai.sagernet.fmt.internal.ChainBean
 import io.nekohasekai.sagernet.fmt.internal.ConfigBean
 import io.nekohasekai.sagernet.fmt.juicity.JuicityBean
 import io.nekohasekai.sagernet.fmt.juicity.toUri
-import io.nekohasekai.sagernet.fmt.masque.MASQUEBean
 import io.nekohasekai.sagernet.fmt.mieru.MieruBean
 import io.nekohasekai.sagernet.fmt.mieru.toUri
 import io.nekohasekai.sagernet.fmt.naive.NaiveBean
 import io.nekohasekai.sagernet.fmt.naive.buildNaiveConfig
 import io.nekohasekai.sagernet.fmt.naive.toUri
 import io.nekohasekai.sagernet.fmt.shadowquic.ShadowQUICBean
-import io.nekohasekai.sagernet.fmt.shadowquic.toUri
+import io.nekohasekai.sagernet.fmt.shadowquic.buildShadowQUICConfig
 import io.nekohasekai.sagernet.fmt.shadowsocks.ShadowsocksBean
 import io.nekohasekai.sagernet.fmt.shadowsocks.toUri
 import io.nekohasekai.sagernet.fmt.shadowsocksr.ShadowsocksRBean
 import io.nekohasekai.sagernet.fmt.shadowsocksr.toUri
+import io.nekohasekai.sagernet.fmt.shadowtls.ShadowTLSBean
 import io.nekohasekai.sagernet.fmt.socks.SOCKSBean
 import io.nekohasekai.sagernet.fmt.socks.toUri
 import io.nekohasekai.sagernet.fmt.ssh.SSHBean
 import io.nekohasekai.sagernet.fmt.trojan.TrojanBean
 import io.nekohasekai.sagernet.fmt.trojan.toUri
 import io.nekohasekai.sagernet.fmt.trusttunnel.TrustTunnelBean
-import io.nekohasekai.sagernet.fmt.snell.SnellBean
-import io.nekohasekai.sagernet.ui.profile.SnellSettingsActivity
 import io.nekohasekai.sagernet.fmt.trusttunnel.toUri
 import io.nekohasekai.sagernet.fmt.tuic5.Tuic5Bean
 import io.nekohasekai.sagernet.fmt.tuic5.toUri
@@ -73,9 +72,59 @@ import io.nekohasekai.sagernet.fmt.wireguard.WireGuardBean
 import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.applyDefaultValues
 import io.nekohasekai.sagernet.ui.profile.*
+import java.util.Locale
+
+fun normalizeImportKey(link: String): String {
+    return link.trim().substringBefore("#").trim()
+}
+
+data class ProxyListItem(
+    val id: Long,
+    val groupId: Long,
+    val type: Int,
+    var userOrder: Long,
+    val tx: Long,
+    val rx: Long,
+    val status: Int,
+    val ping: Int,
+    val error: String?,
+    val profileNameCache: String,
+    val displayNameCache: String,
+    val displayTypeCache: String,
+    val displayAddressCache: String,
+) {
+    @Ignore
+    @Transient
+    var stats: TrafficStats? = null
+
+    fun displayName() = displayNameCache
+    fun displayType() = displayTypeCache
+    fun displayAddress() = displayAddressCache
+
+    fun hasSameContent(other: ProxyListItem): Boolean {
+        return groupId == other.groupId &&
+                type == other.type &&
+                userOrder == other.userOrder &&
+                tx == other.tx &&
+                rx == other.rx &&
+                status == other.status &&
+                ping == other.ping &&
+                error == other.error &&
+                profileNameCache == other.profileNameCache &&
+                displayNameCache == other.displayNameCache &&
+                displayTypeCache == other.displayTypeCache &&
+                displayAddressCache == other.displayAddressCache
+    }
+}
 
 @Entity(
-    tableName = "proxy_entities", indices = [Index("groupId", name = "groupId")]
+    tableName = "proxy_entities", indices = [
+        Index("groupId", name = "groupId"),
+        Index(value = ["groupId", "userOrder"], name = "proxy_group_order_idx"),
+        Index(value = ["status", "ping"], name = "proxy_status_ping_idx"),
+        Index(value = ["displayNameCache"], name = "proxy_display_name_idx"),
+        Index(value = ["importKeyCache"], name = "proxy_import_key_idx"),
+    ]
 )
 data class ProxyEntity(
     @PrimaryKey(autoGenerate = true) var id: Long = 0L,
@@ -88,6 +137,13 @@ data class ProxyEntity(
     var ping: Int = 0,
     var uuid: String = "",
     var error: String? = null,
+    @ColumnInfo(defaultValue = "") var profileNameCache: String = "",
+    @ColumnInfo(defaultValue = "") var displayNameCache: String = "",
+    @ColumnInfo(defaultValue = "") var displayTypeCache: String = "",
+    @ColumnInfo(defaultValue = "") var displayAddressCache: String = "",
+    @ColumnInfo(defaultValue = "") var searchCache: String = "",
+    @ColumnInfo(defaultValue = "") var importKeyCache: String = "",
+    @ColumnInfo(defaultValue = "0") var displayCacheVersion: Int = 0,
     var socksBean: SOCKSBean? = null,
     var httpBean: HttpBean? = null,
     var ssBean: ShadowsocksBean? = null,
@@ -99,6 +155,7 @@ data class ProxyEntity(
     var hysteria2Bean: Hysteria2Bean? = null,
     var mieruBean: MieruBean? = null,
     var tuic5Bean: Tuic5Bean? = null,
+    var shadowtlsBean: ShadowTLSBean? = null,
     var sshBean: SSHBean? = null,
     var wgBean: WireGuardBean? = null,
     var juicityBean: JuicityBean? = null,
@@ -106,14 +163,14 @@ data class ProxyEntity(
     var anytlsBean: AnyTLSBean? = null,
     var shadowquicBean: ShadowQUICBean? = null,
     var trustTunnelBean: TrustTunnelBean? = null,
-    var snellBean: SnellBean? = null,
-    var masqueBean: MASQUEBean? = null,
     var configBean: ConfigBean? = null,
     var chainBean: ChainBean? = null,
     var balancerBean: BalancerBean? = null
 ) : Serializable() {
 
     companion object {
+        const val DISPLAY_CACHE_VERSION = 1
+
         const val TYPE_SOCKS = 0
         const val TYPE_HTTP = 1
         const val TYPE_SS = 2
@@ -127,13 +184,12 @@ data class ProxyEntity(
         const val TYPE_WG = 18
         const val TYPE_MIERU = 19
         const val TYPE_TUIC5 = 23
+        const val TYPE_SHADOWTLS = 24
         const val TYPE_JUICITY = 25
         const val TYPE_HTTP3 = 26
         const val TYPE_ANYTLS = 27
         const val TYPE_SHADOWQUIC = 28
         const val TYPE_TRUSTTUNNEL = 29
-        const val TYPE_SNELL = 30
-        const val TYPE_MASQUE = 31
         const val TYPE_CHAIN = 8
         const val TYPE_BALANCER = 14
         const val TYPE_CONFIG = 13
@@ -221,21 +277,21 @@ data class ProxyEntity(
             TYPE_WG -> wgBean = KryoConverters.wireguardDeserialize(byteArray)
             TYPE_MIERU -> mieruBean = KryoConverters.mieruDeserialize(byteArray)
             TYPE_TUIC5 -> tuic5Bean = KryoConverters.tuic5Deserialize(byteArray)
+            TYPE_SHADOWTLS -> shadowtlsBean = KryoConverters.shadowtlsDeserialize(byteArray)
             TYPE_JUICITY -> juicityBean = KryoConverters.juicityDeserialize(byteArray)
             TYPE_HTTP3 -> http3Bean = KryoConverters.http3Deserialize(byteArray)
             TYPE_ANYTLS -> anytlsBean = KryoConverters.anytlsDeserialize(byteArray)
             TYPE_SHADOWQUIC -> shadowquicBean = KryoConverters.shadowquicDeserialize(byteArray)
             TYPE_TRUSTTUNNEL -> trustTunnelBean = KryoConverters.trusttunnelDeserialize(byteArray)
-            TYPE_SNELL -> snellBean = KryoConverters.snellDeserialize(byteArray)
-            TYPE_MASQUE -> masqueBean = KryoConverters.masqueDeserialize(byteArray)
 
             TYPE_CONFIG -> configBean = KryoConverters.configDeserialize(byteArray)
             TYPE_CHAIN -> chainBean = KryoConverters.chainDeserialize(byteArray)
             TYPE_BALANCER -> balancerBean = KryoConverters.balancerBeanDeserialize(byteArray)
         }
+        refreshCache()
     }
 
-    fun displayType() = when (type) {
+    private fun computeDisplayType() = when (type) {
         TYPE_SOCKS -> socksBean!!.protocolName()
         TYPE_HTTP -> httpBean!!.protocolName()
         TYPE_SS -> ssBean!!.protocolName()
@@ -249,13 +305,12 @@ data class ProxyEntity(
         TYPE_WG -> "WireGuard"
         TYPE_MIERU -> "mieru"
         TYPE_TUIC5 -> "TUIC"
+        TYPE_SHADOWTLS -> "ShadowTLS"
         TYPE_JUICITY -> "Juicity"
         TYPE_HTTP3 -> "HTTP/3"
         TYPE_ANYTLS -> "AnyTLS"
         TYPE_SHADOWQUIC -> "ShadowQUIC"
         TYPE_TRUSTTUNNEL -> "TrustTunnel"
-        TYPE_SNELL -> snellBean!!.protocolName()
-        TYPE_MASQUE -> "MASQUE"
 
         TYPE_CHAIN -> chainName
         TYPE_CONFIG -> configName
@@ -263,8 +318,62 @@ data class ProxyEntity(
         else -> "Invalid"
     }
 
-    fun displayName() = requireBean().displayName()
-    fun displayAddress() = requireBean().displayAddress()
+    fun displayType() = displayTypeCache.ifEmpty {
+        runCatching { computeDisplayType() }.getOrDefault("Invalid")
+    }
+    fun displayName() = displayNameCache.ifEmpty {
+        val bean = requireBean().applyDefaultValues()
+        runCatching { bean.displayName() }.getOrDefault(bean.name ?: "")
+    }
+    fun displayAddress() = displayAddressCache.ifEmpty {
+        runCatching { requireBean().applyDefaultValues().displayAddress() }.getOrDefault("")
+    }
+
+    fun asListItem() = ProxyListItem(
+        id = id,
+        groupId = groupId,
+        type = type,
+        userOrder = userOrder,
+        tx = tx,
+        rx = rx,
+        status = status,
+        ping = ping,
+        error = error,
+        profileNameCache = profileNameCache.ifEmpty { requireBean().name ?: "" },
+        displayNameCache = displayName(),
+        displayTypeCache = displayType(),
+        displayAddressCache = displayAddress(),
+    )
+
+    fun refreshCache(): ProxyEntity {
+        val bean = requireBean().applyDefaultValues()
+        profileNameCache = bean.name ?: ""
+        displayNameCache = try {
+            bean.displayName()
+        } catch (_: Exception) {
+            profileNameCache
+        }
+        displayTypeCache = try {
+            computeDisplayType()
+        } catch (_: Exception) {
+            "Invalid"
+        }
+        displayAddressCache = try {
+            bean.displayAddress()
+        } catch (_: Exception) {
+            ""
+        }
+        importKeyCache = try {
+            toLink()?.let(::normalizeImportKey).orEmpty()
+        } catch (_: Exception) {
+            ""
+        }
+        searchCache = listOf(displayNameCache, displayTypeCache, displayAddressCache)
+            .joinToString("\n")
+            .lowercase(Locale.ROOT)
+        displayCacheVersion = DISPLAY_CACHE_VERSION
+        return this
+    }
 
     fun requireBean(): AbstractBean {
         return when (type) {
@@ -281,13 +390,12 @@ data class ProxyEntity(
             TYPE_WG -> wgBean
             TYPE_MIERU -> mieruBean
             TYPE_TUIC5 -> tuic5Bean
+            TYPE_SHADOWTLS -> shadowtlsBean
             TYPE_JUICITY -> juicityBean
             TYPE_HTTP3 -> http3Bean
             TYPE_ANYTLS -> anytlsBean
             TYPE_SHADOWQUIC -> shadowquicBean
             TYPE_TRUSTTUNNEL -> trustTunnelBean
-            TYPE_SNELL -> snellBean
-            TYPE_MASQUE -> masqueBean
 
             TYPE_CONFIG -> configBean
             TYPE_CHAIN -> chainBean
@@ -306,13 +414,21 @@ data class ProxyEntity(
 
     fun hasShareLink(): Boolean {
         return when (type) {
-            TYPE_SSH, TYPE_WG, TYPE_SNELL, TYPE_MASQUE -> false
+            TYPE_SSH, TYPE_WG, TYPE_SHADOWTLS, TYPE_SHADOWQUIC -> false
             TYPE_CONFIG, TYPE_CHAIN, TYPE_BALANCER -> false
             else -> true
         }
     }
 
-    fun toLink(): String? = with(requireBean()) {
+    fun toLink(): String? {
+        return try {
+            toLinkUnchecked()
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private fun toLinkUnchecked(): String? = with(requireBean()) {
         when (this) {
             is SOCKSBean -> toUri()
             is HttpBean -> toUri()
@@ -329,7 +445,6 @@ data class ProxyEntity(
             is Http3Bean -> toUri()
             is AnyTLSBean -> toUri()
             is TrustTunnelBean -> toUri()
-            is ShadowQUICBean -> toUri()
             else -> null
         }
     }
@@ -356,6 +471,10 @@ data class ProxyEntity(
                                 append("\n\n")
                                 append(bean.buildNaiveConfig(port, username, password))
                             }
+                            is ShadowQUICBean -> {
+                                append("\n\n")
+                                append(bean.buildShadowQUICConfig(port, username, password, forExport = true))
+                            }
                         }
                     }
                 }
@@ -366,6 +485,7 @@ data class ProxyEntity(
     fun needExternal(): Boolean {
         return when (type) {
             TYPE_NAIVE -> true
+            TYPE_SHADOWQUIC -> true
             else -> false
         }
     }
@@ -384,13 +504,12 @@ data class ProxyEntity(
         wgBean = null
         mieruBean = null
         tuic5Bean = null
+        shadowtlsBean = null
         juicityBean = null
         http3Bean = null
         anytlsBean = null
         shadowquicBean = null
         trustTunnelBean = null
-        snellBean = null
-        masqueBean = null
 
         configBean = null
         chainBean = null
@@ -449,6 +568,10 @@ data class ProxyEntity(
                 type = TYPE_TUIC5
                 tuic5Bean = bean
             }
+            is ShadowTLSBean -> {
+                type = TYPE_SHADOWTLS
+                shadowtlsBean = bean
+            }
             is JuicityBean -> {
                 type = TYPE_JUICITY
                 juicityBean = bean
@@ -469,14 +592,6 @@ data class ProxyEntity(
                 type = TYPE_TRUSTTUNNEL
                 trustTunnelBean = bean
             }
-            is SnellBean -> {
-                type = TYPE_SNELL
-                snellBean = bean
-            }
-            is MASQUEBean -> {
-                type = TYPE_MASQUE
-                masqueBean = bean
-            }
 
             is ConfigBean -> {
                 type = TYPE_CONFIG
@@ -492,6 +607,7 @@ data class ProxyEntity(
             }
             else -> error("Undefined type $type")
         }
+        refreshCache()
         return this
     }
 
@@ -510,13 +626,12 @@ data class ProxyEntity(
             TYPE_WG -> WireGuardSettingsActivity::class.java
             TYPE_MIERU -> MieruSettingsActivity::class.java
             TYPE_TUIC5 -> Tuic5SettingsActivity::class.java
+            TYPE_SHADOWTLS -> ShadowTLSSettingsActivity::class.java
             TYPE_JUICITY -> JuicitySettingsActivity::class.java
             TYPE_HTTP3 -> Http3SettingsActivity::class.java
             TYPE_ANYTLS -> AnyTLSSettingsActivity::class.java
             TYPE_SHADOWQUIC -> ShadowQUICSettingsActivity::class.java
             TYPE_TRUSTTUNNEL -> TrustTunnelSettingsActivity::class.java
-            TYPE_SNELL -> SnellSettingsActivity::class.java
-            TYPE_MASQUE -> MASQUESettingsActivity::class.java
 
             TYPE_CONFIG -> ConfigSettingsActivity::class.java
             TYPE_CHAIN -> ChainSettingsActivity::class.java
@@ -537,8 +652,41 @@ data class ProxyEntity(
         @Query("select * from proxy_entities")
         fun getAll(): List<ProxyEntity>
 
+        @RawQuery
+        fun rawProfileList(query: SupportSQLiteQuery): List<ProxyListItem>
+
+        @Query("SELECT importKeyCache FROM proxy_entities WHERE importKeyCache != ''")
+        fun getImportKeys(): List<String>
+
         @Query("SELECT id FROM proxy_entities WHERE groupId = :groupId ORDER BY userOrder")
         fun getIdsByGroup(groupId: Long): List<Long>
+
+        @Query("SELECT id FROM proxy_entities WHERE groupId = :groupId AND status = 0 ORDER BY userOrder")
+        fun getUntestedIdsByGroup(groupId: Long): List<Long>
+
+        @Query("SELECT id FROM proxy_entities WHERE id IN (:proxyIds) AND status = 0")
+        fun getUntestedIds(proxyIds: List<Long>): List<Long>
+
+        @Query(
+            """
+            SELECT p.id FROM proxy_entities p
+             INNER JOIN proxy_groups g ON p.groupId = g.id
+             WHERE p.groupId IN (:groupIds)
+             ORDER BY g.userOrder, p.userOrder
+        """
+        )
+        fun getIdsByGroups(groupIds: List<Long>): List<Long>
+
+        @Query(
+            """
+            SELECT p.id FROM proxy_entities p
+             INNER JOIN proxy_groups g ON p.groupId = g.id
+             WHERE p.groupId IN (:groupIds)
+               AND p.status = 0
+             ORDER BY g.userOrder, p.userOrder
+        """
+        )
+        fun getUntestedIdsByGroups(groupIds: List<Long>): List<Long>
 
         @Query("SELECT * FROM proxy_entities WHERE groupId = :groupId ORDER BY userOrder")
         fun getByGroup(groupId: Long): List<ProxyEntity>
@@ -549,11 +697,129 @@ data class ProxyEntity(
         @Query("SELECT COUNT(*) FROM proxy_entities WHERE groupId = :groupId")
         fun countByGroup(groupId: Long): Long
 
+        @Query("SELECT COUNT(*) FROM proxy_entities WHERE groupId = :groupId AND status = 1")
+        fun countAvailableByGroup(groupId: Long): Long
+
+        @Query("SELECT COUNT(*) FROM proxy_entities WHERE groupId = :groupId AND status = 0")
+        fun countUntestedByGroup(groupId: Long): Long
+
+        @Query("SELECT COUNT(*) FROM proxy_entities WHERE status = 1")
+        fun countAvailable(): Long
+
+        @Query("SELECT COUNT(*) FROM proxy_entities WHERE groupId IN (:groupIds) AND status = 0")
+        fun countUntestedByGroups(groupIds: List<Long>): Long
+
+        @Query("SELECT COUNT(*) FROM proxy_entities WHERE groupId IN (:groupIds) AND status = 1")
+        fun countAvailableByGroups(groupIds: List<Long>): Long
+
+        @Query("SELECT COUNT(*) FROM proxy_entities WHERE id IN (:proxyIds) AND status = 1")
+        fun countAvailableByIds(proxyIds: List<Long>): Long
+
+        @Query(
+            """
+            SELECT id, groupId, type, userOrder, tx, rx, status, ping,
+                   error, profileNameCache, displayNameCache, displayTypeCache,
+                   displayAddressCache
+              FROM proxy_entities
+             WHERE id IN (:proxyIds)
+        """
+        )
+        fun getListItemsByIds(proxyIds: List<Long>): List<ProxyListItem>
+
         @Query("SELECT  MAX(userOrder) + 1 FROM proxy_entities WHERE groupId = :groupId")
         fun nextOrder(groupId: Long): Long?
 
         @Query("SELECT * FROM proxy_entities WHERE id = :proxyId")
         fun getById(proxyId: Long): ProxyEntity?
+
+        @Query(
+            """
+            SELECT * FROM proxy_entities
+             WHERE groupId IN (:groupIds)
+               AND id != :excludeId
+               AND status = 1
+             ORDER BY ping, userOrder
+             LIMIT :limit
+        """
+        )
+        fun getWorkingCandidates(groupIds: List<Long>, excludeId: Long, limit: Int): List<ProxyEntity>
+
+        @Query(
+            """
+            SELECT * FROM proxy_entities
+             WHERE groupId IN (:groupIds)
+               AND id != :excludeId
+             ORDER BY CASE WHEN status = 1 THEN 0 WHEN status = 0 THEN 1 ELSE 2 END,
+                      CASE WHEN status = 1 THEN ping ELSE 114514 END,
+                      userOrder
+             LIMIT :limit
+        """
+        )
+        fun getAutoCandidates(groupIds: List<Long>, excludeId: Long, limit: Int): List<ProxyEntity>
+
+        @Query(
+            """
+            SELECT p.* FROM proxy_entities p
+             INNER JOIN proxy_groups g ON p.groupId = g.id
+             WHERE p.groupId IN (:groupIds)
+             ORDER BY g.userOrder, p.userOrder
+        """
+        )
+        fun getAutoScanProfilesByOrigin(groupIds: List<Long>): List<ProxyEntity>
+
+        @Query(
+            """
+            SELECT p.* FROM proxy_entities p
+             INNER JOIN proxy_groups g ON p.groupId = g.id
+             WHERE p.groupId IN (:groupIds)
+             ORDER BY g.userOrder, p.displayNameCache COLLATE NOCASE, p.userOrder
+        """
+        )
+        fun getAutoScanProfilesByName(groupIds: List<Long>): List<ProxyEntity>
+
+        @Query(
+            """
+            SELECT p.* FROM proxy_entities p
+             INNER JOIN proxy_groups g ON p.groupId = g.id
+             WHERE p.groupId IN (:groupIds)
+             ORDER BY g.userOrder, CASE WHEN p.status = 1 THEN p.ping ELSE 114514 END, p.userOrder
+        """
+        )
+        fun getAutoScanProfilesByDelay(groupIds: List<Long>): List<ProxyEntity>
+
+        @Query("SELECT COUNT(*) FROM proxy_entities WHERE groupId IN (:groupIds)")
+        fun countByGroups(groupIds: List<Long>): Long
+
+        @Query("SELECT IFNULL(MAX(id), 0) FROM proxy_entities WHERE groupId = :groupId")
+        fun latestProfileIdByGroup(groupId: Long): Long
+
+        @Query(
+            """
+            UPDATE proxy_entities
+               SET status = 0,
+                   ping = 0,
+                   error = NULL
+             WHERE groupId IN (:groupIds)
+        """
+        )
+        fun clearTestResultsByGroups(groupIds: List<Long>): Int
+
+        @Query(
+            """
+            UPDATE proxy_entities
+               SET status = 0,
+                   ping = 0,
+                   error = NULL
+             WHERE id IN (:proxyIds)
+        """
+        )
+        fun clearTestResultsByIds(proxyIds: List<Long>): Int
+
+        @Query("SELECT COUNT(*) FROM proxy_entities WHERE displayCacheVersion < :version")
+        fun countMissingDisplayCache(version: Int): Long
+
+        @Query("SELECT * FROM proxy_entities WHERE displayCacheVersion < :version LIMIT :limit")
+        fun getMissingDisplayCache(version: Int, limit: Int): List<ProxyEntity>
 
         @Query("SELECT COUNT(*) FROM proxy_entities WHERE groupId = :groupId AND id = :proxyId LIMIT 1")
         fun isIdInGroup(proxyId: Long, groupId: Long): Long
@@ -579,11 +845,22 @@ data class ProxyEntity(
         @Update
         fun updateProxy(proxies: List<ProxyEntity>): Int
 
+        @Query(
+            """
+        UPDATE proxy_entities
+           SET status = :status,
+               ping = :ping,
+               error = :error
+         WHERE id = :id
+    """
+        )
+        fun updateTestResult(id: Long, status: Int, ping: Int, error: String?): Int
+
         @Insert
         fun addProxy(proxy: ProxyEntity): Long
 
         @Insert
-        fun insert(proxies: List<ProxyEntity>)
+        fun insert(proxies: List<ProxyEntity>): List<Long>
 
         @Query("DELETE FROM proxy_entities WHERE groupId = :groupId")
         fun deleteAll(groupId: Long): Int

@@ -42,7 +42,6 @@ import io.nekohasekai.sagernet.aidl.TrafficStats
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.getColorAttr
-import io.nekohasekai.sagernet.ui.SwitchActivity
 import io.nekohasekai.sagernet.utils.FormatFileSizeCompat
 import io.nekohasekai.sagernet.utils.Theme
 
@@ -57,7 +56,8 @@ import io.nekohasekai.sagernet.utils.Theme
  * See also: https://github.com/aosp-mirror/platform_frameworks_base/commit/070d142993403cc2c42eca808ff3fafcee220ac4
  */
 class ServiceNotification(
-    private val service: BaseService.Interface, profileName: String,
+    private val service: BaseService.Interface,
+    private val profileName: String,
     channel: String, visible: Boolean = false,
 ) : BroadcastReceiver() {
     companion object {
@@ -65,7 +65,7 @@ class ServiceNotification(
         val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
     }
 
-    val trafficStatistics = DataStore.profileTrafficStatistics
+    val trafficStatistics = false
     val showDirectSpeed = DataStore.showDirectSpeed
 
     private val callback: ISagerNetServiceCallback by lazy {
@@ -128,16 +128,22 @@ class ServiceNotification(
         }
     }
     private var callbackRegistered = false
+    private val connectedText = (service as Context).getString(R.string.vpn_connected)
 
     private val builder = NotificationCompat.Builder(service as Context, channel)
         .setWhen(0)
         .setTicker(service.getString(R.string.forward_success))
-        .setContentTitle(profileName)
+        .setContentTitle(AutoVpnManager.notificationTitle(profileName))
+        .setContentText(AutoVpnManager.notificationText(connectedText))
+        .setStyle(NotificationCompat.BigTextStyle().bigText(AutoVpnManager.notificationText(connectedText)))
         .setOnlyAlertOnce(true)
+        .setOngoing(true)
+        .setShowWhen(false)
+        .setSilent(true)
         .setContentIntent(SagerNet.configureIntent(service))
         .setSmallIcon(R.drawable.ic_service_active)
         .setCategory(NotificationCompat.CATEGORY_SERVICE)
-        .setPriority(if (visible) NotificationCompat.PRIORITY_LOW else NotificationCompat.PRIORITY_MIN)
+        .setPriority(NotificationCompat.PRIORITY_LOW)
 
     init {
         service as Context
@@ -159,12 +165,14 @@ class ServiceNotification(
                 addAction(Intent.ACTION_SCREEN_ON)
                 addAction(Intent.ACTION_SCREEN_OFF)
                 addAction(Action.THEME_CHANGED)
+                addAction(Action.AUTO_STATUS_CHANGED)
             }, Context.RECEIVER_EXPORTED)
         } else {
             service.registerReceiver(this, IntentFilter().apply {
                 addAction(Intent.ACTION_SCREEN_ON)
                 addAction(Intent.ACTION_SCREEN_OFF)
                 addAction(Action.THEME_CHANGED)
+                addAction(Action.AUTO_STATUS_CHANGED)
             })
         }
         show()
@@ -174,6 +182,32 @@ class ServiceNotification(
         service as Context
 
         builder.clearActions()
+        val switchAction = NotificationCompat.Action.Builder(
+            0, service.getString(R.string.auto_switch_profile), PendingIntent.getBroadcast(
+                service,
+                1,
+                Intent(Action.AUTO_SWITCH).setPackage(service.packageName),
+                flags or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        ).apply {
+            setShowsUserInterface(false)
+        }.build()
+        builder.addAction(switchAction)
+
+        if (AutoVpnManager.isGeminiModeActive()) {
+            val geminiSoftAction = NotificationCompat.Action.Builder(
+                0, service.getString(R.string.auto_switch_profile_gemini_soft), PendingIntent.getBroadcast(
+                    service,
+                    2,
+                    Intent(Action.AUTO_SWITCH_GEMINI_SOFT).setPackage(service.packageName),
+                    flags or PendingIntent.FLAG_UPDATE_CURRENT
+                )
+            ).apply {
+                setShowsUserInterface(false)
+            }.build()
+            builder.addAction(geminiSoftAction)
+        }
+
         val closeAction = NotificationCompat.Action.Builder(
             0, service.getText(R.string.stop), PendingIntent.getBroadcast(
                 service, 0, Intent(Action.CLOSE).setPackage(service.packageName), flags
@@ -182,18 +216,13 @@ class ServiceNotification(
             setShowsUserInterface(false)
         }.build()
         builder.addAction(closeAction)
-
-        val switchAction = NotificationCompat.Action.Builder(
-            0, service.getString(R.string.quick_toggle), PendingIntent.getActivity(
-                service, 0, Intent(service, SwitchActivity::class.java), flags
-            )
-        ).apply {
-            setShowsUserInterface(false)
-        }.build()
-        builder.addAction(switchAction)
     }
 
     override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action == Action.AUTO_STATUS_CHANGED) {
+            updateAutoState()
+            return
+        }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S && intent.action == Action.THEME_CHANGED) {
             service as Context
             Theme.apply(app)
@@ -204,6 +233,16 @@ class ServiceNotification(
         if (service.data.state == BaseService.State.Connected) {
             updateCallback(intent.action == Intent.ACTION_SCREEN_ON)
         }
+    }
+
+    private fun updateAutoState() {
+        val text = AutoVpnManager.notificationText(connectedText)
+        updateActions()
+        builder
+            .setContentTitle(AutoVpnManager.notificationTitle(profileName))
+            .setContentText(text)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+        update()
     }
 
     private fun updateCallback(screenOn: Boolean) {
