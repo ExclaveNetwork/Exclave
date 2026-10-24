@@ -1,69 +1,87 @@
-name: Debug Build
+name: TestExclaveD Build
 on:
-  push:
-    branches:
-      - dev*
-    paths:
-      - "app/**"
-      - "buildSrc/**"
-      - "library/**"
-      - ".github/workflows/debug.yml"
   workflow_dispatch:
+    inputs:
+      publish_release:
+        description: Attach the test APKs to a GitHub pre-release
+        required: true
+        type: boolean
+        default: true
+permissions:
+  contents: read
 jobs:
   build:
-    name: Build
+    name: Build TestExclaveD
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
-      - name: Setup Go
-        uses: actions/setup-go@v7
-        with:
-          go-version: 1.27.3
-          cache-dependency-path: "library/core/go.sum"
-      - name: Setup Go Mobile
-        # https://github.com/golang/mobile/blob/c31d5b91ecc32c0d598b8fe8457d244ca0b4e815/cmd/gomobile/init.go#L83
+        uses: actions/checkout@v6
+      - name: Verify test flavor is available
         run: |
-          go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20261011034528-197770444867
-          go install golang.org/x/mobile/cmd/gobind@v0.0.0-20261011034528-197770444867
-      - name: Setup Java
-        uses: actions/setup-java@v6
+          if ! grep -Fq 'productFlavors.create("clone")' buildSrc/src/main/kotlin/Helpers.kt; then
+            echo "::error::This branch does not contain the current TestExclaveD clone flavor yet. Sync the main source before running this workflow."
+            exit 1
+          fi
+      - name: Setup Go
+        uses: actions/setup-go@v6
         with:
-          distribution: 'temurin'
+          go-version: 1.26.3
+          cache-dependency-path: library/core/go.sum
+      - name: Setup Go Mobile
+        run: |
+          go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20260520154334-0e4426e1883d
+          go install golang.org/x/mobile/cmd/gobind@v0.0.0-20260520154334-0e4426e1883d
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
           java-version: 21
-          cache: 'gradle'
+          cache: gradle
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: platform-tools platforms;android-36
       - name: Setup Android NDK
         id: setup-ndk
         uses: nttld/setup-ndk@v1
         with:
-          ndk-version: r30
-      - name: Native Build
+          ndk-version: r29
+      - name: Build native core
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-        run: |
-          ./run lib core debug
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          path: app/libs/libexclavecore.aar
-          name: "LibExclaveCore"
-      - name: Gradle Cache
-        uses: actions/cache@v6
-        with:
-          path: ~/.gradle
-          key: gradle-debug-${{ hashFiles('**/*.gradle.kts') }}
-      - name: Gradle Build
+        run: ./run lib core debug
+      - name: Build test APKs
         run: |
           echo "sdk.dir=${ANDROID_HOME}" > local.properties
-          ./gradlew :app:downloadAssets
-          ./gradlew :app:assembleOssDebug :app:assembleLegacyDebug
-      - name: Upload Artifacts
+          ./gradlew :app:downloadAssets :app:assembleCloneDebug
+      - name: Upload test APKs
         uses: actions/upload-artifact@v7
         with:
-          name: APKs
-          path: app/build/outputs/apk/oss/debug
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v7
+          name: TestExclaveD-APKs
+          path: app/build/outputs/apk/clone/debug/*.apk
+          if-no-files-found: error
+          retention-days: 30
+  publish:
+    name: Publish test pre-release
+    if: ${{ inputs.publish_release }}
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Download test APKs
+        uses: actions/download-artifact@v8
         with:
-          name: APKs-legacy
-          path: app/build/outputs/apk/legacy/debug
+          name: TestExclaveD-APKs
+          path: artifacts
+      - name: Publish GitHub pre-release
+        run: |
+          version="$(sed -n 's/^VERSION_NAME=//p' version.properties | head -n 1)"
+          tag="test-v${version}-${GITHUB_RUN_NUMBER}"
+          mkdir -p apks
+          find artifacts -type f -name '*.apk' -exec cp {} apks/ \;
+          gh release create "$tag" --target "$GITHUB_SHA" --title "TestExclaveD ${version} (build ${GITHUB_RUN_NUMBER})" --notes "Automated TestExclaveD build." --prerelease apks/*.apk

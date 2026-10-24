@@ -1,13 +1,5 @@
 name: Release Build
 on:
-  push:
-    branches:
-      - dev*
-    paths:
-      - "app/**"
-      - "buildSrc/**"
-      - "library/**"
-      - ".github/workflows/release.yml"
   workflow_dispatch:
     inputs:
       release:
