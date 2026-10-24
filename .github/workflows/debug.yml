@@ -49,16 +49,29 @@ jobs:
       - name: Build native core
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-        run: ./run lib core debug
-      - name: Build test APKs
+        run: ./run lib core
+      - name: Configure test signing key
+        env:
+          RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+        run: |
+          test -n "$RELEASE_KEYSTORE_BASE64" || { echo "Missing Actions secret: RELEASE_KEYSTORE_BASE64"; exit 1; }
+          printf '%s' "$RELEASE_KEYSTORE_BASE64" | base64 --decode > release.keystore
+      - name: Build signed test APKs
+        env:
+          KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
+          ALIAS_NAME: ${{ secrets.ALIAS_NAME }}
+          ALIAS_PASS: ${{ secrets.ALIAS_PASS }}
         run: |
           echo "sdk.dir=${ANDROID_HOME}" > local.properties
-          ./gradlew :app:downloadAssets :app:assembleCloneDebug
+          test -n "$KEYSTORE_PASS" || { echo "Missing Actions secret: KEYSTORE_PASS"; exit 1; }
+          test -n "$ALIAS_NAME" || { echo "Missing Actions secret: ALIAS_NAME"; exit 1; }
+          test -n "$ALIAS_PASS" || { echo "Missing Actions secret: ALIAS_PASS"; exit 1; }
+          ./gradlew :app:downloadAssets :app:assembleCloneRelease
       - name: Upload test APKs
         uses: actions/upload-artifact@v7
         with:
           name: TestExclaveD-APKs
-          path: app/build/outputs/apk/clone/debug/*.apk
+          path: app/build/outputs/apk/clone/release/*.apk
           if-no-files-found: error
           retention-days: 30
   publish:
