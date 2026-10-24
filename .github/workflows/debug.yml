@@ -66,7 +66,7 @@ jobs:
           test -n "$KEYSTORE_PASS" || { echo "Missing Actions secret: KEYSTORE_PASS"; exit 1; }
           test -n "$ALIAS_NAME" || { echo "Missing Actions secret: ALIAS_NAME"; exit 1; }
           test -n "$ALIAS_PASS" || { echo "Missing Actions secret: ALIAS_PASS"; exit 1; }
-          ./gradlew :app:downloadAssets :app:assembleCloneRelease
+          ./gradlew :app:updateAssets :app:assembleCloneRelease
       - name: Upload test APKs
         uses: actions/upload-artifact@v7
         with:
