@@ -56,6 +56,7 @@ import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withTimeoutOrNull
 import java.net.HttpURLConnection
 import java.net.IDN
+import java.io.IOException
 import java.net.SocketTimeoutException
 import java.net.URL
 import java.util.LinkedHashSet
@@ -127,6 +128,7 @@ object AutoVpnManager {
     private data class ActiveCheckResult(
         val bad: Boolean,
         val ping: Int? = null,
+        val exitCountryRejected: Boolean = false,
     )
 
     private data class AutoProgressSnapshot(
@@ -1581,6 +1583,10 @@ object AutoVpnManager {
 
         DiagnosticLog.event("auto-vpn", "traffic-signal profile=$profileId mode=$safeMode")
         val first = checkActiveProfile()
+        if (first.exitCountryRejected && isSameStartedAutoProfile(profileId, safeMode)) {
+            confirmActiveProfileFailure(profileId, safeMode, "exit-country-rejected")
+            return
+        }
         if (!first.bad || !isSameStartedAutoProfile(profileId, safeMode)) {
             failures = 0
             return
@@ -1596,6 +1602,10 @@ object AutoVpnManager {
         if (!isSameStartedAutoProfile(profileId, safeMode)) return
 
         val second = checkActiveProfile()
+        if (second.exitCountryRejected && isSameStartedAutoProfile(profileId, safeMode)) {
+            confirmActiveProfileFailure(profileId, safeMode, "exit-country-rejected")
+            return
+        }
         if (!second.bad || !isSameStartedAutoProfile(profileId, safeMode)) {
             failures = 0
             return
@@ -1611,6 +1621,10 @@ object AutoVpnManager {
         if (!isSameStartedAutoProfile(profileId, mode)) return
 
         val activeCheck = checkActiveProfile()
+        if (activeCheck.exitCountryRejected && isSameStartedAutoProfile(profileId, mode)) {
+            confirmActiveProfileFailure(profileId, mode, "exit-country-rejected")
+            return
+        }
         if (!activeCheck.bad || !isSameStartedAutoProfile(profileId, mode)) {
             failures = 0
             return
@@ -1753,6 +1767,18 @@ object AutoVpnManager {
         val mode = sanitizeMode(DataStore.autoVpnMode)
         val urlTester = activeUrlTester ?: return ActiveCheckResult(checkCurrentProfileBad())
         if (profileId <= 0L || !isSameStartedAutoProfile(profileId, mode)) return ActiveCheckResult(false)
+        if (requiresExitCountryCheck(mode)) {
+            val profile = SagerDatabase.proxyDao.getById(profileId) ?: return ActiveCheckResult(true)
+            if (hasExcludedGlobeMarker(profile)) return ActiveCheckResult(true, exitCountryRejected = true)
+            val countryCode = ExitIpGeoChecker.countryCode()
+            DiagnosticLog.event(
+                "auto-vpn",
+                "active-exit-country mode=$mode profile=$profileId country=${countryCode ?: "unknown"}",
+            )
+            if (countryCode == null || countryCode == "RU") {
+                return ActiveCheckResult(true, exitCountryRejected = true)
+            }
+        }
 
         setAutoStatus(mode, R.string.auto_vpn_status_checking_active)
         val ping = testStartedConnection(profileId, mode, urlTester, recordFailure = false)
@@ -2181,12 +2207,14 @@ object AutoVpnManager {
         profile: ProxyEntity,
         mode: Int,
         markFailure: Boolean = true,
-    ): CandidateResult? = testProfileOutcome(profile, mode, markFailure).result
+        verifyExitCountry: Boolean = false,
+    ): CandidateResult? = testProfileOutcome(profile, mode, markFailure, verifyExitCountry).result
 
     private suspend fun testProfileOutcome(
         profile: ProxyEntity,
         mode: Int,
         markFailure: Boolean = true,
+        verifyExitCountry: Boolean = false,
     ): CandidateOutcome {
         val timeout = DataStore.connectionTestTimeoutSeconds.coerceAtLeast(1) * 1000
         val link = testUrlForMode(mode)
@@ -2213,9 +2241,24 @@ object AutoVpnManager {
                     link,
                     timeout,
                     protectPath = protectPathForTests(),
+                    enableHttpProxy = verifyExitCountry,
                 )
                 val ping = try {
-                    runCandidateUrlTest(instance, timeout)
+                    val result = runCandidateUrlTest(instance, timeout)
+                    if (verifyExitCountry && requiresExitCountryCheck(mode)) {
+                        val countryCode = instance.exitIpCountryCode()
+                        DiagnosticLog.event(
+                            "auto-vpn",
+                            "candidate-exit-country mode=$mode profile=${profile.id} " +
+                                    "country=${countryCode ?: "unknown"}",
+                        )
+                        if (countryCode == null || countryCode == "RU") {
+                            throw IOException(
+                                if (countryCode == "RU") "Exit IP is in Russia" else "Exit IP country is unknown"
+                            )
+                        }
+                    }
+                    result
                 } finally {
                     instance.close()
                 }
@@ -2335,8 +2378,15 @@ object AutoVpnManager {
 
     private fun profileAllowed(profile: ProxyEntity, mode: Int): Boolean {
         if (mode != MODE_ANY && looksRussian(profile)) return false
+        if (requiresExitCountryCheck(mode) && hasExcludedGlobeMarker(profile)) return false
         return mode != MODE_GEMINI || !isGeminiRejected(profile)
     }
+
+    private fun hasExcludedGlobeMarker(profile: ProxyEntity): Boolean =
+        "🌐" in profile.displayName() || "🌐" in profile.profileNameCache
+
+    private fun requiresExitCountryCheck(mode: Int): Boolean =
+        mode == MODE_NON_RU || mode == MODE_GEMINI
 
     private fun rememberGeminiRejectedProfiles(profileIds: Collection<Long>) {
         if (profileIds.isEmpty()) return
@@ -2647,7 +2697,9 @@ object AutoVpnManager {
     ): Boolean {
         val safeMode = sanitizeMode(mode)
         val precheckEnabled = DataStore.autoVpnPrecheckEnabled
-        if (precheckEnabled && !pauseVpnForDirectTests("candidate-precheck")) return false
+        if ((precheckEnabled || requiresExitCountryCheck(safeMode)) &&
+            !pauseVpnForDirectTests("candidate-precheck")
+        ) return false
         val rejectedIds = LinkedHashSet<Long>()
         var candidate: CandidateResult? = initial
 
@@ -2669,7 +2721,7 @@ object AutoVpnManager {
                 continue
             }
 
-            if (!precheckEnabled) {
+            if (!precheckEnabled && !requiresExitCountryCheck(safeMode)) {
                 setAutoStatus(safeMode, R.string.auto_vpn_status_selecting)
                 DiagnosticLog.critical(
                     "auto-vpn",
@@ -2692,7 +2744,12 @@ object AutoVpnManager {
                         ProfileTestRunner.profileDiagnosticSummary(profile)
             )
 
-            val verified = testProfile(profile, safeMode, markFailure = true)
+            val verified = testProfile(
+                profile,
+                safeMode,
+                markFailure = true,
+                verifyExitCountry = requiresExitCountryCheck(safeMode),
+            )
             // A successful direct test proves that the profile can establish a connection.
             // The bad-ping threshold is for monitoring an already connected VPN; rejecting
             // a live profile here can leave initial auto-start without any connection at all.
