@@ -22,7 +22,7 @@ object ReleaseUpdateChecker {
     suspend fun findAvailableUpdate(): AvailableAppUpdate? = withContext(Dispatchers.IO) {
         val preferences = DataStore.configurationStore
         val includeStable = preferences.getBoolean(Key.CHECK_RELEASE_UPDATES) ?: true
-        val includePrerelease = preferences.getBoolean(Key.CHECK_PRERELEASE_UPDATES) ?: true
+        val includePrerelease = preferences.getBoolean(Key.CHECK_PRERELEASE_UPDATES) ?: false
         if (!includeStable && !includePrerelease) return@withContext null
 
         val channelPrefix = if (BuildConfig.FLAVOR == "clone") "test-v" else "main-v"
