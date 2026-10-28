@@ -182,6 +182,8 @@ object Key {
     const val ACQUIRE_WAKE_LOCK = "acquireWakeLock"
     const val STUN_SERVERS = "stunServers"
     const val FAB_STYLE = "fabStyle"
+    const val CHECK_RELEASE_UPDATES = "checkReleaseUpdates"
+    const val CHECK_PRERELEASE_UPDATES = "checkPrereleaseUpdates"
     const val USE_IEC_UNIT = "useIECUnit"
     const val QUERY_ALL_PACKAGES_ALTERNATIVE_METHOD = "queryAllPackagesAlternativeMethod"
 

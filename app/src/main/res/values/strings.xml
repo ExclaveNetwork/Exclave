@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">ExclaveD</string>
+    <string name="check_release_updates">Check stable release updates</string>
+    <string name="check_prerelease_updates">Check pre-release updates</string>
+    <string name="check_prerelease_updates_summary">Developer builds for this app only</string>
+    <string name="app_update_available_title">Update available: %1$s</string>
+    <string name="app_update_available_message">Installed: %1$s\nAvailable: %2$s (%3$s)</string>
+    <string name="app_update_prerelease">pre-release</string>
+    <string name="app_update_stable">release</string>
+    <string name="app_update_later">Later</string>
+    <string name="app_update_download">Download update</string>
     <string name="project">Project</string>
     <string name="github">Source code</string>
     <string name="app_version">Version</string>

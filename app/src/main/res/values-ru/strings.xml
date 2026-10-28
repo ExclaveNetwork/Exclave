@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="check_release_updates">Проверять обычные релизы</string>
+    <string name="check_prerelease_updates">Проверять pre-release версии</string>
+    <string name="check_prerelease_updates_summary">Только для этой версии приложения</string>
+    <string name="app_update_available_title">Доступно обновление: %1$s</string>
+    <string name="app_update_available_message">Установлена версия: %1$s\nДоступна версия: %2$s (%3$s)</string>
+    <string name="app_update_prerelease">pre-release</string>
+    <string name="app_update_stable">обычный релиз</string>
+    <string name="app_update_later">Позже</string>
+    <string name="app_update_download">Скачать обновление</string>
     <string name="header_type">Обфускация заголовка</string>
     <string name="network">Сеть</string>
     <string name="security">Шифрование транспортного уровня</string>

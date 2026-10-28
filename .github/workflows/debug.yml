@@ -3,7 +3,12 @@ on:
   workflow_dispatch:
     inputs:
       publish_release:
-        description: Attach the test APKs to a GitHub pre-release
+        description: Publish APKs to the TestExclaveD release channel
+        required: true
+        type: boolean
+        default: true
+      prerelease:
+        description: Mark this build as a pre-release
         required: true
         type: boolean
         default: true
@@ -11,6 +16,7 @@ permissions:
   contents: read
 jobs:
   build:
+    if: github.ref == 'refs/heads/dev'
     name: Build TestExclaveD
     runs-on: ubuntu-latest
     steps:
@@ -92,9 +98,15 @@ jobs:
           name: TestExclaveD-APKs
           path: artifacts
       - name: Publish GitHub pre-release
+        env:
+          PRERELEASE: ${{ inputs.prerelease }}
         run: |
           version="$(sed -n 's/^VERSION_NAME=//p' version.properties | head -n 1)"
           tag="test-v${version}-${GITHUB_RUN_NUMBER}"
           mkdir -p apks
           find artifacts -type f -name '*.apk' -exec cp {} apks/ \;
-          gh release create "$tag" --target "$GITHUB_SHA" --title "TestExclaveD ${version} (build ${GITHUB_RUN_NUMBER})" --notes "Automated TestExclaveD build." --prerelease apks/*.apk
+          if [ "$PRERELEASE" = "true" ]; then
+            gh release create "$tag" --target "$GITHUB_SHA" --title "TestExclaveD ${version} (build ${GITHUB_RUN_NUMBER})" --notes "Automated TestExclaveD build." --prerelease apks/*.apk
+          else
+            gh release create "$tag" --target "$GITHUB_SHA" --title "TestExclaveD ${version}" --notes "TestExclaveD release." apks/*.apk
+          fi

@@ -1,0 +1,104 @@
+name: ExclaveD Main Build
+on:
+  workflow_dispatch:
+    inputs:
+      publish_release:
+        description: Publish APKs to the ExclaveD release channel
+        required: true
+        type: boolean
+        default: true
+      prerelease:
+        description: Mark this build as a pre-release
+        required: true
+        type: boolean
+        default: true
+permissions:
+  contents: read
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    name: Build ExclaveD
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Setup Go
+        uses: actions/setup-go@v7
+        with:
+          go-version: 1.27.3
+          cache-dependency-path: library/core/go.sum
+      - name: Setup Go Mobile
+        run: |
+          go install golang.org/x/mobile/cmd/gomobile@v0.0.0-20261011034528-197770444867
+          go install golang.org/x/mobile/cmd/gobind@v0.0.0-20261011034528-197770444867
+      - name: Setup Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+      - name: Setup Android NDK
+        id: setup-ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r30
+      - name: Build native core
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: ./run lib core
+      - name: Configure release signing key
+        env:
+          RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+        run: |
+          test -n "$RELEASE_KEYSTORE_BASE64" || { echo "Missing Actions secret: RELEASE_KEYSTORE_BASE64"; exit 1; }
+          printf '%s' "$RELEASE_KEYSTORE_BASE64" | base64 --decode > release.keystore
+      - name: Build signed ExclaveD APKs
+        env:
+          KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
+          ALIAS_NAME: ${{ secrets.ALIAS_NAME }}
+          ALIAS_PASS: ${{ secrets.ALIAS_PASS }}
+        run: |
+          echo "sdk.dir=${ANDROID_HOME}" > local.properties
+          test -n "$KEYSTORE_PASS" || { echo "Missing Actions secret: KEYSTORE_PASS"; exit 1; }
+          test -n "$ALIAS_NAME" || { echo "Missing Actions secret: ALIAS_NAME"; exit 1; }
+          test -n "$ALIAS_PASS" || { echo "Missing Actions secret: ALIAS_PASS"; exit 1; }
+          ./gradlew :app:updateAssets :app:assembleOssRelease :app:assembleLiteRelease
+      - name: Upload ExclaveD APKs
+        uses: actions/upload-artifact@v7
+        with:
+          name: ExclaveD-APKs
+          path: |
+            app/build/outputs/apk/oss/release/*.apk
+            app/build/outputs/apk/lite/release/*.apk
+          if-no-files-found: error
+          retention-days: 30
+  publish:
+    name: Publish ExclaveD release
+    if: ${{ inputs.publish_release }}
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Download ExclaveD APKs
+        uses: actions/download-artifact@v8
+        with:
+          name: ExclaveD-APKs
+          path: artifacts
+      - name: Publish ExclaveD release
+        env:
+          PRERELEASE: ${{ inputs.prerelease }}
+        run: |
+          version="$(sed -n 's/^VERSION_NAME=//p' version.properties | head -n 1)"
+          tag="main-v${version}-${GITHUB_RUN_NUMBER}"
+          mkdir -p apks
+          find artifacts -type f -name '*.apk' -exec cp {} apks/ \;
+          if [ "$PRERELEASE" = "true" ]; then
+            gh release create "$tag" --target "$GITHUB_SHA" --title "ExclaveD ${version} (build ${GITHUB_RUN_NUMBER})" --notes "Automated ExclaveD build." --prerelease apks/*.apk
+          else
+            gh release create "$tag" --target "$GITHUB_SHA" --title "ExclaveD ${version}" --notes "ExclaveD release." apks/*.apk
+          fi
