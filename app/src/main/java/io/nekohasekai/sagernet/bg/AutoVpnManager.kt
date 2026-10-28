@@ -46,6 +46,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
+import java.io.IOException
 import java.net.IDN
 import java.util.LinkedHashSet
 import java.util.Locale
@@ -115,6 +116,7 @@ object AutoVpnManager {
     private data class ActiveCheckResult(
         val bad: Boolean,
         val ping: Int? = null,
+        val exitCountryRejected: Boolean = false,
     )
 
     private data class AutoProgressSnapshot(
@@ -1330,7 +1332,11 @@ object AutoVpnManager {
                 if (!SagerNet.started || DataStore.startedProfile <= 0L) continue
                 try {
                     val activeCheck = checkActiveProfile()
-                    if (activeCheck.bad) {
+                    if (activeCheck.exitCountryRejected) {
+                        val mode = sanitizeMode(DataStore.autoVpnMode)
+                        failures = failuresBeforeSwitch()
+                        setActiveFailureStatus(mode, activeCheck.ping, failures, failuresBeforeSwitch())
+                    } else if (activeCheck.bad) {
                         val mode = sanitizeMode(DataStore.autoVpnMode)
                         failures = (failures + 1).coerceAtMost(failuresBeforeSwitch())
                         setActiveFailureStatus(mode, activeCheck.ping, failures, failuresBeforeSwitch())
@@ -1404,9 +1410,25 @@ object AutoVpnManager {
         val mode = sanitizeMode(DataStore.autoVpnMode)
         val urlTester = activeUrlTester ?: return ActiveCheckResult(checkCurrentProfileBad())
         if (profileId <= 0L || !isSameStartedAutoProfile(profileId, mode)) return ActiveCheckResult(false)
+        if (requiresExitCountryCheck(mode)) {
+            val profile = SagerDatabase.proxyDao.getById(profileId) ?: return ActiveCheckResult(true)
+            if (hasExcludedGlobeMarker(profile)) return ActiveCheckResult(true, exitCountryRejected = true)
+            val countryCode = ExitIpGeoChecker.countryCode()
+            DiagnosticLog.event(
+                "auto-vpn",
+                "active-exit-country mode=$mode profile=$profileId country=${countryCode ?: "unknown"}",
+            )
+            if (countryCode == null || countryCode == "RU") {
+                return ActiveCheckResult(true, exitCountryRejected = true)
+            }
+        }
 
         setAutoStatus(mode, R.string.auto_vpn_status_checking_active)
-        val ping = testStartedConnection(profileId, mode, urlTester)
+        val ping = testStartedConnection(
+            profileId,
+            mode,
+            urlTester,
+        )
         if (ping == null) {
             return ActiveCheckResult(true)
         }
@@ -1417,7 +1439,11 @@ object AutoVpnManager {
         return ActiveCheckResult(false)
     }
 
-    private suspend fun testStartedConnection(profileId: Long, mode: Int, urlTester: () -> Int): Int? {
+    private suspend fun testStartedConnection(
+        profileId: Long,
+        mode: Int,
+        urlTester: () -> Int,
+    ): Int? {
         val profile = SagerDatabase.proxyDao.getById(profileId) ?: return null
         return try {
             val ping = urlTester()
@@ -1960,12 +1986,14 @@ object AutoVpnManager {
         profile: ProxyEntity,
         mode: Int,
         markFailure: Boolean = true,
-    ): CandidateResult? = testProfileOutcome(profile, mode, markFailure).result
+        verifyExitCountry: Boolean = false,
+    ): CandidateResult? = testProfileOutcome(profile, mode, markFailure, verifyExitCountry).result
 
     private suspend fun testProfileOutcome(
         profile: ProxyEntity,
         mode: Int,
         markFailure: Boolean = true,
+        verifyExitCountry: Boolean = false,
     ): CandidateOutcome {
         val timeout = DataStore.connectionTestTimeoutSeconds.coerceAtLeast(1) * 1000
         val link = testUrlForMode(mode)
@@ -1987,12 +2015,32 @@ object AutoVpnManager {
                 )
                 CandidateOutcome(null, System.currentTimeMillis() - startedAt, null)
             } else {
-                val ping = V2RayTestInstance(
+                val instance = V2RayTestInstance(
                     profile,
                     link,
                     timeout,
                     protectPath = protectPathForTests(),
-                ).use { it.doTest() }
+                    enableHttpProxy = verifyExitCountry,
+                )
+                val ping = try {
+                    val result = instance.doTest()
+                    if (verifyExitCountry && requiresExitCountryCheck(mode)) {
+                        val countryCode = instance.exitIpCountryCode()
+                        DiagnosticLog.event(
+                            "auto-vpn",
+                            "candidate-exit-country mode=$mode profile=${profile.id} " +
+                                    "country=${countryCode ?: "unknown"}",
+                        )
+                        if (countryCode == null || countryCode == "RU") {
+                            throw IOException(
+                                if (countryCode == "RU") "Exit IP is in Russia" else "Exit IP country is unknown"
+                            )
+                        }
+                    }
+                    result
+                } finally {
+                    instance.close()
+                }
                 recordLastPing(ping)
                 profile.ping = ping
                 profile.status = 1
@@ -2078,8 +2126,15 @@ object AutoVpnManager {
 
     private fun profileAllowed(profile: ProxyEntity, mode: Int): Boolean {
         if (mode != MODE_ANY && looksRussian(profile)) return false
+        if (requiresExitCountryCheck(mode) && hasExcludedGlobeMarker(profile)) return false
         return mode != MODE_GEMINI || !isGeminiRejected(profile)
     }
+
+    private fun hasExcludedGlobeMarker(profile: ProxyEntity): Boolean =
+        "🌐" in profile.displayName() || "🌐" in profile.profileNameCache
+
+    private fun requiresExitCountryCheck(mode: Int): Boolean =
+        mode == MODE_NON_RU || mode == MODE_GEMINI
 
     private fun rememberGeminiRejectedProfiles(profileIds: Collection<Long>) {
         if (profileIds.isEmpty()) return
@@ -2286,7 +2341,9 @@ object AutoVpnManager {
     ): Boolean {
         val safeMode = sanitizeMode(mode)
         val precheckEnabled = DataStore.autoVpnPrecheckEnabled
-        if (precheckEnabled && !pauseVpnForDirectTests("candidate-precheck")) return false
+        if ((precheckEnabled || requiresExitCountryCheck(safeMode)) &&
+            !pauseVpnForDirectTests("candidate-precheck")
+        ) return false
         val rejectedIds = LinkedHashSet<Long>()
         var candidate: CandidateResult? = initial
 
@@ -2308,7 +2365,7 @@ object AutoVpnManager {
                 continue
             }
 
-            if (!precheckEnabled) {
+            if (!precheckEnabled && !requiresExitCountryCheck(safeMode)) {
                 setAutoStatus(safeMode, R.string.auto_vpn_status_selecting)
                 DiagnosticLog.critical(
                     "auto-vpn",
@@ -2331,7 +2388,12 @@ object AutoVpnManager {
                         ProfileTestRunner.profileDiagnosticSummary(profile)
             )
 
-            val verified = testProfile(profile, safeMode, markFailure = true)
+            val verified = testProfile(
+                profile,
+                safeMode,
+                markFailure = true,
+                verifyExitCountry = requiresExitCountryCheck(safeMode),
+            )
             if (verified != null && verified.ping <= badPingMillis()) {
                 rememberWorkingResults(safeMode, listOf(verified))
                 DiagnosticLog.critical(
