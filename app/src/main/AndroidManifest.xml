@@ -180,6 +180,17 @@
             android:excludeFromRecents="true"
             android:taskAffinity="" />
         <activity
+            android:name="io.nekohasekai.sagernet.ui.LiteActivity"
+            android:exported="false"
+            android:launchMode="singleTask" />
+        <activity
+            android:name="io.nekohasekai.sagernet.ui.LiteSettingsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="io.nekohasekai.sagernet.ui.LiteContentActivity"
+            android:exported="false" />
+        <activity
             android:name="io.nekohasekai.sagernet.ui.profile.SocksSettingsActivity" />
         <activity
             android:name="io.nekohasekai.sagernet.ui.profile.HttpSettingsActivity" />
@@ -319,6 +330,11 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="auto-profile-direct-test" />
         </service>
+
+        <receiver
+            android:name="io.nekohasekai.sagernet.bg.FloatingSwitchCommandReceiver"
+            android:exported="false"
+            android:process=":bg" />
 
         <service
             android:name="io.nekohasekai.sagernet.bg.TileService"

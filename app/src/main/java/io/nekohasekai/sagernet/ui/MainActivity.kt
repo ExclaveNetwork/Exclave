@@ -43,6 +43,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.setPadding
 import androidx.core.view.updatePadding
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceDataStore
 import com.google.android.material.bottomappbar.BottomAppBar.FAB_ALIGNMENT_MODE_CENTER
 import com.google.android.material.bottomappbar.BottomAppBar.FAB_ALIGNMENT_MODE_END
@@ -71,6 +72,8 @@ import io.nekohasekai.sagernet.utils.DiagnosticLog
 import io.nekohasekai.sagernet.utils.PackageCache
 import io.noties.markwon.Markwon
 import libsagernetcore.Libsagernetcore
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.io.encoding.Base64
 import java.util.Locale
 
@@ -81,6 +84,7 @@ class MainActivity : ThemedActivity(),
 
     lateinit var binding: LayoutMainBinding
     lateinit var navigation: NavigationView
+    private var releaseUpdateCheckScheduled = false
 
     val userInterface by lazy { GroupInterfaceAdapter(this) }
 
@@ -92,6 +96,15 @@ class MainActivity : ThemedActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (BuildConfig.FLAVOR == "lite") {
+            startActivity(Intent(this, LiteActivity::class.java).apply {
+                action = intent?.action
+                data = intent?.data
+                flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+            })
+            finish()
+            return
+        }
         DiagnosticLog.critical(
             "ui",
             "MainActivity.onCreate savedState=${savedInstanceState != null} " +
@@ -219,6 +232,7 @@ class MainActivity : ThemedActivity(),
                                 }
                             }
                         }
+                        scheduleReleaseUpdateCheck()
                     }
                     setOnCancelListener { _ ->
                         DataStore.configurationStore.putBoolean(
@@ -233,6 +247,7 @@ class MainActivity : ThemedActivity(),
                                 }
                             }
                         }
+                        scheduleReleaseUpdateCheck()
                     }
                 }.show()
             }
@@ -802,6 +817,37 @@ class MainActivity : ThemedActivity(),
             "MainActivity.onResume state=$state profileTest=${ProfileTestRunner.diagnosticStateSummary()} " +
                     "${DiagnosticLog.stateSummary()}"
         )
+        scheduleReleaseUpdateCheck()
+    }
+
+    private fun scheduleReleaseUpdateCheck() {
+        if (releaseUpdateCheckScheduled || !licenseAccepted()) return
+        releaseUpdateCheckScheduled = true
+        lifecycleScope.launch {
+            delay(1200)
+            if (isFinishing || isDestroyed) return@launch
+            val update = ReleaseUpdateChecker.findAvailableUpdate() ?: return@launch
+            if (isFinishing || isDestroyed) return@launch
+            MaterialAlertDialogBuilder(this@MainActivity)
+                .setTitle(getString(R.string.app_update_available_title, update.version))
+                .setMessage(
+                    getString(
+                        R.string.app_update_available_message,
+                        BuildConfig.VERSION_NAME,
+                        update.version,
+                        getString(if (update.prerelease) R.string.app_update_prerelease else R.string.app_update_stable)
+                    )
+                )
+                .setNegativeButton(R.string.app_update_later, null)
+                .setPositiveButton(R.string.app_update_download) { _, _ ->
+                    runCatching {
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(update.downloadUrl)))
+                    }.onFailure {
+                        snackbar(R.string.action_export_err).show()
+                    }
+                }
+                .show()
+        }
     }
 
     override fun onPause() {

@@ -866,7 +866,7 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
                     }
                 }.joinToString("\n")
                 try {
-                    (requireActivity() as MainActivity).contentResolver.openOutputStream(
+                    requireActivity().contentResolver.openOutputStream(
                         data
                     )!!.bufferedWriter().use {
                         it.write(links)
@@ -895,7 +895,7 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
                     } else null
                 }.joinToString("\n")
                 try {
-                    (requireActivity() as MainActivity).contentResolver.openOutputStream(
+                    requireActivity().contentResolver.openOutputStream(
                         data
                     )!!.bufferedWriter().use {
                         it.write(links)
@@ -1443,7 +1443,7 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
                                 groupStatus.text = when {
                                     size == 0L -> getString(R.string.group_status_empty_subscription)
                                     group.subscription!!.lastUpdated <= 0L -> context!!.resources.getQuantityString(R.plurals.group_status_proxies, size.toInt(), size)
-                                    else -> (requireActivity() as MainActivity).resources.getQuantityString(R.plurals.group_status_proxies_subscription, size.toInt(), size,
+                                    else -> resources.getQuantityString(R.plurals.group_status_proxies_subscription, size.toInt(), size,
                                         DateUtils.getRelativeTimeSpanString(context, group.subscription!!.lastUpdated * 1000)
                                             // hack for Chinese, "1月1日" -> "1 月 1 日","上午0:00" -> 上午 0:00"
                                             .replace("^([1-9]|1[0-2])月([1-9]|1[0-9]|2[0-9]|3[0-1])日+".toRegex(), "$1 月 $2 日")

@@ -57,6 +57,7 @@ import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ui.MainActivity
+import io.nekohasekai.sagernet.ui.LiteActivity
 import io.nekohasekai.sagernet.utils.CrashHandler
 import io.nekohasekai.sagernet.utils.DiagnosticLog
 import io.nekohasekai.sagernet.utils.DefaultNetworkListener
@@ -217,9 +218,11 @@ class SagerNet : Application(),
                     it,
                     0,
                     Intent(
-                        application, MainActivity::class.java
-                    ).setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT),
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
+                        application,
+                        if (BuildConfig.FLAVOR == "lite") LiteActivity::class.java else MainActivity::class.java,
+                    ).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP),
+                    (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0) or
+                            PendingIntent.FLAG_UPDATE_CURRENT,
                 )
             }
         }

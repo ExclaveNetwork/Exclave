@@ -1,5 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="check_release_updates">Проверять обычные релизы</string>
+    <string name="check_prerelease_updates">Проверять pre-release версии</string>
+    <string name="check_prerelease_updates_summary">Только для этой версии приложения</string>
+    <string name="app_update_available_title">Доступно обновление: %1$s</string>
+    <string name="app_update_available_message">Установлена версия: %1$s\nДоступна версия: %2$s (%3$s)</string>
+    <string name="app_update_prerelease">pre-release</string>
+    <string name="app_update_stable">обычный релиз</string>
+    <string name="app_update_later">Позже</string>
+    <string name="app_update_download">Скачать обновление</string>
+    <string name="lite_choose_mode">Режим автоподбора</string>
+    <string name="lite_mode_no_ru">Без RU</string>
+    <string name="lite_mode_gemini">Gemini</string>
+    <string name="lite_start_vpn">Включить VPN</string>
+    <string name="lite_stop_vpn">Выключить VPN</string>
+    <string name="lite_cancel_selection">Отменить подбор</string>
+    <string name="lite_connected_profile">Подключено: %s</string>
+    <string name="lite_connected">VPN подключен</string>
+    <string name="lite_not_connected">VPN выключен</string>
+    <string name="lite_starting_auto">Запускаю VPN и ищу профили. Подождите…</string>
+    <string name="lite_check_ping">Проверить пинг</string>
+    <string name="lite_initial_sync_start">Синхронизирую источник групп…</string>
+    <string name="lite_switch_gemini_remember">Сменить и запомнить</string>
+    <string name="lite_route_alert">VPN требует внимания: %s</string>
     <string name="header_type">Обфускация заголовка</string>
     <string name="network">Сеть</string>
     <string name="security">Шифрование транспортного уровня</string>
@@ -656,6 +679,7 @@
     <string name="auto_vpn_status_rechecking_reserve">%1$s: перепроверяю запасные профили: %2$d</string>
     <string name="auto_vpn_status_verifying_connected">%1$s: проверяю подключенный профиль %2$d/%3$d...</string>
     <string name="auto_vpn_status_checking_active">%1$s: проверяю активный профиль...</string>
+    <string name="auto_vpn_status_no_direct_network_retry">%1$s: прямой интернет недоступен, повтор через %2$d сек...</string>
     <string name="auto_vpn_status_active_issue">%1$s: активный профиль не прошёл %2$d/%3$d</string>
     <string name="auto_vpn_status_active_bad_ping">%1$s: активный пинг %2$d мс выше %3$d мс</string>
     <string name="auto_vpn_status_active_bad_ping_count">%1$s: активный пинг %2$d мс выше %3$d мс, неудача %4$d/%5$d</string>
@@ -675,6 +699,9 @@
     <string name="auto_vpn_selection_reason_ping">минимальный пинг %1$d мс</string>
     <string name="auto_vpn_progress">%1$s: проверено %2$d/%3$d</string>
     <string name="auto_vpn_progress_short">проверено %1$d/%2$d</string>
+    <string name="lite_auto_progress">Проверено: %1$d/%2$d · Рабочих: %3$d</string>
+    <string name="lite_auto_reserve">Запас: %1$d/%2$d</string>
+    <string name="lite_auto_traffic">Трафик: %1$s/с ↑ · %2$s/с ↓</string>
     <string name="auto_vpn_checked_count">проверено %1$d/%2$d</string>
     <string name="auto_vpn_working_count_target">рабочих %1$d/%2$d</string>
     <string name="auto_vpn_quarantine_count">карантин %d</string>

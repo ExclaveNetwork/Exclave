@@ -102,7 +102,12 @@ class KeyValuePair() : Parcelable {
             val buffer = ByteBuffer.wrap(value)
             val result = HashSet<String>()
             while (buffer.hasRemaining()) {
-                val chArr = ByteArray(buffer.int)
+                // Older builds saved the character count, not the UTF-8 byte count.
+                // A non-ASCII value could therefore make the remaining stream invalid.
+                if (buffer.remaining() < Int.SIZE_BYTES) return emptySet()
+                val byteCount = buffer.int
+                if (byteCount < 0 || byteCount > buffer.remaining()) return emptySet()
+                val chArr = ByteArray(byteCount)
                 buffer.get(chArr)
                 result.add(String(chArr))
             }
@@ -152,9 +157,10 @@ class KeyValuePair() : Parcelable {
         val stream = ByteArrayOutputStream()
         val intBuffer = ByteBuffer.allocate(4)
         for (v in value) {
+            val valueBytes = v.toByteArray()
             intBuffer.rewind()
-            stream.write(intBuffer.putInt(v.length).array())
-            stream.write(v.toByteArray())
+            stream.write(intBuffer.putInt(valueBytes.size).array())
+            stream.write(valueBytes)
         }
         this.value = stream.toByteArray()
         return this

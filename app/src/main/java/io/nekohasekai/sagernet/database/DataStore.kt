@@ -289,6 +289,8 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var autoVpnQuarantineMinutes by configurationStore.stringToInt(Key.AUTO_VPN_QUARANTINE_MINUTES) { 45 }
     var autoVpnGeminiTestUrl by configurationStore.string(Key.AUTO_VPN_GEMINI_TEST_URL) { "https://gemini.google.com/" }
     var autoVpnGeminiRejectedKeys by configurationStore.stringSet(Key.AUTO_VPN_GEMINI_REJECTED_KEYS)
+    var autoVpnGeminiRejectedNames by configurationStore.string(Key.AUTO_VPN_GEMINI_REJECTED_NAMES)
+    var autoVpnGeminiRejectedRevision by configurationStore.long(Key.AUTO_VPN_GEMINI_REJECTED_REVISION)
     var autoVpnProfileScoreStats by configurationStore.string(Key.AUTO_VPN_PROFILE_SCORE_STATS)
     var autoVpnStatusText by configurationStore.string(Key.AUTO_VPN_STATUS_TEXT)
     var autoVpnDetailStatusText by configurationStore.string(Key.AUTO_VPN_DETAIL_STATUS_TEXT)
@@ -309,7 +311,12 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var autoVpnReserveIdsAny by configurationStore.string(Key.AUTO_VPN_RESERVE_IDS_ANY)
     var autoVpnReserveIdsNonRu by configurationStore.string(Key.AUTO_VPN_RESERVE_IDS_NON_RU)
     var autoVpnReserveIdsGemini by configurationStore.string(Key.AUTO_VPN_RESERVE_IDS_GEMINI)
+    var autoVpnScannedIdsAny by configurationStore.string(Key.AUTO_VPN_SCANNED_IDS_ANY)
+    var autoVpnScannedIdsNonRu by configurationStore.string(Key.AUTO_VPN_SCANNED_IDS_NON_RU)
+    var autoVpnScannedIdsGemini by configurationStore.string(Key.AUTO_VPN_SCANNED_IDS_GEMINI)
     var autoVpnServiceStartRequested by configurationStore.boolean(Key.AUTO_VPN_SERVICE_START_REQUESTED)
+    var autoVpnDirectSearchToken by configurationStore.long(Key.AUTO_VPN_DIRECT_SEARCH_TOKEN)
+    var autoVpnDirectSearchHeartbeat by configurationStore.long(Key.AUTO_VPN_DIRECT_SEARCH_HEARTBEAT)
     var autoVpnFloatingSwitchEnabled by configurationStore.boolean(Key.AUTO_VPN_FLOATING_SWITCH_ENABLED)
     var autoVpnFloatingSwitchX by configurationStore.int(Key.AUTO_VPN_FLOATING_SWITCH_X) { -1 }
     var autoVpnFloatingSwitchY by configurationStore.int(Key.AUTO_VPN_FLOATING_SWITCH_Y) { -1 }
@@ -318,7 +325,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var subscriptionVpnIntervalMinutes by configurationStore.stringToInt(Key.SUBSCRIPTION_VPN_INTERVAL_MINUTES) { 90 }
     var subscriptionVpnRetryIntervalMinutes by configurationStore.stringToInt(Key.SUBSCRIPTION_VPN_RETRY_INTERVAL_MINUTES) { 15 }
     var subscriptionVpnRetryCount by configurationStore.stringToInt(Key.SUBSCRIPTION_VPN_RETRY_COUNT) { 3 }
-    var subscriptionSendHwid by configurationStore.boolean(Key.SUBSCRIPTION_SEND_HWID)
+    var subscriptionSendHwid by configurationStore.boolean(Key.SUBSCRIPTION_SEND_HWID) { true }
     private var subscriptionHwidValue by configurationStore.string(Key.SUBSCRIPTION_HWID)
     var groupHealthCheckStatsEnabled by configurationStore.boolean(Key.GROUP_HEALTH_CHECK_STATS_ENABLED)
     var groupSourceSyncEnabled by configurationStore.boolean(Key.GROUP_SOURCE_SYNC_ENABLED) { true }
@@ -337,7 +344,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var subscriptionGlobalAutoUpdateDelay by configurationStore.stringToInt(Key.SUBSCRIPTION_GLOBAL_AUTO_UPDATE_DELAY) { 90 }
     var groupSourceSyncIntervalMinutes by configurationStore.stringToInt(Key.GROUP_SOURCE_SYNC_INTERVAL_MINUTES) { 60 }
     var subscriptionRemoveDuplicates by configurationStore.boolean(Key.SUBSCRIPTION_REMOVE_DUPLICATES) { true }
-    var subscriptionAutoSortGroups by configurationStore.boolean(Key.SUBSCRIPTION_AUTO_SORT_GROUPS)
+    var subscriptionAutoSortGroups by configurationStore.boolean(Key.SUBSCRIPTION_AUTO_SORT_GROUPS) { true }
     var subscriptionUpdateParallel by configurationStore.stringToInt(Key.SUBSCRIPTION_UPDATE_PARALLEL) { 60 }
     var subscriptionUpdateTimeoutSeconds by configurationStore.stringToInt(Key.SUBSCRIPTION_UPDATE_TIMEOUT_SECONDS) { 30 }
     var profileTestPendingIds by configurationStore.string(Key.PROFILE_TEST_PENDING_IDS)

@@ -679,6 +679,15 @@
         app:initialExpandedChildrenCount="0">
         <SwitchPreference
             app:defaultValue="true"
+            app:key="checkReleaseUpdates"
+            app:title="@string/check_release_updates" />
+        <SwitchPreference
+            app:defaultValue="true"
+            app:key="checkPrereleaseUpdates"
+            app:summary="@string/check_prerelease_updates_summary"
+            app:title="@string/check_prerelease_updates" />
+        <SwitchPreference
+            app:defaultValue="true"
             app:icon="@drawable/ic_social_emoji_symbols"
             app:key="showGroupName"
             app:title="@string/show_group_name_in_notification" />

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_lite_settings"
+        android:icon="@drawable/ic_action_settings"
+        android:title="@string/settings"
+        android:showAsAction="never" />
+    <item
+        android:id="@+id/action_lite_groups"
+        android:title="@string/menu_group"
+        android:showAsAction="never" />
+    <item
+        android:id="@+id/action_lite_routes"
+        android:title="@string/menu_route"
+        android:showAsAction="never" />
+    <item
+        android:id="@+id/action_lite_tools"
+        android:title="@string/menu_tools"
+        android:showAsAction="never" />
+    <item
+        android:id="@+id/action_lite_logs"
+        android:title="@string/menu_log"
+        android:showAsAction="never" />
+</menu>

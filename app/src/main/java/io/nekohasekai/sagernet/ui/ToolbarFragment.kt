@@ -24,6 +24,7 @@ import android.view.KeyEvent
 import android.view.View
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
+import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import io.nekohasekai.sagernet.R
 
@@ -37,10 +38,18 @@ open class ToolbarFragment : Fragment {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         toolbar = view.findViewById(R.id.toolbar)
-        toolbar.setNavigationIcon(R.drawable.ic_navigation_menu)
+        toolbar.setNavigationIcon(
+            if (activity is MainActivity) R.drawable.ic_navigation_menu else R.drawable.baseline_arrow_back_24,
+        )
         toolbar.setNavigationOnClickListener {
-            (activity as MainActivity).binding.drawerLayout.openDrawer(GravityCompat.START)
+            val host = activity
+            if (host is MainActivity) {
+                host.binding.drawerLayout.openDrawer(GravityCompat.START)
+            } else {
+                host?.onBackPressedDispatcher?.onBackPressed()
+            }
         }
+        ViewCompat.requestApplyInsets(requireActivity().findViewById(android.R.id.content))
     }
 
     open fun onKeyDown(ketCode: Int, event: KeyEvent) = false

@@ -209,6 +209,9 @@ fun Project.setupApp() {
         productFlavors.create("clone") {
             applicationIdSuffix = "test"
         }
+        productFlavors.create("lite") {
+            applicationIdSuffix = "lite"
+        }
         tasks.register("downloadAssets") {
             downloadAssets(update = false)
         }
@@ -229,7 +232,11 @@ fun Project.setupApp() {
                 }
                 (output as? VariantOutputImpl)?.let { variantOutputImpl ->
                     val versionName = variantOutputImpl.versionName.orNull.orEmpty()
-                    val appName = if (variant.flavorName == "clone") "TestExclaveD" else "ExclaveD"
+                    val appName = when (variant.flavorName) {
+                        "clone" -> "TestExclaveD"
+                        "lite" -> "LiteExclaveD"
+                        else -> "ExclaveD"
+                    }
                     variantOutputImpl.outputFileName.set(variantOutputImpl.outputFileName.get()
                         .replace(project.name, "$appName-$versionName")
                         .replace("-release", "")

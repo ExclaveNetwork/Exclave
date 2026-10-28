@@ -37,6 +37,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.preference.Preference
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.ui.MainActivity
@@ -167,8 +168,10 @@ fun View.crossFadeFrom(other: View) {
 }
 
 
-fun Fragment.snackbar(textId: Int) = (requireActivity() as MainActivity).snackbar(textId)
-fun Fragment.snackbar(text: CharSequence) = (requireActivity() as MainActivity).snackbar(text)
+fun Fragment.snackbar(textId: Int) = snackbar(getString(textId))
+fun Fragment.snackbar(text: CharSequence): Snackbar =
+    (activity as? ThemedActivity)?.snackbar(text)
+        ?: Snackbar.make(requireView(), text, Snackbar.LENGTH_LONG)
 
 fun ThemedActivity.startFilesForResult(
     launcher: ActivityResultLauncher<String>, input: String

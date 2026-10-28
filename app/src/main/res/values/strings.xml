@@ -1,6 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">ExclaveD</string>
+    <string name="check_release_updates">Check stable release updates</string>
+    <string name="check_prerelease_updates">Check pre-release updates</string>
+    <string name="check_prerelease_updates_summary">Developer builds for this app only</string>
+    <string name="app_update_available_title">Update available: %1$s</string>
+    <string name="app_update_available_message">Installed: %1$s\nAvailable: %2$s (%3$s)</string>
+    <string name="app_update_prerelease">pre-release</string>
+    <string name="app_update_stable">release</string>
+    <string name="app_update_later">Later</string>
+    <string name="app_update_download">Download update</string>
+    <string name="lite_choose_mode">Auto mode</string>
+    <string name="lite_mode_no_ru">No RU</string>
+    <string name="lite_mode_gemini">Gemini</string>
+    <string name="lite_start_vpn">Start VPN</string>
+    <string name="lite_stop_vpn">Stop VPN</string>
+    <string name="lite_cancel_selection">Cancel selection</string>
+    <string name="lite_connected_profile">Connected to %s</string>
+    <string name="lite_connected">VPN is connected</string>
+    <string name="lite_not_connected">VPN is off</string>
+    <string name="lite_starting_auto">Starting VPN and searching for profiles. Please wait…</string>
+    <string name="lite_check_ping">Check ping</string>
+    <string name="lite_initial_sync_start">Syncing group source…</string>
+    <string name="lite_switch_gemini_remember">Switch and remember</string>
+    <string name="lite_route_alert">VPN needs attention: %s</string>
     <string name="project">Project</string>
     <string name="github">Source code</string>
     <string name="app_version">Version</string>
@@ -361,6 +384,7 @@
     <string name="auto_vpn_status_rechecking_reserve">%1$s: rechecking %2$d reserve profiles...</string>
     <string name="auto_vpn_status_verifying_connected">%1$s: checking connected profile %2$d/%3$d...</string>
     <string name="auto_vpn_status_checking_active">%1$s: checking active profile...</string>
+    <string name="auto_vpn_status_no_direct_network_retry">%1$s: no direct internet, retrying in %2$d sec...</string>
     <string name="auto_vpn_status_active_issue">%1$s: active profile failed %2$d/%3$d</string>
     <string name="auto_vpn_status_active_bad_ping">%1$s: active ping %2$d ms is above %3$d ms</string>
     <string name="auto_vpn_status_active_bad_ping_count">%1$s: active ping %2$d ms is above %3$d ms, failed %4$d/%5$d</string>
@@ -380,6 +404,9 @@
     <string name="auto_vpn_selection_reason_ping">lowest ping %1$d ms</string>
     <string name="auto_vpn_progress">%1$s: %2$d/%3$d checked</string>
     <string name="auto_vpn_progress_short">checked %1$d/%2$d</string>
+    <string name="lite_auto_progress">Checked: %1$d/%2$d · Working: %3$d</string>
+    <string name="lite_auto_reserve">Reserve: %1$d/%2$d</string>
+    <string name="lite_auto_traffic">Traffic: %1$s/s ↑ · %2$s/s ↓</string>
     <string name="auto_vpn_checked_count">checked %1$d/%2$d</string>
     <string name="auto_vpn_working_count_target">working %1$d/%2$d</string>
     <string name="auto_vpn_quarantine_count">quarantine %d</string>

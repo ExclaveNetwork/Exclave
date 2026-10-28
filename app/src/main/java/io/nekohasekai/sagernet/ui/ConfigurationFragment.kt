@@ -1532,7 +1532,7 @@ class ConfigurationFragment @JvmOverloads constructor(
         DiagnosticLog.critical(
             "configuration-ui",
             "urlTest-request resume=$resume currentGroup=${currentGroup.id} groups=${groups.map { it.id }.take(20)} " +
-                    "groupCount=${groups.size} geminiFilter=$geminiFilter ${DiagnosticLog.stateSummary()}"
+                    "groupCount=${groups.size} geminiFilter=$geminiFilter testUrl=${testUrl.take(120)} ${DiagnosticLog.stateSummary()}"
         )
         runOnDefaultDispatcher {
             val snapshot = if (resume) {
@@ -1599,7 +1599,7 @@ class ConfigurationFragment @JvmOverloads constructor(
         DiagnosticLog.critical(
             "configuration-ui",
             "beginUrlTest resume=$resume ids=${profileIdsToTest.size} groups=${groups.size} " +
-                    "snapshot=$resumeSnapshot geminiFilter=$geminiFilter"
+                    "snapshot=$resumeSnapshot geminiFilter=$geminiFilter url=${testUrl.take(120)}"
         )
         runOnDefaultDispatcher {
             ProfileTestRunner.start(

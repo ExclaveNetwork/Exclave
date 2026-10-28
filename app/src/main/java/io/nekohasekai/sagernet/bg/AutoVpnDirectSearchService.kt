@@ -31,6 +31,7 @@ import io.nekohasekai.sagernet.utils.DiagnosticLog
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 /**
  * Owns direct Auto VPN checks while the VPN service is deliberately stopped.
@@ -99,6 +100,8 @@ class AutoVpnDirectSearchService : Service() {
     private var searchJob: Job? = null
     private var foregroundStarted = false
     private var wakeLock: PowerManager.WakeLock? = null
+    private var searchGeneration = 0L
+    private var directSessionToken = 0L
 
     private val autoStatusReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -131,24 +134,43 @@ class AutoVpnDirectSearchService : Service() {
         val action = intent?.action ?: return START_NOT_STICKY
         if (action == ACTION_STOP) {
             DiagnosticLog.critical("auto-vpn", "direct-search-service-stop-requested")
+            searchGeneration += 1L
+            AutoVpnManager.finishDirectSearchSession(directSessionToken)
+            directSessionToken = 0L
             AutoVpnManager.stopDetachedDirectSearch()
             searchJob?.cancel()
+            searchJob = null
             stopSelf(startId)
             return START_NOT_STICKY
         }
-        if (searchJob?.isActive == true) {
-            DiagnosticLog.warn("auto-vpn", "direct-search-service-request-ignored action=$action")
-            return START_NOT_STICKY
+        val previousSearch = searchJob
+        if (previousSearch?.isActive == true) {
+            // The Auto mode can change while a previous direct scan is winding down.
+            // Keep the newest request: ignoring it leaves the newly selected mode at 0.
+            DiagnosticLog.critical("auto-vpn", "direct-search-service-replacing-active-request action=$action")
+            previousSearch.cancel()
         }
 
         startForeground(NOTIFICATION_ID, buildNotification())
         foregroundStarted = true
+        val generation = ++searchGeneration
+        val sessionToken = AutoVpnManager.beginDirectSearchSession()
+        directSessionToken = sessionToken
         val mode = intent.getIntExtra(EXTRA_MODE, AutoVpnManager.MODE_ANY)
         val profileId = intent.getLongExtra(EXTRA_PROFILE_ID, 0L)
         val reason = intent.getStringExtra(EXTRA_REASON).orEmpty()
         val resetResults = intent.getBooleanExtra(EXTRA_RESET_RESULTS, false)
         searchJob = runOnDefaultDispatcher {
+            val heartbeatJob = launch {
+                while (isActive && generation == searchGeneration) {
+                    AutoVpnManager.touchDirectSearchSession(sessionToken)
+                    delay(5_000L)
+                }
+            }
             try {
+                // Let the cancelled run write its terminal state before this one owns it.
+                previousSearch?.join()
+                if (generation != searchGeneration) return@runOnDefaultDispatcher
                 DiagnosticLog.critical(
                     "auto-vpn",
                     "direct-search-service-start action=$action mode=$mode profile=$profileId reason=$reason"
@@ -167,6 +189,9 @@ class AutoVpnDirectSearchService : Service() {
                     )
                 }
             } finally {
+                heartbeatJob.cancel()
+                AutoVpnManager.finishDirectSearchSession(sessionToken)
+                if (generation != searchGeneration) return@runOnDefaultDispatcher
                 DiagnosticLog.critical("auto-vpn", "direct-search-service-finish action=$action")
                 foregroundStarted = false
                 if (DataStore.startedProfile > 0L || DataStore.autoVpnServiceStartRequested) {
@@ -182,6 +207,9 @@ class AutoVpnDirectSearchService : Service() {
     }
 
     override fun onDestroy() {
+        searchGeneration += 1L
+        AutoVpnManager.finishDirectSearchSession(directSessionToken)
+        directSessionToken = 0L
         searchJob?.cancel()
         searchJob = null
         foregroundStarted = false
@@ -213,6 +241,7 @@ class AutoVpnDirectSearchService : Service() {
         .setSilent(true)
         .setCategory(NotificationCompat.CATEGORY_SERVICE)
         .setPriority(NotificationCompat.PRIORITY_LOW)
+        .setContentIntent(SagerNet.configureIntent(this))
         .build()
     }
 }

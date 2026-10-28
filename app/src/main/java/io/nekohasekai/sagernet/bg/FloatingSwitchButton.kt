@@ -11,7 +11,9 @@
 
 package io.nekohasekai.sagernet.bg
 
+import android.app.Application
 import android.content.Context
+import android.content.Intent
 import android.content.ComponentCallbacks
 import android.content.res.Configuration
 import android.graphics.Color
@@ -36,6 +38,9 @@ import kotlin.math.abs
 
 object FloatingSwitchButton {
 
+    const val ACTION_SYNC = "io.nekohasekai.sagernet.action.FLOATING_SWITCH_SYNC"
+    const val ACTION_HIDE = "io.nekohasekai.sagernet.action.FLOATING_SWITCH_HIDE"
+
     private var windowManager: WindowManager? = null
     private var button: TextView? = null
     private var layoutParams: WindowManager.LayoutParams? = null
@@ -54,6 +59,10 @@ object FloatingSwitchButton {
     }
 
     fun sync(context: Context = app) {
+        if (!isOverlayOwner(context)) {
+            dispatchCommand(context, ACTION_SYNC)
+            return
+        }
         runOnMainDispatcher {
             val appContext = context.applicationContext
             if (!DataStore.autoVpnFloatingSwitchEnabled ||
@@ -73,9 +82,44 @@ object FloatingSwitchButton {
     }
 
     fun hide() {
+        if (!isOverlayOwner(app)) {
+            dispatchCommand(app, ACTION_HIDE)
+            return
+        }
         runOnMainDispatcher {
             hideOnMain()
         }
+    }
+
+    fun handleCommand(context: Context, action: String?) {
+        when (action) {
+            ACTION_SYNC -> sync(context)
+            ACTION_HIDE -> hide()
+        }
+    }
+
+    private fun dispatchCommand(context: Context, action: String) {
+        runCatching {
+            context.applicationContext.sendBroadcast(
+                Intent(context, FloatingSwitchCommandReceiver::class.java).setAction(action),
+            )
+        }.onFailure {
+            DiagnosticLog.warn("floating-switch", "command dispatch failed: ${it.message.orEmpty()}")
+        }
+    }
+
+    private fun isOverlayOwner(context: Context): Boolean {
+        val processName = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            Application.getProcessName()
+        } else {
+            runCatching {
+                @Suppress("PrivateApi")
+                Class.forName("android.app.ActivityThread")
+                    .getDeclaredMethod("currentProcessName")
+                    .invoke(null) as? String
+            }.getOrNull()
+        }
+        return processName == "${context.packageName}:bg"
     }
 
     private fun showOnMain(context: Context) {

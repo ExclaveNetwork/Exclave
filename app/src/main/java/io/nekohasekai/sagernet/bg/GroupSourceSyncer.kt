@@ -193,6 +193,12 @@ object GroupSourceSyncer {
         }
     }
 
+    suspend fun syncNowAndUpdate(): SyncSummary {
+        val summary = syncNow()
+        updateSyncedGroups(summary)
+        return summary
+    }
+
     private suspend inline fun <T> stage(name: String, crossinline block: suspend () -> T): T {
         return try {
             block()

@@ -17,3 +17,8 @@ local.properties
 jniLibs/
 go.work
 go.work.sum
+/release.keystore
+/ExclaveD-*.apk
+/LiteExclaveD-*.apk
+/TestExclaveD-*.apk
+/build-*.log
