@@ -682,7 +682,7 @@
             app:key="checkReleaseUpdates"
             app:title="@string/check_release_updates" />
         <SwitchPreference
-            app:defaultValue="true"
+            app:defaultValue="false"
             app:key="checkPrereleaseUpdates"
             app:summary="@string/check_prerelease_updates_summary"
             app:title="@string/check_prerelease_updates" />
