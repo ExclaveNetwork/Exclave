@@ -242,7 +242,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 val path = File(
                     app.getExternalFilesDir(null)?.apply { mkdirs() } ?: app.filesDir,
                     "pcap"
-                ).absolutePath
+                ).canonicalPath
                 MaterialAlertDialogBuilder(requireContext()).apply {
                     setTitle(R.string.pcap)
                     setMessage(resources.getString(R.string.pcap_notice, path))

@@ -128,13 +128,12 @@ class SagerNet : Application(),
         Libexclavecore.setenv("exclave.conf.geoloader", "memconservative")
         externalAssets.mkdirs()
         Libexclavecore.initializeV2Ray(
-            filesDir.absolutePath + "/",
-            externalAssets.absolutePath + "/",
+            externalAssets.canonicalPath + "/",
             "exclave-core/",
         )
 
         try {
-            if (DataStore.providerRootCA == RootCAProvider.SYSTEM_AND_USER) {
+            if (DataStore.providerRootCA == RootCAProvider.ANDROID) {
                 Libexclavecore.registerAndroidCAStore(this)
             }
             Libexclavecore.updateSystemRoots(DataStore.providerRootCA)

@@ -36,6 +36,7 @@ import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.database.StatsEntity
 import io.nekohasekai.sagernet.fmt.LOCALHOST
 import io.nekohasekai.sagernet.ktx.Logs
+import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.getBooleanProperty
 import io.nekohasekai.sagernet.ktx.listByLineOrComma
 import io.nekohasekai.sagernet.ui.VpnRequestActivity
@@ -328,7 +329,7 @@ class VpnService : BaseVpnService(),
         }
 
         if (tunImplementation == TunImplementation.SYSTEM) {
-            config.protectPath = SagerNet.deviceStorage.noBackupFilesDir.toString() + "/protect_path"
+            config.protectPath = app.cacheDir.toString() + "/protect_path"
         }
 
         tun = Libexclavecore.newTun2ray(config)

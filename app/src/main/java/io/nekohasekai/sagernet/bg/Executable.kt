@@ -49,7 +49,7 @@ object Executable {
                 Logs.w("SIGKILL ${exe.nameWithoutExtension} (${process.name}) succeed")
             } catch (e: ErrnoException) {
                 if (e.errno != OsConstants.ESRCH) {
-                    Logs.w("SIGKILL ${exe.absolutePath} (${process.name}) failed")
+                    Logs.w("SIGKILL ${exe.canonicalPath} (${process.name}) failed")
                     Logs.w(e)
                 }
             }

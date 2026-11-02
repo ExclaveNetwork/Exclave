@@ -41,6 +41,7 @@ import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.databinding.LayoutProbeCertBinding
 import io.nekohasekai.sagernet.ktx.Logs
+import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.dp2px
 import io.nekohasekai.sagernet.ktx.onMainDispatcher
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
@@ -214,7 +215,7 @@ class ProbeCertActivity : ThemedActivity() {
         runOnDefaultDispatcher {
             val certProber = Libexclavecore.newCertProber().apply {
                 if (SagerNet.started && DataStore.startedProfile > 0) {
-                    useUDS(SagerNet.deviceStorage.noBackupFilesDir.toString() + "/ipc.sock")
+                    useUDS(app.cacheDir.toString() + "/ipc.sock")
                 }
             }
             val result = when (binding.probeCertProtocol.selectedItemPosition) {

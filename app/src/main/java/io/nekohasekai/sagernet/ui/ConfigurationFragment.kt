@@ -863,7 +863,7 @@ class ConfigurationFragment @JvmOverloads constructor(
 
                         try {
                             val instance = if (DataStore.tunImplementation == TunImplementation.SYSTEM && DataStore.serviceMode == Key.MODE_VPN && SagerNet.started && DataStore.startedProfile > 0) {
-                                V2RayTestInstance(profile, link, timeout, protectPath = SagerNet.deviceStorage.noBackupFilesDir.toString() + "/protect_path")
+                                V2RayTestInstance(profile, link, timeout, protectPath = app.cacheDir.toString() + "/protect_path")
                             } else {
                                 V2RayTestInstance(profile, link, timeout)
                             }

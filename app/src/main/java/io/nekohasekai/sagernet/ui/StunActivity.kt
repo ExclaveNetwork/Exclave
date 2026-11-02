@@ -32,6 +32,7 @@ import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.databinding.LayoutStunBinding
 import io.nekohasekai.sagernet.ktx.PUBLIC_STUN_SERVERS
+import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.listByLineOrComma
 import io.nekohasekai.sagernet.ktx.onMainDispatcher
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
@@ -125,8 +126,8 @@ class StunActivity : ThemedActivity() {
         runOnDefaultDispatcher {
             val stunClient = Libexclavecore.newStunClient().apply {
                 if (SagerNet.started && DataStore.startedProfile > 0) {
-                    useUDS(SagerNet.deviceStorage.noBackupFilesDir.toString() + "/ipc.sock")
-                    useDNSUDS(SagerNet.deviceStorage.noBackupFilesDir.toString() + "/ipc_dns.sock")
+                    useUDS(app.cacheDir.toString() + "/ipc.sock")
+                    useDNSUDS(app.cacheDir.toString() + "/ipc_dns.sock")
                 }
             }
             val result = stunClient.stunNatBehaviorDiscovery(binding.stunServerAddress.text.toString())
@@ -157,8 +158,8 @@ class StunActivity : ThemedActivity() {
         runOnDefaultDispatcher {
             val stunClient = Libexclavecore.newStunClient().apply {
                 if (SagerNet.started && DataStore.startedProfile > 0) {
-                    useUDS(SagerNet.deviceStorage.noBackupFilesDir.toString() + "/ipc.sock")
-                    useDNSUDS(SagerNet.deviceStorage.noBackupFilesDir.toString() + "/ipc_dns.sock")
+                    useUDS(app.cacheDir.toString() + "/ipc.sock")
+                    useDNSUDS(app.cacheDir.toString() + "/ipc_dns.sock")
                 }
             }
             val result = stunClient.stunNatTypeTest(binding.stunServerAddress.text.toString())
@@ -188,8 +189,8 @@ class StunActivity : ThemedActivity() {
         runOnDefaultDispatcher {
             val stunClient = Libexclavecore.newStunClient().apply {
                 if (SagerNet.started && DataStore.startedProfile > 0) {
-                    useUDS(SagerNet.deviceStorage.noBackupFilesDir.toString() + "/ipc.sock")
-                    useDNSUDS(SagerNet.deviceStorage.noBackupFilesDir.toString() + "/ipc_dns.sock")
+                    useUDS(app.cacheDir.toString() + "/ipc.sock")
+                    useDNSUDS(app.cacheDir.toString() + "/ipc_dns.sock")
                 }
             }
             val result = if (isTCP) {

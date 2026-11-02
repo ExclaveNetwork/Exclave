@@ -20,7 +20,6 @@
 package io.nekohasekai.sagernet.bg.proto
 
 import android.annotation.SuppressLint
-import android.os.SystemClock
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -41,6 +40,8 @@ import io.nekohasekai.sagernet.plugin.PluginManager
 import kotlinx.coroutines.*
 import libexclavecore.V2RayInstance
 import java.io.File
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 abstract class V2RayInstance(
     val profile: ProxyEntity,
@@ -91,53 +92,58 @@ abstract class V2RayInstance(
         loadConfig()
     }
 
+    @OptIn(ExperimentalUuidApi::class)
     @SuppressLint("SetJavaScriptEnabled")
     override fun launch() {
         val context = SagerNet.application
+        var pemFile: File? = null
+        val providerRootCA = DataStore.providerRootCA
         for ((_, chain) in config.index) {
             chain.entries.forEachIndexed { _, (triple, profile) ->
                 val port = triple.first
                 val bean = profile.requireBean()
                 val (_, config) = pluginConfigs[port] ?: (0 to "")
-                val env = mutableMapOf<String, String>()
-                if (DataStore.providerRootCA != RootCAProvider.SYSTEM) {
-                    env["SSL_CERT_FILE"] = when (DataStore.providerRootCA) {
-                        RootCAProvider.MOZILLA -> {
-                            File(app.filesDir, "mozilla_included.pem").canonicalPath
-                        }
-                        RootCAProvider.SYSTEM_AND_USER -> {
-                            File(app.filesDir, "android_included.pem").canonicalPath
-                        }
-                        RootCAProvider.CUSTOM -> {
-                            File(app.externalAssets, "root_store.certs").canonicalPath
-                        }
-                        else -> error("impossible")
-                    }
-                }
                 when {
                     externalInstances.containsKey(port) -> {
                         externalInstances[port]!!.launch()
                     }
                     bean is NaiveBean -> {
                         val configFile = File(
-                            context.noBackupFilesDir,
-                            "naive_" + SystemClock.elapsedRealtime() + ".json"
-                        )
-                        configFile.parentFile?.mkdirs()
-                        configFile.writeText(config)
-                        cacheFiles.add(configFile)
+                            app.cacheDir,
+                            "naiveproxy_" + Uuid.generateV4().toHexString() + ".json"
+                        ).apply {
+                            parentFile?.mkdirs()
+                            writeText(config)
+                            cacheFiles.add(this)
+                        }
+                        val env = mutableMapOf<String, String>()
                         if (bean.certificate.isNotEmpty()) {
-                            val caFile = File(
-                                context.noBackupFilesDir,
-                                "naive_" + SystemClock.elapsedRealtime() + ".ca"
-                            )
-                            caFile.parentFile?.mkdirs()
-                            caFile.writeText(bean.certificate)
-                            cacheFiles.add(caFile)
-                            env["SSL_CERT_FILE"] = caFile.absolutePath
+                            File(app.cacheDir, "naiveproxy_" + Uuid.generateV4().toHexString() + ".pem").apply {
+                                parentFile?.mkdirs()
+                                writeText(bean.certificate)
+                                cacheFiles.add(this)
+                                env["SSL_CERT_FILE"] = canonicalPath
+                            }
+                        } else if (providerRootCA == RootCAProvider.CUSTOM) {
+                            File(app.externalAssets, "root_store.certs").apply {
+                                env["SSL_CERT_FILE"] = canonicalPath
+                            }
+                        } else if (providerRootCA == RootCAProvider.MOZILLA || providerRootCA == RootCAProvider.ANDROID) {
+                            if (pemFile == null) {
+                                pemFile = File(app.cacheDir, "naiveproxy_" + Uuid.generateV4().toHexString() + ".pem").apply {
+                                    parentFile?.mkdirs()
+                                    writeBytes(if (providerRootCA == RootCAProvider.MOZILLA) {
+                                        app.assets.open("mozilla_included.pem").use { it.readBytes() }
+                                    } else {
+                                        app.certificates()
+                                    })
+                                    cacheFiles.add(this)
+                                }
+                            }
+                            env["SSL_CERT_FILE"] = pemFile.canonicalPath
                         }
                         val commands = mutableListOf(
-                            initPlugin("naive-plugin").path, configFile.absolutePath
+                            initPlugin("naive-plugin").path, configFile.canonicalPath
                         )
                         processes.start(commands, env)
                     }

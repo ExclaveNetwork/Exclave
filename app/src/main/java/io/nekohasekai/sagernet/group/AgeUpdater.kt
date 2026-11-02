@@ -58,7 +58,7 @@ object AgeUpdater : GroupUpdater() {
         } else {
             val response = Libexclavecore.newHttpClient().apply {
                 if (SagerNet.started && DataStore.startedProfile > 0) {
-                    useUDS(SagerNet.deviceStorage.noBackupFilesDir.toString() + "/ipc.sock")
+                    useUDS(app.cacheDir.toString() + "/ipc.sock")
                 }
             }.newRequest().apply {
                 setURL(subscription.link)
