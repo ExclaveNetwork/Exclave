@@ -2,7 +2,7 @@ module libexclavecore
 
 go 1.26.0
 
-require github.com/exclavenetwork/libexclavecore v0.0.0-20261103084658-f52eea448d5d
+require github.com/exclavenetwork/libexclavecore v0.0.0-20261103210534-6fcfd5b0815f
 
 require (
 	filippo.io/age v1.3.2 // indirect
@@ -16,11 +16,11 @@ require (
 	github.com/dgryski/go-camellia v0.0.0-20191119043421-69a8a13fb23d // indirect
 	github.com/dgryski/go-metro v0.0.0-20261008173524-5059e0b1da03 // indirect
 	github.com/enfein/mieru/v3 v3.39.0 // indirect
-	github.com/exclavenetwork/exclave-core/v5 v5.50.1-0.20261101165045-09b7ccd8675e // indirect
+	github.com/exclavenetwork/exclave-core/v5 v5.50.1-0.20261103210247-27332e8cea30 // indirect
 	github.com/exclavenetwork/go-stun v0.1.7-0.20260811120819-d09f4628f065 // indirect
 	github.com/exclavenetwork/hysteria/core/v2 v2.13.0-1 // indirect
 	github.com/exclavenetwork/hysteria/extras/v2 v2.13.0-1 // indirect
-	github.com/exclavenetwork/reality v0.0.0-20261024092657-66bffb4f0244 // indirect
+	github.com/exclavenetwork/reality v0.0.0-20261103173053-3dac93477407 // indirect
 	github.com/exclavenetwork/sing-juicity v0.3.1 // indirect
 	github.com/exclavenetwork/sing-shadowquic v0.0.0-20261025201941-b0544c564b00 // indirect
 	github.com/gofrs/uuid/v5 v5.5.1 // indirect
@@ -30,7 +30,7 @@ require (
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/hashicorp/yamux v0.1.2 // indirect
 	github.com/klauspost/compress v1.20.3 // indirect
-	github.com/klauspost/cpuid/v2 v2.4.1 // indirect
+	github.com/klauspost/cpuid/v2 v2.4.2 // indirect
 	github.com/lunixbochs/struc v0.0.0-20241101090106-8d528fa2c543 // indirect
 	github.com/metacubex/cpu v0.1.2 // indirect
 	github.com/metacubex/hkdf v0.1.0 // indirect
@@ -43,7 +43,7 @@ require (
 	github.com/miekg/dns v1.1.73 // indirect
 	github.com/pires/go-proxyproto v0.15.0 // indirect
 	github.com/quic-go/qpack v0.6.0 // indirect
-	github.com/quic-go/quic-go v0.64.1 // indirect
+	github.com/quic-go/quic-go v0.65.0 // indirect
 	github.com/refraction-networking/utls v1.8.3-0.20260924070827-6af385813fd8 // indirect
 	github.com/riobard/go-bloom v0.0.0-20200614022211-cdc8013cb5b3 // indirect
 	github.com/sagernet/quic-go v0.61.0-sing-box-mod.12 // indirect

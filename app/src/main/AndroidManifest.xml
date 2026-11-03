@@ -3,8 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:installLocation="internalOnly">
 
-    <uses-sdk tools:overrideLibrary="com.google.zxing.client.android" />
-
     <permission
         android:name="${applicationId}.SERVICE"
         android:protectionLevel="signature" />
@@ -17,7 +15,8 @@
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"
         tools:ignore="BackgroundLocationPolicy" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"
+        tools:ignore="ForegroundServicesPolicy" />
     <uses-permission
         android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission
