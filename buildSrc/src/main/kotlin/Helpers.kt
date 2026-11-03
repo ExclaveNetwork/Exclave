@@ -91,6 +91,7 @@ fun Project.setupCommon(projectName: String = "") {
                 "/META-INF/native-image/**",
                 "/META-INF/INDEX.LIST",
                 "/META-INF/LICENSE.md",
+                "/META-INF/NOTICE.md",
                 "DebugProbesKt.bin",
                 "com/**",
                 "org/**",
