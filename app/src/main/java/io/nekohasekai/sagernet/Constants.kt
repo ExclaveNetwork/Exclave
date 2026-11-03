@@ -99,6 +99,7 @@ object Key {
     const val LOG_LEVEL_DEBUG_WARNING_DISABLE = "logLevelDebugWarningDisable"
     const val ENABLE_DEBUG = "enableDebug"
     const val PPROF_SERVER = "pprofServer"
+    const val GOBEBUG = "goDebug"
 
     const val ALWAYS_SHOW_ADDRESS = "alwaysShowAddress"
     const val SHOW_GROUP_NAME = "showGroupName"

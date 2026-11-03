@@ -179,6 +179,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var logLevelDebugWarningDisable by configurationStore.boolean(Key.LOG_LEVEL_DEBUG_WARNING_DISABLE)
     var enableDebug by configurationStore.boolean(Key.ENABLE_DEBUG) { BuildConfig.DEBUG }
     var pprofServer by configurationStore.string(Key.PPROF_SERVER)
+    var goDebug by configurationStore.string(Key.GOBEBUG)
     var enablePcap by configurationStore.boolean(Key.ENABLE_PCAP)
     var allowAppsBypassVpn by configurationStore.boolean(Key.ALLOW_APPS_BYPASS_VPN)
     var acquireWakeLock by configurationStore.boolean(Key.ACQUIRE_WAKE_LOCK)

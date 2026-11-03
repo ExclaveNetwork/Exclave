@@ -470,6 +470,11 @@
             app:title="pprof server listening address"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
+            app:dialogMessage="This is set after Go runtime initialization. Therefore, not all GODEBUG can take effect."
+            app:key="goDebug"
+            app:title="GODEBUG"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
             app:dialogMessage="For testing purpose only.\nBreaking changes are expected.\nNo guarantee of existence."
             app:key="experimentalFlags"
             app:title="Experimental flags" />
