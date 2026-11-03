@@ -475,6 +475,11 @@
             app:title="GODEBUG"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
+            app:dialogMessage="Example:\nkey1=value1\nkey2=value2"
+            app:key="environmentVariables"
+            app:title="Environment variables"
+            app:useSimpleSummaryProvider="true" />
+        <EditTextPreference
             app:dialogMessage="For testing purpose only.\nBreaking changes are expected.\nNo guarantee of existence."
             app:key="experimentalFlags"
             app:title="Experimental flags" />

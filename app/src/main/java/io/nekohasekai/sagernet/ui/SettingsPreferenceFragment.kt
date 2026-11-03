@@ -603,7 +603,11 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             isVisible = DataStore.enableDebug
         }
 
-        findPreference<EditTextPreference>(Key.GOBEBUG)!!.apply {
+        findPreference<EditTextPreference>(Key.GODEBUG)!!.apply {
+            isVisible = DataStore.enableDebug
+        }
+
+        findPreference<EditTextPreference>(Key.ENVIRONMENT_VARIABLES)!!.apply {
             isVisible = DataStore.enableDebug
         }
 
