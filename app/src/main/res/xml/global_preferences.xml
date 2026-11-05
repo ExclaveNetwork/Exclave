@@ -475,7 +475,7 @@
             app:title="GODEBUG"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
-            app:dialogMessage="Example:\nkey1=value1\nkey2=value2"
+            app:dialogMessage="This is set after Go runtime initialization. Therefore, not all environment variables can take effect.\nExample:\nkey1=value1\nkey2=value2"
             app:key="environmentVariables"
             app:title="Environment variables"
             app:useSimpleSummaryProvider="true" />
