@@ -2,7 +2,7 @@ module libexclavecore
 
 go 1.26.0
 
-require github.com/exclavenetwork/libexclavecore v0.0.0-20261103210534-6fcfd5b0815f
+require github.com/exclavenetwork/libexclavecore v0.0.0-20261105085820-70a0522b7722
 
 require (
 	filippo.io/age v1.3.2 // indirect
@@ -10,17 +10,17 @@ require (
 	filippo.io/mldsa v1.0.0 // indirect
 	github.com/adrg/xdg v0.5.3 // indirect
 	github.com/aead/chacha20 v0.0.0-20180709150244-8b13a72661da // indirect
-	github.com/andybalholm/brotli v1.2.7 // indirect
+	github.com/andybalholm/brotli v1.2.8 // indirect
 	github.com/anytls/sing-anytls v0.0.13 // indirect
 	github.com/apernet/quic-go v0.63.1-0.20261004180939-a10df75c260c // indirect
 	github.com/dgryski/go-camellia v0.0.0-20191119043421-69a8a13fb23d // indirect
 	github.com/dgryski/go-metro v0.0.0-20261008173524-5059e0b1da03 // indirect
 	github.com/enfein/mieru/v3 v3.39.0 // indirect
-	github.com/exclavenetwork/exclave-core/v5 v5.50.1-0.20261103210247-27332e8cea30 // indirect
+	github.com/exclavenetwork/exclave-core/v5 v5.50.1-0.20261105085552-115cedfb4582 // indirect
 	github.com/exclavenetwork/go-stun v0.1.7-0.20260811120819-d09f4628f065 // indirect
 	github.com/exclavenetwork/hysteria/core/v2 v2.13.0-1 // indirect
 	github.com/exclavenetwork/hysteria/extras/v2 v2.13.0-1 // indirect
-	github.com/exclavenetwork/reality v0.0.0-20261103173053-3dac93477407 // indirect
+	github.com/exclavenetwork/reality v0.0.0-20261105065227-9407e3a8cc2a // indirect
 	github.com/exclavenetwork/sing-juicity v0.3.1 // indirect
 	github.com/exclavenetwork/sing-shadowquic v0.0.0-20261025201941-b0544c564b00 // indirect
 	github.com/gofrs/uuid/v5 v5.5.1 // indirect
