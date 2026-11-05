@@ -79,4 +79,4 @@ material-minSdk21 = { module = "com.google.android.material:material", version =
 [plugins]
 ksp = { id = "com.google.devtools.ksp", version = "2.3.13" }
 aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin", version = "15.3.0" }
-protobuf = { id = "com.google.protobuf", version = "0.10.0" }
+protobuf = { id = "com.google.protobuf", version = "0.10.1" }
