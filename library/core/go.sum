@@ -68,8 +68,8 @@ github.com/exclavenetwork/hysteria/core/v2 v2.13.0-1 h1:uPdWKF/ox2CrWtSXQPPi7qWt
 github.com/exclavenetwork/hysteria/core/v2 v2.13.0-1/go.mod h1:GsUJWcwuhJCk8HKG2UEfxddfUzja1maH9IEik4hl6hQ=
 github.com/exclavenetwork/hysteria/extras/v2 v2.13.0-1 h1:slr8b5Zxzj8I1XbW376hZYShfzHu/oIgoIkAsqPPTiY=
 github.com/exclavenetwork/hysteria/extras/v2 v2.13.0-1/go.mod h1:IKo1/vSm5na6Sd/4PCoB3j49rlC04i0j1v+OTCMDwrk=
-github.com/exclavenetwork/libexclavecore v0.0.0-20261105085820-70a0522b7722 h1:BUJQi2zvcTKGbzd1wqQ9ByGMj+MB7CaXYYuuR0NqVG4=
-github.com/exclavenetwork/libexclavecore v0.0.0-20261105085820-70a0522b7722/go.mod h1:8n9BbKNq25Awg7+Xvhq0DrmlA+N9LkfgEGJ/5JCANas=
+github.com/exclavenetwork/libexclavecore v0.0.0-20261105091049-a00645dcb7fb h1:/MorBZ/Bmqr6TPQCuRjkz565tTsy/9abxG4uJoa872Q=
+github.com/exclavenetwork/libexclavecore v0.0.0-20261105091049-a00645dcb7fb/go.mod h1:8n9BbKNq25Awg7+Xvhq0DrmlA+N9LkfgEGJ/5JCANas=
 github.com/exclavenetwork/reality v0.0.0-20261105065227-9407e3a8cc2a h1:cWSuwEeY0vZamwTuw5SZ6CaFqC84X4daU0M5Upzq9Xs=
 github.com/exclavenetwork/reality v0.0.0-20261105065227-9407e3a8cc2a/go.mod h1:yzm3qFfgLRjm13GIcdRB8cjM9m2vR+ZPSksgz1M1TwE=
 github.com/exclavenetwork/sing-juicity v0.3.1 h1:0NXWxJwQZqyoeE9WOWj7YzJ6k0GEHOIcL8HnEX5exrg=
