@@ -53,8 +53,8 @@
     </plurals>
     <string name="group_no_difference">%s: Farklılık yok</string>
     <plurals name="group_status_proxies_subscription">
-        <item quantity="one">%d profil | Son güncelleme: %s</item>
-        <item quantity="other">%d profiller | Son güncelleme: %s</item>
+        <item quantity="one">%d Vekil Sunucu | %s güncellendi</item>
+        <item quantity="other">%d Vekil Sunucu | %s güncellendi</item>
     </plurals>
     <plurals name="group_status_proxies">
         <item quantity="one">%d profil</item>
@@ -365,12 +365,12 @@
     <string name="fileSize_pebibyte">PiB</string>
     <string name="translation_platform">Çeviri Platformu</string>
     <string name="insecure_warn">Güvenlik ipuçları</string>
-    <string name="ws_max_early_data">Max early data</string>
+    <string name="ws_max_early_data">Maksimum erken veri</string>
     <string name="hijack_dns_message">TUN DNS adresine gönderilmeyen DNS sorgularını DNS dinleyicisi ile ele geçir</string>
     <string name="require_socks">SOCKS üzerinden istekleri etkinleştir</string>
-    <string name="hijack_dns">Hijack DNS</string>
+    <string name="hijack_dns">DNS\'yi ele geçirme</string>
     <string name="alter_id">Alter ID</string>
-    <string name="flow">Flow</string>
+    <string name="flow">Akış</string>
     <string name="url">URL</string>
     <string name="balancer_use_landing_proxy">Grup çıkış vekil sunucu kullan</string>
     <string name="balancer_use_front_proxy">Grup ön vekil sunucu kullan</string>
@@ -385,7 +385,7 @@
     <string name="stun_attest_loading">Bu işlem birkaç dakika sürebilir…</string>
     <string name="nat_mapping_behaviour">NAT eşleme davranışı</string>
     <string name="nat_filtering_behaviour">NAT filtreleme davranışı</string>
-    <string name="route_ssid">Wi-Fi SSID</string>
+    <string name="route_ssid">Wi-Fi SSID\'si</string>
     <string name="missing_permission">Eksik izinler</string>
     <string name="location_disabled">Konum devre dışı</string>
     <string name="route_need_location_enabled">Yönlendirme kuralı `%s` **Wi-Fi SSID**\'nize erişim gerektiriyor, ancak bunun için **konumun etkin** olması gerekir</string>
@@ -425,14 +425,14 @@
     <string name="tuic_udp_relay_mode">UDP aktarım modu</string>
     <string name="congestion_control">Tıkanıklık kontrolü</string>
     <string name="tuic_disable_sni">SNI\'yı devre dışı bırak</string>
-    <string name="tuic_zero_rtt_handshake">0-RTT handshake</string>
+    <string name="tuic_zero_rtt_handshake">0-RTT el sıkışma</string>
     <string name="reality_public_key">REALITY genel anahtarı</string>
     <string name="reality_short_id">REALITY Kısa ID</string>
     <string name="reality_fingerprint">REALITY uTLS parmakizi</string>
     <string name="wireguard_reserved">Ayrılmış</string>
-    <string name="bootstrap_dns">Bootstrap DNS</string>
+    <string name="bootstrap_dns">Önyükleme DNS\'si</string>
     <string name="use_local_dns_as_bootstrap_dns">Sistem DNS\'ini Bootstrap DNS olarak kullan</string>
-    <string name="brook_fragment">Fragment</string>
+    <string name="brook_fragment">Parça</string>
     <string name="action_flash_on">Flaşı aç</string>
     <string name="action_camera_switch">Kamerayı değiştir</string>
     <string name="action_flash_off">Flaşı kapat</string>
@@ -454,7 +454,7 @@
     <string name="rules_geosite_url">geosite.dat URL</string>
     <string name="rules_geoip_url">geoip.dat URL</string>
     <string name="http_proxy_exception_list">HTTP proxy istisna listesi</string>
-    <string name="mux_settings">Mux ayarları</string>
+    <string name="mux_settings">Mux.Cool ayarları</string>
     <string name="update_subscription">Aboneliği güncelle</string>
     <string name="group_not_a_subscription">Bu grup bir abonelik değil.</string>
     <string name="enable_fragment">TLS Client Hello Fragmentasyonunu etkinleştir</string>
@@ -568,7 +568,7 @@
     <string name="enable_hysteria2_omit_max_datagram_frame_size">Hysteria 2 OmitMaxDatagramFrameSize\'i etkinleştir</string>
     <string name="hysteria2_omit_max_datagram_frame_size_sum">Hysteria 2 sunucusu bu önemli değişikliği desteklemiyorsa UDP kullanılamaz. Bu geçici bir seçenektir ve gelecekte kaldırılabilir.</string>
     <string name="nearby_devices_permission_notice">Bunun çalışması için \"yakındaki cihazlar\" izni gereklidir, ancak bu izin verilmemiştir.</string>
-    <string name="pre_shared_key">Pre-shared key</string>
+    <string name="pre_shared_key">Önceden paylaşılan anahtar</string>
     <string name="snell_obfs_mode">Gizleme modu</string>
     <string name="snell_obfs_host">Gizleme sunucusu</string>
     <string name="snell_mode">Mod</string>
@@ -577,12 +577,16 @@
     <string name="hysteria2_gecko_max_packet_size">Maksimum paket boyutu</string>
     <string name="hysteria2_gecko_min_packet_size">Minimum paket boyutu</string>
     <string name="custom_outbound">Özel giden bağlantı (outbound)</string>
-    <string name="grpc_multi_mode">Multi mode</string>
-    <string name="mieru_traffic_pattern">Traffic pattern</string>
+    <string name="grpc_multi_mode">Çoklu mod</string>
+    <string name="mieru_traffic_pattern">Trafik düzeni</string>
     <string name="hysteria_hop_interval_min">Minimum port değiştirme aralığı (sn)</string>
     <string name="hysteria_hop_interval_max">Maximum port değiştirme aralığı (sn)</string>
     <string name="ssh_keepalive_interval">Keepalive aralığı (sn)</string>
     <string name="snell_reuse">Bağlantı yeniden kullanımı</string>
     <string name="anytls_disable_reuse">Bağlantı yeniden kullanımını devre dışı bırak</string>
     <string name="chrome_parrot_summary">Chrome\'un QUIC Client Hello\'sunu taklit et</string>
+    <string name="ssh_host_key">Ana makine anahtarı</string>
+    <string name="naiveproxy_tunnel_timeout">Tünel zaman aşımı (saniye)</string>
+    <string name="naiveproxy_idle_timeout">Boşta kalma zaman aşımı (saniye)</string>
+    <string name="uri_template">URI Şablonu</string>
 </resources>
