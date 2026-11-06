@@ -339,7 +339,6 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                 }
                 bean.packetEncoding = when {
                     isPacket -> "packet"
-                    @Suppress("KotlinConstantConditions")
                     isXUDP -> "xudp"
                     else -> "xudp"
                 }
@@ -817,26 +816,44 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                 serverPort = proxy.getInt("port")?.takeIf { it > 0 } ?: return listOf()
                 psk = proxy.getString("psk")
                 version = proxy.getInt("version")
-                if (version != 4) return listOf()
-                proxy.getObject("obfs-opts")?.also { opts ->
-                     when (opts.getString("mode")) {
-                        "tls" -> {
-                            obfsMode = SnellBean.OBFS_TLS
-                            obfsHost = when (val host = opts.getString("host")) {
-                                // null -> "bing.com"
-                                else ->  host
+                when (version) {
+                    4 -> {
+                        if (proxy.getString("mode")?.isNotEmpty() == true) return listOf()
+                        proxy.getObject("obfs-opts")?.also { opts ->
+                            when (opts.getString("mode")) {
+                                "tls" -> {
+                                    obfsMode = SnellBean.OBFS_TLS
+                                    obfsHost = when (val host = opts.getString("host")) {
+                                        // null -> "bing.com"
+                                        else ->  host
+                                    }
+                                }
+                                "http" -> {
+                                    obfsMode = SnellBean.OBFS_HTTP
+                                    obfsHost = when (val host = opts.getString("host")) {
+                                        null -> "bing.com" // https://github.com/MetaCubeX/mihomo/blob/75eeba429292d915691f61d89fc5e57a612c8844/adapter/outbound/snell.go#L158
+                                        else ->  host
+                                    }
+                                }
+                                null, "" -> SnellBean.OBFS_NONE
+                                else -> return listOf()
                             }
                         }
-                         "http" -> {
-                             obfsMode = SnellBean.OBFS_HTTP
-                             obfsHost = when (val host = opts.getString("host")) {
-                                 null -> "bing.com" // https://github.com/MetaCubeX/mihomo/blob/75eeba429292d915691f61d89fc5e57a612c8844/adapter/outbound/snell.go#L158
-                                 else ->  host
-                             }
-                         }
-                         null, "" -> SnellBean.OBFS_NONE
-                         else -> return listOf()
                     }
+                    6 -> {
+                        proxy.getObject("obfs-opts")?.also { opts ->
+                            when (opts.getString("mode")) {
+                                "tls", "http" -> return listOf()
+                            }
+                        }
+                        when (proxy.getString("mode")) {
+                            null, "", "default" ->  mode = SnellBean.MODE_DEFAULT
+                            "unshaped" -> mode = SnellBean.MODE_UNSHAPED
+                            "unsafe-raw" -> mode = SnellBean.MODE_UNSAFE_RAW
+                            else -> return listOf()
+                        }
+                    }
+                    else -> return listOf()
                 }
                 reuse = proxy.getBoolean("reuse") ?: false
                 name = proxy.getString("name")
