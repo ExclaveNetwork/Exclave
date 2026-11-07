@@ -97,11 +97,6 @@ public class ShadowQUICBean extends AbstractBean {
         }
     }
 
-    @Override
-    public String network() {
-        return "udp";
-    }
-
     @NonNull
     @Override
     public ShadowQUICBean clone() {
