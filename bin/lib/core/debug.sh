@@ -2,7 +2,6 @@
 
 source "bin/init/env.sh"
 
-rm -rf library/core/build
 cd library/core
 ./debug.sh || exit 1
 
