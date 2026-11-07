@@ -64,7 +64,7 @@ fun Project.requireLocalProperties(): Properties {
     return localProperties
 }
 
-fun Project.setupCommon(projectName: String = "") {
+fun Project.setupCommon() {
     android.apply {
         buildToolsVersion = "37.0.0"
         compileSdk {
@@ -72,7 +72,7 @@ fun Project.setupCommon(projectName: String = "") {
                 minorApiLevel = 2
             }
         }
-        defaultConfig.minSdk = if (projectName.lowercase() == "naive") 24 else 21
+        defaultConfig.minSdk = 21
         compileOptions.sourceCompatibility = JavaVersion.VERSION_21
         compileOptions.targetCompatibility = JavaVersion.VERSION_21
         lint.showAll = true
@@ -102,14 +102,12 @@ fun Project.setupCommon(projectName: String = "") {
     }
 }
 
-fun Project.setupAppCommon(projectName: String = "") {
-    setupCommon(projectName)
-
+fun Project.setupApp() {
+    setupCommon()
     val lp = requireLocalProperties()
     val keystorePwd = lp.getProperty("KEYSTORE_PASS") ?: System.getenv("KEYSTORE_PASS")
     val alias = lp.getProperty("ALIAS_NAME") ?: System.getenv("ALIAS_NAME")
     val pwd = lp.getProperty("ALIAS_PASS") ?: System.getenv("ALIAS_PASS")
-
     androidApp.apply {
         if (keystorePwd != null) {
             signingConfigs.create("release") {
@@ -120,7 +118,6 @@ fun Project.setupAppCommon(projectName: String = "") {
                 enableV3Signing = true
             }
         }
-
         defaultConfig.targetSdk = 37
         buildTypes.getByName("release") {
             @Suppress("UnstableApiUsage")
@@ -150,42 +147,9 @@ fun Project.setupAppCommon(projectName: String = "") {
             }
         }
     }
-}
-
-fun Project.setupPlugin(projectName: String) {
-    setupAppCommon(projectName)
-
-    val propPrefix = projectName.uppercase()
-    val verName = requireMetadata().getProperty("${propPrefix}_VERSION_NAME").trim()
-    val verCode = requireMetadata().getProperty("${propPrefix}_VERSION").trim().toInt()
-
-    androidApp.apply {
-        defaultConfig.versionName = verName
-        defaultConfig.versionCode = verCode
-        flavorDimensions.add("vendor")
-        productFlavors.create("oss")
-    }
-    androidComponents.apply {
-        onVariants { variant ->
-            variant.outputs.forEach { output ->
-                (output as? VariantOutputImpl)?.let { variantOutputImpl ->
-                    val versionName = variantOutputImpl.versionName.orNull.orEmpty()
-                    variantOutputImpl.outputFileName.set(variantOutputImpl.outputFileName.get()
-                        .replace(project.name, "${projectName}-plugin-$versionName")
-                        .replace("-release", "")
-                        .replace("-oss", "")
-                    )
-                }
-            }
-        }
-    }
-}
-
-fun Project.setupApp() {
     val pkgName = requireMetadata().getProperty("PACKAGE_NAME").trim()
     val verName = requireMetadata().getProperty("VERSION_NAME").trim()
     val verCode = requireMetadata().getProperty("VERSION_CODE").trim().toInt() * 5
-    setupAppCommon()
     androidApp.apply {
         defaultConfig.applicationId = pkgName
         defaultConfig.versionCode = verCode

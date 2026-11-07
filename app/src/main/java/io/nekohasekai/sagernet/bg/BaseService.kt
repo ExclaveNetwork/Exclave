@@ -490,7 +490,6 @@ class BaseService {
             data.changeState(State.Connecting)
             runOnMainDispatcher {
                 try {
-                    Executable.killAll()    // clean up old processes
                     preInit()
                     proxy.init()
                     proxy.processes = GuardedProcessPool {

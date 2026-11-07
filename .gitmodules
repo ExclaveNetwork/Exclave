@@ -1,3 +1,0 @@
-[submodule "plugin/naive/src/main/jni/naiveproxy"]
-	path = plugin/naive/src/main/jni/naiveproxy
-	url = https://github.com/klzgrad/naiveproxy

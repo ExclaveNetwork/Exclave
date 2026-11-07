@@ -107,7 +107,7 @@ Exclave is licensed under the GNU General Public License as published by the Fre
 
 ## Build from source
 
-- Install and configure JDK 21, Go 1.27 and Go Mobile.
+- Install and configure JDK 21 or JDK 25, Go 1.27 and Go Mobile.
 - Install and configure Android SDK Platform 37.2, Android SDK Build-Tools 37.0.0, Android SDK Platform-Tools and Android NDK r30 through Android Studio or Android SDK Command-line Tools.
 - Replace `release.keystore` with your own. It can be generated with Java `keytool`.
 - Create a new `local.properties` file if it does not exist. Append the following lines to `local.properties`.
