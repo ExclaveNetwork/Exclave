@@ -1,9 +1,5 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-source "bin/init/env.sh"
-
-cd library/core
-./build.sh || exit 1
-
-mkdir -p "$PROJECT/app/libs"
-cp -f libexclavecore.aar "$PROJECT/app/libs"
+pushd library/core
+./build.sh
+popd
