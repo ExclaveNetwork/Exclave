@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="cag_misc">موارد متفرقه</string>
+    <string name="cag_misc">تنظیمات متفرقه</string>
     <string name="speed_interval">فاصله‌ی به‌روزرسانی اعلان سرعت</string>
     <string name="ws_browser_forwarding_sum">ارسال WebSocket از طریق مرورگر</string>
     <string name="ws_browser_forwarding">بازارسال مرورگر</string>
@@ -11,7 +11,7 @@
     <string name="allow_access_sum">اتصال سرورهای ورودی به 0.0.0.0</string>
     <string name="allow_access">اجازه اتصال از طریق LAN</string>
     <string name="cag_route">تنظیمات مسیر</string>
-    <string name="port_transproxy">پورت Transproxy</string>
+    <string name="port_transproxy">پورت پروکسی واضح</string>
     <string name="port_http">پورت پروکسی HTTP</string>
     <string name="port_proxy">پورت پروکسی SOCKS5</string>
     <string name="service_mode_vpn">VPN</string>
@@ -21,11 +21,10 @@
 \n%s</string>
     <string name="group_deleted">حذف شده:
 \n%s</string>
-    <string name="group_changed">به روز شده:
-\n%s</string>
+    <string name="group_changed">به روز شده: \n%s</string>
     <string name="group_added">اضافه:
 \n%s</string>
-    <string name="group_delete_confirm_prompt">آیا مطمئن هستید که می خواهید این گروه را حذف کنید؟</string>
+    <string name="group_delete_confirm_prompt">از حذف این گروه مطمئن هستید؟</string>
     <string name="group_diff">تفاوت (%s)</string>
     <plurals name="group_updated">
         <item quantity="one">%s: %d پیکربندی به‌روزرسانی شد</item>
@@ -76,11 +75,11 @@
     <string name="speed">%s/ثانیه</string>
     <string name="speed_detail">پروکسی:\t%1$s↑ %2$s↓
 \nمستقیم:\t%3$s↑ %4$s↓</string>
-    <string name="allow_insecure_sum">فعال‌سازی این گزینه بدون به‌کارگیری سایر تدابیر امنیتی می‌تواند باعث موفقیت حمله‌ی مرد میانی شود. جز در صورتی که دقیقاً می‌دانید چه می‌کنید، آن را فعال نکنید.</string>
-    <string name="allow_insecure">رد کردن اعتبارسنجی گواهی‌نامه</string>
+    <string name="allow_insecure_sum">بدون قراردادن اقدامات امنیتی روشن کردن این گزینه منجر به دسترسی افراد غیرمجاز-به-خط ارتباطی میشود. درصورت نداشتن آگاهی کامل این گزینه را روشن نکنید.</string>
+    <string name="allow_insecure">اعتبارسنجی گواهینامه را انجام نده</string>
     <string name="security_settings">تنظیمات امنیتی</string>
     <string name="show_direct_speed_sum">نمایش سرعت ترافیک بدون استفاده از پراکسی در اعلان‌ها</string>
-    <string name="show_direct_speed">نمایش سرعت اتصال مستقیم</string>
+    <string name="show_direct_speed">نمایش سرعت مستقیم</string>
     <string name="server_port">پورت سرور</string>
     <string name="server_address">سرور</string>
     <string name="profile_name">نام پروفایل</string>
@@ -93,7 +92,7 @@
     <string name="uuid">شناسه کاربر</string>
     <string name="obfs_param">پارامترهای Obfs</string>
     <string name="obfs">پروتکل Obfs</string>
-    <string name="header_type">نوع سربرگ</string>
+    <string name="header_type">نوع سرآیند مبهم‌سازی</string>
     <string name="network">شبکه</string>
     <string name="security">رمزنگاری لایه انتقال</string>
     <string name="ws_host">WebSocket میزبان</string>
@@ -391,7 +390,7 @@
     <string name="backup_import_summary">وارد کردن داده‌های موجود را بازنویسی می‌کند.</string>
     <string name="backup_importing">در حال وارد کردن…</string>
     <string name="use_local_dns_as_direct_dns">استفاده از LocalDNS بعنوان DirectDNS</string>
-    <string name="flow">الگوریتم کنترل جریان</string>
+    <string name="flow">جریان</string>
     <string name="udp_over_tcp">UDP بیش از TCP</string>
     <string name="tuic_udp_relay_mode">حالت رله UDP</string>
     <string name="congestion_control">کنترل تراکم</string>
@@ -438,7 +437,7 @@
     <string name="reality_fingerprint">اثر انگشت uTLS در REALITY</string>
     <string name="wireguard_reserved">فیلد رزرو‌شده</string>
     <string name="bootstrap_dns">DNS راه‌انداز (Bootstrap DNS)</string>
-    <string name="use_local_dns_as_bootstrap_dns">استفاده از DNS سیستم به‌عنوان DNS راه‌انداز (Bootstrap DNS)</string>
+    <string name="use_local_dns_as_bootstrap_dns">استفاده از DNS سیستم به‌عنوان DNS راه‌اندازی فیلترشکن</string>
     <string name="brook_fragment">قطعه (Fragment)</string>
     <string name="hysteria_hop_interval">فاصله‌ی پرش پورت (ثانیه)</string>
     <string name="nat_stun_server_hint">سرور STUN</string>
@@ -548,7 +547,7 @@
     <string name="interrupt_reused_connections">قطع اتصالات مجدداستفاده‌شده هنگام تغییر شبکه</string>
     <string name="cag_grpc">تنظیمات gRPC</string>
     <string name="grpc_service_name_compat">سازگاری نام سرویس gRPC</string>
-    <string name="grpc_service_name_compat_sum">سازگار با تغییر ناسازگار Xray، اما ناسازگاری با سرورهای غیر Xray.</string>
+    <string name="grpc_service_name_compat_sum">با تغییرات فیلتر شکنی سرورهای Xray سازگار باش ولی با تغییرات سرورهای غیراز Xray سازگار نشو.</string>
     <string name="grpc_multi_mode">حالت چندگانه</string>
     <string name="import_routing_rules_warning">تمام قوانین موجود حذف خواهند شد.</string>
     <string name="export_routing_rules_warning">این فقط برای اهداف سازگاری است و اطلاعات کامل را شامل نمی‌شود.</string>
@@ -587,4 +586,5 @@
     <string name="chrome_parrot_omit_max_datagram_frame_size_datagram_warning">این گزینه برای هماهنگی با رفتار کروم غیرفعال شده است.</string>
     <string name="option_globally_enabled">این گزینه به صورت سراسری فعال شده و مقدار آن حذف خواهد شد.</string>
     <string name="snell_obfs_uri">نشانی پنهان‌سازی</string>
+    <string name="uri_template">الگوی URI</string>
 </resources>
