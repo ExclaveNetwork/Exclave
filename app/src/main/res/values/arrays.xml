@@ -488,6 +488,7 @@
         <item>Chrome_120_PQ</item>
         <item>Chrome_131</item>
         <item>Chrome_133</item>
+        <item>Chrome_155</item>
         <item>IOS_11_1</item>
         <item>IOS_12_1</item>
         <item>IOS_13</item>
@@ -538,6 +539,7 @@
         <item>hellochrome_120_pq</item>
         <item>hellochrome_131</item>
         <item>hellochrome_133</item>
+        <item>hellochrome_155</item>
         <item>helloios_11_1</item>
         <item>helloios_12_1</item>
         <item>helloios_13</item>
@@ -566,6 +568,7 @@
         <item>hellochrome_120</item>
         <item>hellochrome_131</item>
         <item>hellochrome_133</item>
+        <item>hellochrome_155</item>
         <item>helloios_13</item>
         <item>helloios_14</item>
         <item>helloedge_106</item>
