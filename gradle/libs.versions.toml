@@ -1,5 +1,5 @@
 [libraries]
-android-gradle-plugin = { module = "com.android.tools.build:gradle", version = "9.5.0" }
+android-gradle-plugin = { module = "com.android.tools.build:gradle", version = "9.5.1" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version = "2.4.21" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version = "5.5.1" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version = "1.11.0" }
