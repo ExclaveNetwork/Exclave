@@ -119,13 +119,23 @@ Exclave is licensed under the GNU General Public License as published by the Fre
 
 - Linux (x64) or macOS (x64/arm64):
 
-  - Build libexclavecore: `./run lib core` or `./library/core/build.sh`
+  - Build libexclavecore:
+  ```
+  pushd ./library/core
+  ./build.sh
+  popd
+  ```
   - Download assets: `./gradlew :app:downloadAssets`, or update assets to the latest version: `./gradlew :app:updateAssets`
   - Build Exclave: `./gradlew :app:assembleOssRelease` (default flavor) or `./gradlew :app:assembleLegacyRelease` (legacy flavor)
 
 - Windows (x64):
 
-  - Build libexclavecore: `.\library\core\build.bat`
+  - Build libexclavecore:
+  ```
+  pushd .\library\core
+  .\build.bat
+  popd
+  ```
   - Download assets: `.\gradlew.bat :app:downloadAssets`, or update assets to the latest version: `.\gradlew.bat :app:updateAssets`
   - Build Exclave: `.\gradlew.bat :app:assembleOssRelease` (default flavor) or `.\gradlew.bat :app:assembleLegacyRelease` (legacy flavor)
 
