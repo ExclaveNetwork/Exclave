@@ -324,6 +324,12 @@ class AssetsActivity : ThemedActivity() {
             1 -> repo = "Loyalsoldier/v2ray-rules-dat"
             2 -> repo = "Chocolate4U/Iran-v2ray-rules"
             4 -> repo = "runetfreedom/russia-v2ray-rules-dat"
+            5 -> {
+                repo = "XTLS/Xray-rules-dat"
+                if (file.name == internalFiles[0]) {
+                    fileName = "geoip-lite.dat"
+                }
+            }
             else -> error("invalid asset provider")
         }
 
