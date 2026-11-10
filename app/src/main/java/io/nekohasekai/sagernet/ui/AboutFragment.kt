@@ -260,7 +260,8 @@ class AboutFragment : ToolbarFragment(R.layout.layout_about) {
                                                 "BSD 2-Clause License",
                                                 "GNU GENERAL PUBLIC LICENSE Version 3",
                                                 "Mozilla Public License Version 2.0",
-                                                "Creative Commons Attribution 4.0 International Public License"
+                                                "Creative Commons Attribution 4.0 International Public License",
+                                                "Community Data License Agreement - Permissive - Version 2.0"
                                             )
                                         )
                                         setOnItemClickListener { _, _, position, _ ->
@@ -273,6 +274,7 @@ class AboutFragment : ToolbarFragment(R.layout.layout_about) {
                                                 5 -> "license/GPL-3.0.txt"
                                                 6 -> "license/MPL-2.0.txt"
                                                 7 -> "license/CC-BY-4.0.txt"
+                                                8 -> "license/CDLA-Permissive-2.0.txt"
                                                 else -> error("index out of bound")
                                             })
                                         }

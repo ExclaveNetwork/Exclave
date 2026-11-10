@@ -2437,9 +2437,19 @@ androidx.camera:camera-core, libyuv
       (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
       OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-mozilla_included.pem (https://curl.se/docs/caextract.html)
+mozilla_included.pem (https://ccadb.my.salesforce-sites.com/mozilla/IncludedRootsPEMTxt?TrustBitsInclude=Websites)
 
-      Mozilla Public License, version 2.0
+      CCADB Data Usage Terms
+
+      The data in this repository is licensed under the Community Data License Agreement – Permissive, Version 2.0 (CDLA-2.0 Permissive).
+
+      Key Terms:
+
+      1. You may use, modify, and redistribute the data freely, provided that you comply with the terms of the CDLA-2.0 Permissive license.
+      2. Attribution to the Common CA Database (CCADB) is required when redistributing or using this data in derived works.
+      3. The names and trademarks of the CCADB or any contributors may not be used to endorse or promote products derived from this data without prior written permission.
+
+      For the full license text, visit the CDLA website (https://cdla.dev/permissive-2-0/).
 
 geosite.dat (https://github.com/v2fly/domain-list-community)
 

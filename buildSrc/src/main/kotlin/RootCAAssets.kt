@@ -26,9 +26,9 @@ fun Project.downloadRootCAList() {
     val assets = File(projectDir, "src/main/assets")
     val pem = File(assets, "mozilla_included.pem")
     val downloader = OkHttpClient.Builder().followRedirects(true).followSslRedirects(true).build()
-    println("Downloading https://curl.se/ca/cacert.pem ...")
+    println("Downloading IncludedRootsPEMTxt ...")
     val body = downloader.newCall(
-        Request.Builder().url("https://curl.se/ca/cacert.pem").build()
+        Request.Builder().url("https://ccadb.my.salesforce-sites.com/mozilla/IncludedRootsPEMTxt?TrustBitsInclude=Websites").build()
     ).execute().body
     pem.writeText(body.string())
     body.close()
