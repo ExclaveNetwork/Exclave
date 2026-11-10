@@ -21,16 +21,10 @@ package io.nekohasekai.sagernet.fmt.anytls
 
 import io.nekohasekai.sagernet.ktx.*
 import libexclavecore.Libexclavecore
+import kotlin.io.encoding.Base64
 
 fun parseAnyTLS(url: String): AnyTLSBean {
     val link = Libexclavecore.parseURL(url)
-    if (link.queryParameter("security") == "reality") {
-        // We don't parse parameters which do not exist in the specification. v2rayN (?) and others
-        // invented `security=reality` without changing the scheme. Ignoring `security=reality` and
-        // parsing the link as normal AnyTLS will make users unable to connect to the server.
-        // Explicitly ban `security=reality` from importing.
-        error("anytls must use tls")
-    }
     return AnyTLSBean().apply {
         name = link.fragment
         serverAddress = link.host
@@ -45,6 +39,21 @@ fun parseAnyTLS(url: String): AnyTLSBean {
         }
         link.queryParameter("insecure")?.takeIf { it == "1" }?.also {
             allowInsecure = true
+        }
+        if (link.queryParameter("security") == "reality") {
+            // invented by unknown person, unfortunately widely adopted
+            security = "reality"
+            link.queryParameter("pbk")?.also {
+                realityPublicKey = it
+            }
+            require(Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT)
+                .decode(realityPublicKey).size == 32
+            ) { "invalid pbk" }
+            link.queryParameter("sid")?.also {
+                require(it.hexToByteArray().size <= 8) { "invalid sid" }
+                realityShortId = it
+            }
+            allowInsecure = null
         }
     }
 }

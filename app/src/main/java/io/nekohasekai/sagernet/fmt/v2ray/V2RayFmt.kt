@@ -244,12 +244,12 @@ fun parseV2Ray(link: String): StandardV2RayBean {
                 bean.sni = it
             }
             url.queryParameter("pbk")?.let {
-                try {
-                    require(Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).decode(it).size == 32)
-                } catch (_: Exception) {
-                    throw IllegalArgumentException("invalid pbk")
-                }
                 bean.realityPublicKey = it
+            }
+            try {
+                require(Base64.UrlSafe.withPadding(Base64.PaddingOption.ABSENT).decode(bean.realityPublicKey).size == 32)
+            } catch (_: Exception) {
+                throw IllegalArgumentException("invalid pbk")
             }
             url.queryParameter("sid")?.let {
                 try {
