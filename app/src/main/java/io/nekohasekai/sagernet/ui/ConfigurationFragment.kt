@@ -308,16 +308,14 @@ class ConfigurationFragment @JvmOverloads constructor(
                 val proxies = mutableListOf<AbstractBean>()
                 if (fileName != null && fileName.endsWith(".zip")) {
                     // try parse wireguard zip
-                    val zip = ZipInputStream(requireContext().contentResolver.openInputStream(file)!!)
-                    while (true) {
-                        val entry = zip.nextEntry ?: break
-                        if (entry.isDirectory) continue
-                        fileText = zip.bufferedReader().readText()
-                        RawUpdater.parseRaw(fileText)?.let { pl -> proxies.addAll(pl) }
-                        zip.closeEntry()
-                    }
-                    runCatching {
-                        zip.close()
+                    ZipInputStream(requireContext().contentResolver.openInputStream(file)!!).use { zip ->
+                        while (true) {
+                            val entry = zip.nextEntry ?: break
+                            if (entry.isDirectory) continue
+                            fileText = zip.bufferedReader().readText()
+                            RawUpdater.parseRaw(fileText)?.let { pl -> proxies.addAll(pl) }
+                            zip.closeEntry()
+                        }
                     }
                 } else {
                     fileText = requireContext().contentResolver.openInputStream(file)!!.use {
