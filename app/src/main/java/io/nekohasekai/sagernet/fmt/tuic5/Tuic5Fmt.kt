@@ -75,8 +75,8 @@ fun parseTuic(server: String): AbstractBean {
             !link.hasPassword() && link.username.length >= 42 && link.username[41] == ':'
                     && link.username.substring(0, 9) == "urn:uuid:"
                     && Uuid.parseHexOrNull(link.username.substring(9, 41)) != null -> {
-                if (link.username.length >= 42) {
-                    password = link.username.substring(41)
+                if (link.username.length >= 43) {
+                    password = link.username.substring(42)
                 }
                 Uuid.parseHex(link.username.substring(9, 41))
             }
