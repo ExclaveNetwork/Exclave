@@ -153,6 +153,7 @@ object SIP008Updater : GroupUpdater() {
                         entity.putBean(bean)
                         toUpdate.add(entity)
                         updated[entity.displayName()] = name
+                        entity.userOrder = userOrder
                     }
                     entity.userOrder != userOrder -> {
                         entity.putBean(bean)
