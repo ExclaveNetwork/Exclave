@@ -378,15 +378,15 @@
         },
         {
             "uniqueId": "org.bouncycastle:bcpkix-jdk18on",
-            "artifactVersion": "1.86"
+            "artifactVersion": "1.87"
         },
         {
             "uniqueId": "org.bouncycastle:bcprov-jdk18on",
-            "artifactVersion": "1.86"
+            "artifactVersion": "1.87"
         },
         {
             "uniqueId": "org.bouncycastle:bcutil-jdk18on",
-            "artifactVersion": "1.86"
+            "artifactVersion": "1.87"
         },
         {
             "uniqueId": "org.jetbrains.kotlin:kotlin-bom",

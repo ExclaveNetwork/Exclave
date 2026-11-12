@@ -33,7 +33,7 @@ room-ktx = { module = "androidx.room:room-ktx", version = "2.8.5" }
 #noinspection SimilarGradleDependency
 material = { module = "com.google.android.material:material", version = "1.14.0" }
 gson = { module = "com.google.code.gson:gson", version = "2.15.0" }
-bouncycastle = { module = "org.bouncycastle:bcpkix-jdk18on", version = "1.86" }
+bouncycastle = { module = "org.bouncycastle:bcpkix-jdk18on", version = "1.87" }
 zxing-core = { module = "com.google.zxing:core", version = "3.5.4" }
 protobuf-java = { module = "com.google.protobuf:protobuf-java", version = "4.36.2" }
 snakeyaml = { module = "org.yaml:snakeyaml", version = "2.7" }
