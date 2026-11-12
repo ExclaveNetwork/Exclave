@@ -125,8 +125,8 @@ fun Hysteria2Bean.toUri(): String? {
         && serverNameToVerify.listByLineOrComma().isEmpty()) {
         builder.addQueryParameter("insecure", "1")
     }
-    if (pinnedPeerCertificateSha256.isNotEmpty()) {
-        val pinSHA256 = pinnedPeerCertificateSha256.listByLineOrComma()[0].replace(":", "").lowercase()
+    pinnedPeerCertificateSha256.listByLineOrComma().firstOrNull()?.let {
+        val pinSHA256 = it.replace(":", "").replace("-", "").lowercase()
         try {
             require(pinSHA256.hexToByteArray().size == 32)
         } catch (_: Exception) {

@@ -78,10 +78,10 @@ fun JuicityBean.toUri(): String? {
     if (sni.isNotEmpty()) {
         builder.addQueryParameter("sni", sni)
     }
-    if (pinnedPeerCertificateChainSha256.isNotEmpty()) {
+    val certChainHash = pinnedPeerCertificateChainSha256.listByLineOrComma().firstOrNull()
+    if (certChainHash != null) {
         // https://github.com/juicity/juicity/blob/412dbe43e091788c5464eb2d6e9c169bdf39f19c/cmd/client/run.go#L87-L96
         // it actually supports Base64 URL-safe encoding with padding, Base64 standard encoding with padding and Hex encoding
-        val certChainHash = pinnedPeerCertificateChainSha256.listByLineOrComma()[0]
         val hash = try {
             if (certChainHash.length == 64) {
                 certChainHash.hexToByteArray()
@@ -98,7 +98,7 @@ fun JuicityBean.toUri(): String? {
     }
     // as `pinnedPeerCertificate(PublicKey)Sha256` is not exportable,
     // only add `allow_insecure=1` if `pinnedPeerCertificate(PublicKey)Sha256` is not used
-    if (pinnedPeerCertificateChainSha256.isNotEmpty() ||
+    if (certChainHash != null ||
         (allowInsecure && pinnedPeerCertificateSha256.isEmpty() &&
                 pinnedPeerCertificatePublicKeySha256.isEmpty() && serverNameToVerify.listByLineOrComma().isEmpty())
         ) {
