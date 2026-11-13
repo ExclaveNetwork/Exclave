@@ -45,6 +45,7 @@ import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.widget.UndoSnackbarManager
 import libexclavecore.Libexclavecore
 import java.io.File
+import java.security.MessageDigest
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -150,8 +151,19 @@ class AssetsActivity : ThemedActivity() {
                 val outFile = File(app.externalAssets, fileName).apply {
                     parentFile?.mkdirs()
                 }
+                val cacheFile = File(outFile.parentFile, outFile.name + ".tmp")
 
-                contentResolver.openInputStream(file)?.use(outFile.outputStream())
+                try {
+                    contentResolver.openInputStream(file)?.use(cacheFile.outputStream())
+                    installAsset(cacheFile, outFile)
+                } catch (e: Exception) {
+                    onMainDispatcher {
+                        alert(e.readableMessage).show()
+                    }
+                    return@runOnDefaultDispatcher
+                } finally {
+                    cacheFile.delete()
+                }
 
                 File(outFile.parentFile, outFile.nameWithoutExtension + ".version.txt").apply {
                     if (isFile) delete()
@@ -360,6 +372,12 @@ class AssetsActivity : ThemedActivity() {
                 ?: error("File $fileName not found in release ${release["url"]}")
             val browserDownloadUrl = assetToDownload.getString("browser_download_url")
 
+            // Only the preset providers publish checksums; custom URLs (provider 3) are not checked.
+            val digest = assetToDownload.getString("digest")
+                ?.takeIf { it.startsWith("sha256:") }
+                ?.removePrefix("sha256:")?.hexToByteArray()
+                ?.takeIf { it.size == 32 } ?: error("invalid checksum for release ${release["url"]}")
+
             response = client.newRequest().apply {
                 setURL(browserDownloadUrl)
             }.execute()
@@ -367,9 +385,12 @@ class AssetsActivity : ThemedActivity() {
             val cacheFile = File(file.parentFile, file.name + ".tmp")
             cacheFile.parentFile?.mkdirs()
 
-            response.writeTo(cacheFile.canonicalPath)
-
-            cacheFile.renameTo(file)
+            try {
+                response.writeTo(cacheFile.canonicalPath)
+                installAsset(cacheFile, file, digest)
+            } finally {
+                cacheFile.delete()
+            }
 
             versionFile.writeText(tagName)
 
@@ -381,6 +402,28 @@ class AssetsActivity : ThemedActivity() {
         } finally {
             client.close()
         }
+    }
+
+    private fun installAsset(cacheFile: File, file: File, digest: ByteArray? = null) {
+        if (digest != null && !digest.contentEquals(cacheFile.sha256())) {
+            error("checksum mismatch for ${file.name}")
+        }
+        if (!cacheFile.renameTo(file)) {
+            error("failed to rename ${cacheFile.name} to ${file.name}")
+        }
+    }
+
+    private fun File.sha256(): ByteArray {
+        val digest = MessageDigest.getInstance("SHA-256")
+        inputStream().use { input ->
+            val buffer = ByteArray(8192)
+            while (true) {
+                val read = input.read(buffer)
+                if (read < 0) break
+                digest.update(buffer, 0, read)
+            }
+        }
+        return digest.digest()
     }
 
     suspend fun updateGeoAsset(file: File, versionFile: File) {
@@ -406,8 +449,12 @@ class AssetsActivity : ThemedActivity() {
             }.execute()
             val cacheFile = File(file.parentFile, file.name + ".tmp")
             cacheFile.parentFile?.mkdirs()
-            response.writeTo(cacheFile.canonicalPath)
-            cacheFile.renameTo(file)
+            try {
+                response.writeTo(cacheFile.canonicalPath)
+                installAsset(cacheFile, file)
+            } finally {
+                cacheFile.delete()
+            }
             adapter.reloadAssets()
             onMainDispatcher {
                 snackbar(R.string.route_asset_updated).show()
