@@ -150,8 +150,19 @@ class AssetsActivity : ThemedActivity() {
                 val outFile = File(app.externalAssets, fileName).apply {
                     parentFile?.mkdirs()
                 }
+                val cacheFile = File(outFile.parentFile, outFile.name + ".tmp")
 
-                contentResolver.openInputStream(file)?.use(outFile.outputStream())
+                try {
+                    contentResolver.openInputStream(file)?.use(cacheFile.outputStream())
+                    installAsset(cacheFile, outFile)
+                } catch (e: Exception) {
+                    onMainDispatcher {
+                        alert(e.readableMessage).show()
+                    }
+                    return@runOnDefaultDispatcher
+                } finally {
+                    cacheFile.delete()
+                }
 
                 File(outFile.parentFile, outFile.nameWithoutExtension + ".version.txt").apply {
                     if (isFile) delete()
@@ -367,9 +378,12 @@ class AssetsActivity : ThemedActivity() {
             val cacheFile = File(file.parentFile, file.name + ".tmp")
             cacheFile.parentFile?.mkdirs()
 
-            response.writeTo(cacheFile.canonicalPath)
-
-            cacheFile.renameTo(file)
+            try {
+                response.writeTo(cacheFile.canonicalPath)
+                installAsset(cacheFile, file)
+            } finally {
+                cacheFile.delete()
+            }
 
             versionFile.writeText(tagName)
 
@@ -380,6 +394,23 @@ class AssetsActivity : ThemedActivity() {
             }
         } finally {
             client.close()
+        }
+    }
+
+    /**
+     * Verifies [cacheFile] and atomically moves it over [file], so that a corrupt or
+     * partial download/import can never replace a working asset.
+     */
+    private fun installAsset(cacheFile: File, file: File) {
+        if (file.name.endsWith(".dat")) {
+            try {
+                cacheFile.validateGeoData()
+            } catch (e: IllegalArgumentException) {
+                throw IllegalStateException(getString(R.string.route_asset_invalid_file, file.name), e)
+            }
+        }
+        if (!cacheFile.renameTo(file)) {
+            error("failed to rename ${cacheFile.name} to ${file.name}")
         }
     }
 
@@ -406,8 +437,12 @@ class AssetsActivity : ThemedActivity() {
             }.execute()
             val cacheFile = File(file.parentFile, file.name + ".tmp")
             cacheFile.parentFile?.mkdirs()
-            response.writeTo(cacheFile.canonicalPath)
-            cacheFile.renameTo(file)
+            try {
+                response.writeTo(cacheFile.canonicalPath)
+                installAsset(cacheFile, file)
+            } finally {
+                cacheFile.delete()
+            }
             adapter.reloadAssets()
             onMainDispatcher {
                 snackbar(R.string.route_asset_updated).show()
