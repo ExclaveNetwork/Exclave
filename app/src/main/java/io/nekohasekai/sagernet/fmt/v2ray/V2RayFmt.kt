@@ -970,11 +970,10 @@ fun StandardV2RayBean.toUri(): String? {
                 // bad format from where?
                 builder.addQueryParameter("allowInsecure", "1")
             }
-            if (pinnedPeerCertificateSha256.isNotEmpty()) {
-                val hashes = pinnedPeerCertificateSha256.listByLineOrComma()
-                for (hash in hashes) {
+            pinnedPeerCertificateSha256.listByLineOrComma().takeIf { it.isNotEmpty() }?.also { hashes ->
+                hashes.forEach {
                     try {
-                        require(hash.hexToByteArray().size == 32)
+                        require(it.hexToByteArray().size == 32)
                     } catch (_: Exception) {
                         throw IllegalArgumentException("invalid pcs")
                     }
