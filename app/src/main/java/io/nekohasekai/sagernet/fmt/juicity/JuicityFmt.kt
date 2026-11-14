@@ -99,8 +99,9 @@ fun JuicityBean.toUri(): String? {
     // as `pinnedPeerCertificate(PublicKey)Sha256` is not exportable,
     // only add `allow_insecure=1` if `pinnedPeerCertificate(PublicKey)Sha256` is not used
     if (certChainHash != null ||
-        (allowInsecure && pinnedPeerCertificateSha256.isEmpty() &&
-                pinnedPeerCertificatePublicKeySha256.isEmpty() && serverNameToVerify.listByLineOrComma().isEmpty())
+        (allowInsecure && pinnedPeerCertificateSha256.listByLineOrComma().isEmpty() &&
+                pinnedPeerCertificatePublicKeySha256.listByLineOrComma().isEmpty() &&
+                serverNameToVerify.listByLineOrComma().isEmpty())
         ) {
         builder.addQueryParameter("allow_insecure", "1")
     }

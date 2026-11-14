@@ -159,7 +159,7 @@ fun Tuic5Bean.toUri(): String? {
     if (sni.isNotEmpty()) {
         builder.addQueryParameter("sni", sni)
     }
-    if (alpn.isNotEmpty()) {
+    if (alpn.listByLineOrComma().isNotEmpty()) {
         builder.addQueryParameter("alpn", alpn.listByLineOrComma().joinToString(","))
     }
     if (disableSNI) {
@@ -169,8 +169,9 @@ fun Tuic5Bean.toUri(): String? {
         builder.addQueryParameter("reduce_rtt", "1")
     }
     // as pinned certificate is not exportable, only add `allow_insecure=1` if pinned certificate is not used
-    if (allowInsecure && pinnedPeerCertificateSha256.isEmpty() &&
-        pinnedPeerCertificatePublicKeySha256.isEmpty() && pinnedPeerCertificateChainSha256.isEmpty() &&
+    if (allowInsecure && pinnedPeerCertificateSha256.listByLineOrComma().isEmpty() &&
+        pinnedPeerCertificatePublicKeySha256.listByLineOrComma().isEmpty() &&
+        pinnedPeerCertificateChainSha256.listByLineOrComma().isEmpty() &&
         serverNameToVerify.listByLineOrComma().isEmpty()) {
         builder.addQueryParameter("allow_insecure", "1")
     }

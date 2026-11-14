@@ -109,8 +109,10 @@ fun TrustTunnelBean.toUri(): String {
         }
         writeTLV(Tag.Username.code, username.toByteArray())
         writeTLV(Tag.Password.code, password.toByteArray())
-        if (pinnedPeerCertificateChainSha256.isEmpty() && pinnedPeerCertificatePublicKeySha256.isEmpty() &&
-            pinnedPeerCertificateSha256.isEmpty() && serverNames.isEmpty() && allowInsecure) {
+        if (pinnedPeerCertificateChainSha256.listByLineOrComma().isEmpty() &&
+            pinnedPeerCertificatePublicKeySha256.listByLineOrComma().isEmpty() &&
+            pinnedPeerCertificateSha256.listByLineOrComma().isEmpty() &&
+            serverNames.isEmpty() && allowInsecure) {
             writeTLV(Tag.SkipVerification.code, byteArrayOf(SkipVerification.True.code))
         }
         when (protocol) {

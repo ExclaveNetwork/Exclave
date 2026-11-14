@@ -791,12 +791,12 @@ fun StandardV2RayBean.toUri(): String? {
             if (headerType == "http") {
                 // invented by v2rayNG
                 builder.addQueryParameter("headerType", headerType)
-                if (host.isNotEmpty()) {
-                    builder.addQueryParameter("host", host.listByLineOrComma().joinToString(","))
+                host.listByLineOrComma().takeIf { it.isNotEmpty() }?.also {
+                    builder.addQueryParameter("host", it.joinToString(","))
                 }
                 // See https://github.com/ExclaveNetwork/Exclave/issues/357
-                /*if (path.isNotEmpty()) {
-                    builder.addQueryParameter("path", path.listByLineOrComma().joinToString(","))
+                /*path.listByLineOrComma().takeIf { it.isNotEmpty() }?.also {
+                    builder.addQueryParameter("path", it.joinToString(","))
                 }*/
             }
         }
@@ -957,15 +957,18 @@ fun StandardV2RayBean.toUri(): String? {
                     builder.addQueryParameter("sni", sni)
                 }
             }
-            if (type == "quic" && (alpn.isEmpty() || alpn.listByLineOrComma().isEmpty())) {
-                // https://github.com/ExclaveNetwork/Exclave/issues/488
-                builder.addQueryParameter("alpn", "h3")
-            } else if (alpn.isNotEmpty()) {
+            if (alpn.listByLineOrComma().isNotEmpty()) {
                 builder.addQueryParameter("alpn", alpn.listByLineOrComma().joinToString(","))
+            } else {
+                if (type == "quic") {
+                    // https://github.com/ExclaveNetwork/Exclave/issues/488
+                    builder.addQueryParameter("alpn", "h3")
+                }
             }
             // as pinned certificate is not exportable, only add `allowInsecure=1` if pinned certificate is not used
-            if (allowInsecure && pinnedPeerCertificateSha256.isEmpty() &&
-                pinnedPeerCertificatePublicKeySha256.isEmpty() && pinnedPeerCertificateChainSha256.isEmpty() &&
+            if (allowInsecure && pinnedPeerCertificateSha256.listByLineOrComma().isEmpty() &&
+                pinnedPeerCertificatePublicKeySha256.listByLineOrComma().isEmpty() &&
+                pinnedPeerCertificateChainSha256.listByLineOrComma().isEmpty() &&
                 serverNameToVerify.listByLineOrComma().isEmpty()) {
                 // bad format from where?
                 builder.addQueryParameter("allowInsecure", "1")
@@ -980,10 +983,9 @@ fun StandardV2RayBean.toUri(): String? {
                 }
                 builder.addQueryParameter("pcs", hashes.joinToString(","))
             }
-            if (serverNameToVerify.isNotEmpty()) {
-                val serverNames = serverNameToVerify.listByLineOrComma()
-                if (serverNames.contains("")) error("serverNameToVerify contains empty value")
-                builder.addQueryParameter("vcn", serverNames.joinToString(","))
+            serverNameToVerify.listByLineOrComma().takeIf { it.isNotEmpty() }?.also {
+                if (it.contains("")) error("serverNameToVerify contains empty value")
+                builder.addQueryParameter("vcn", it.joinToString(","))
             }
             if (this is VLESSBean && flow.isNotEmpty()) {
                 builder.addQueryParameter("flow", flow.removeSuffix("-udp443"))

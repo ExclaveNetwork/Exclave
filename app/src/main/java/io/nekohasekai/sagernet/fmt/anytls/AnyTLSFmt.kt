@@ -72,8 +72,10 @@ fun AnyTLSBean.toUri(): String? {
         builder.addQueryParameter("sni", sni)
     }
     // as pinned certificate is not exportable, only add `insecure=1` if pinned certificate is not used
-    if (pinnedPeerCertificateChainSha256.isEmpty() && pinnedPeerCertificatePublicKeySha256.isEmpty() &&
-        pinnedPeerCertificateSha256.isEmpty() && serverNameToVerify.listByLineOrComma().isEmpty() && allowInsecure) {
+    if (pinnedPeerCertificateChainSha256.listByLineOrComma().isEmpty() &&
+        pinnedPeerCertificatePublicKeySha256.listByLineOrComma().isEmpty() &&
+        pinnedPeerCertificateSha256.listByLineOrComma().isEmpty() &&
+        serverNameToVerify.listByLineOrComma().isEmpty() && allowInsecure) {
         builder.addQueryParameter("insecure", "1")
     }
     if (name.isNotEmpty()) {
