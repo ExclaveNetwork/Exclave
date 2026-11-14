@@ -35,6 +35,7 @@ import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
+import com.google.gson.JsonObject
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.database.DataStore
@@ -43,8 +44,10 @@ import io.nekohasekai.sagernet.databinding.LayoutAssetItemBinding
 import io.nekohasekai.sagernet.databinding.LayoutAssetsBinding
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.widget.UndoSnackbarManager
+import libexclavecore.HTTPClient
 import libexclavecore.Libexclavecore
 import java.io.File
+import java.security.MessageDigest
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -150,8 +153,19 @@ class AssetsActivity : ThemedActivity() {
                 val outFile = File(app.externalAssets, fileName).apply {
                     parentFile?.mkdirs()
                 }
+                val cacheFile = File(outFile.parentFile, outFile.name + ".tmp")
 
-                contentResolver.openInputStream(file)?.use(outFile.outputStream())
+                try {
+                    contentResolver.openInputStream(file)?.use(cacheFile.outputStream())
+                    installAsset(cacheFile, outFile)
+                } catch (e: Exception) {
+                    onMainDispatcher {
+                        alert(e.readableMessage).show()
+                    }
+                    return@runOnDefaultDispatcher
+                } finally {
+                    cacheFile.delete()
+                }
 
                 File(outFile.parentFile, outFile.nameWithoutExtension + ".version.txt").apply {
                     if (isFile) delete()
@@ -359,6 +373,8 @@ class AssetsActivity : ThemedActivity() {
             val assetToDownload = releaseAssets?.find { it.getString("name") == fileName }
                 ?: error("File $fileName not found in release ${release["url"]}")
             val browserDownloadUrl = assetToDownload.getString("browser_download_url")
+            // Only the preset providers publish checksums; custom URLs (provider 3) are not checked.
+            val expectedSha256 = findExpectedSha256(client, releaseAssets.orEmpty(), assetToDownload)
 
             response = client.newRequest().apply {
                 setURL(browserDownloadUrl)
@@ -367,9 +383,12 @@ class AssetsActivity : ThemedActivity() {
             val cacheFile = File(file.parentFile, file.name + ".tmp")
             cacheFile.parentFile?.mkdirs()
 
-            response.writeTo(cacheFile.canonicalPath)
-
-            cacheFile.renameTo(file)
+            try {
+                response.writeTo(cacheFile.canonicalPath)
+                installAsset(cacheFile, file, expectedSha256)
+            } finally {
+                cacheFile.delete()
+            }
 
             versionFile.writeText(tagName)
 
@@ -381,6 +400,84 @@ class AssetsActivity : ThemedActivity() {
         } finally {
             client.close()
         }
+    }
+
+    /**
+     * Verifies [cacheFile] and atomically moves it over [file], so that a corrupt or
+     * partial download/import can never replace a working asset.
+     *
+     * - If [expectedSha256] is given (preset route asset providers only), the file must match it.
+     * - A `.dat` file must be decoded successfully by the geodata decoder of the core (Go side).
+     */
+    private fun installAsset(cacheFile: File, file: File, expectedSha256: String? = null) {
+        if (expectedSha256 != null) {
+            val actual = cacheFile.sha256()
+            if (!actual.equals(expectedSha256, ignoreCase = true)) {
+                error(getString(R.string.route_asset_sha256_mismatch, file.name))
+            }
+        }
+        if (file.name.endsWith(".dat")) {
+            try {
+                val path = cacheFile.canonicalPath
+                when (file.name) {
+                    internalFiles[0] -> Libexclavecore.validateGeoIPFile(path)
+                    internalFiles[1] -> Libexclavecore.validateGeoSiteFile(path)
+                    else -> Libexclavecore.validateGeoDataFile(path)
+                }
+            } catch (e: Exception) {
+                throw IllegalStateException(
+                    getString(R.string.route_asset_invalid_file, file.name) + "\n" + e.readableMessage, e
+                )
+            }
+        }
+        if (!cacheFile.renameTo(file)) {
+            error("failed to rename ${cacheFile.name} to ${file.name}")
+        }
+    }
+
+    private fun File.sha256(): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        inputStream().use { input ->
+            val buffer = ByteArray(8192)
+            while (true) {
+                val read = input.read(buffer)
+                if (read < 0) break
+                digest.update(buffer, 0, read)
+            }
+        }
+        return digest.digest().joinToString("") { "%02x".format(it) }
+    }
+
+    private val sha256Regex = Regex("^[0-9a-fA-F]{64}$")
+
+    /**
+     * Looks up the SHA256 published by the release for [assetToDownload]: first the
+     * `<name>.sha256sum` asset (`<hash>  <name>`), then the `digest` field of the GitHub
+     * release API (`sha256:<hash>`). Returns null if the release does not publish one.
+     */
+    private fun findExpectedSha256(
+        client: HTTPClient,
+        releaseAssets: List<JsonObject>,
+        assetToDownload: JsonObject,
+    ): String? {
+        val name = assetToDownload.getString("name")
+        val sumUrl = releaseAssets.find { it.getString("name") == "$name.sha256sum" }
+            ?.getString("browser_download_url")
+        if (sumUrl != null) {
+            val content = client.newRequest().apply {
+                setURL(sumUrl)
+            }.execute().contentString
+            val hash = content.trim().split(Regex("\\s+")).firstOrNull()
+            if (hash == null || !sha256Regex.matches(hash)) {
+                error("invalid $name.sha256sum")
+            }
+            return hash.lowercase()
+        }
+        val digest = assetToDownload.getString("digest")?.removePrefix("sha256:")
+        if (digest != null && sha256Regex.matches(digest)) {
+            return digest.lowercase()
+        }
+        return null
     }
 
     suspend fun updateGeoAsset(file: File, versionFile: File) {
@@ -406,8 +503,12 @@ class AssetsActivity : ThemedActivity() {
             }.execute()
             val cacheFile = File(file.parentFile, file.name + ".tmp")
             cacheFile.parentFile?.mkdirs()
-            response.writeTo(cacheFile.canonicalPath)
-            cacheFile.renameTo(file)
+            try {
+                response.writeTo(cacheFile.canonicalPath)
+                installAsset(cacheFile, file)
+            } finally {
+                cacheFile.delete()
+            }
             adapter.reloadAssets()
             onMainDispatcher {
                 snackbar(R.string.route_asset_updated).show()

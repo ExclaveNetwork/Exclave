@@ -147,6 +147,8 @@
     <string name="route_asset_no_update">Already up-to-date</string>
     <string name="route_asset_updated">Updated</string>
     <string name="route_not_asset">Not an asset file: excepted .dat, but %s</string>
+    <string name="route_asset_invalid_file">Invalid asset file: %s is not a valid geodata file</string>
+    <string name="route_asset_sha256_mismatch">SHA256 mismatch: the downloaded %s is corrupted or has been tampered with</string>
     <string name="route_opt_bypass_lan">Bypass private addresses</string>
     <string name="domain_strategy">Domain strategy</string>
     <string name="traffic_sniffing">Enable sniffing</string>
