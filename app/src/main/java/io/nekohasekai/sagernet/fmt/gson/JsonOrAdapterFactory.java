@@ -41,7 +41,7 @@ public class JsonOrAdapterFactory implements TypeAdapterFactory {
         Type[] args = parameterized.getActualTypeArguments();
         try {
             JsonOr<?, ?> instance = (JsonOr<?, ?>) type.getRawType().newInstance();
-            return new JsonOrAdapter(gson, TypeToken.get(args[0]), TypeToken.get(args[1]), type, instance.tokenX, instance.tokenY);
+            return new JsonOrAdapter(gson, TypeToken.get(args[0]), TypeToken.get(args[1]), type, instance.tokenX, instance.tokenY).nullSafe();
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
