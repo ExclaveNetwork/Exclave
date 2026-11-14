@@ -87,7 +87,7 @@ fun SOCKSBean.toUri(): String? {
     if (protocol == SOCKSBean.PROTOCOL_SOCKS5 && password.length > 255) {
         error("password too long")
     }
-    if (protocol == SOCKSBean.PROTOCOL_SOCKS4 || protocol == SOCKSBean.PROTOCOL_SOCKS4A && password.isNotEmpty()) {
+    if ((protocol == SOCKSBean.PROTOCOL_SOCKS4 || protocol == SOCKSBean.PROTOCOL_SOCKS4A) && password.isNotEmpty()) {
         error("SOCKS4 and SOCKS4A do not have password field")
     }
     val builder = Libexclavecore.newURL("socks${protocolVersion()}").apply {

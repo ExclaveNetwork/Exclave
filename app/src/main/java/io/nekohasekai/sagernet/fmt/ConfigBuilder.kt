@@ -794,13 +794,13 @@ fun buildV2RayConfig(
                                             servers = listOf(SocksOutboundConfigurationObject.ServerObject().apply {
                                                 address = bean.serverAddress
                                                 port = bean.serverPort
-                                                if (bean.username.isNotEmpty() || bean.password.isNotEmpty() && bean.protocol == SOCKSBean.PROTOCOL_SOCKS5) {
+                                                if ((bean.username.isNotEmpty() || bean.password.isNotEmpty()) && bean.protocol == SOCKSBean.PROTOCOL_SOCKS5) {
                                                     users = listOf(SocksOutboundConfigurationObject.ServerObject.UserObject().apply {
                                                         user = bean.username
                                                         pass = bean.password
                                                     })
                                                 }
-                                                if (bean.protocol == SOCKSBean.PROTOCOL_SOCKS4 || bean.protocol == SOCKSBean.PROTOCOL_SOCKS4A && bean.username.isNotEmpty()) {
+                                                if ((bean.protocol == SOCKSBean.PROTOCOL_SOCKS4 || bean.protocol == SOCKSBean.PROTOCOL_SOCKS4A) && bean.username.isNotEmpty()) {
                                                     users = listOf(SocksOutboundConfigurationObject.ServerObject.UserObject().apply {
                                                         user = bean.username
                                                     })
