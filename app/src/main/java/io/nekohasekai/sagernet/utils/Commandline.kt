@@ -61,6 +61,7 @@ object Commandline {
         val result = StringBuilder()
         for (arg in args) {
             if (result.isNotEmpty()) result.append(' ')
+            if (arg.isEmpty()) result.append("\"\"")
             arg.indices.map { arg[it] }.forEach {
                 when (it) {
                     ' ', '\\', '"', '\'' -> {
