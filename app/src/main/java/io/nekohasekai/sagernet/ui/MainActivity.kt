@@ -86,6 +86,10 @@ class MainActivity : ThemedActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        runOnDefaultDispatcher {
+            QuickToggleShortcut.publishShortcut(this@MainActivity)
+        }
+
         binding = LayoutMainBinding.inflate(layoutInflater)
         when (DataStore.fabStyle) {
             FabStyle.SagerNet -> {
