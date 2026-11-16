@@ -24,6 +24,7 @@ package io.nekohasekai.sagernet.ui
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.Manifest
+import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -39,6 +40,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
+import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.setPadding
@@ -83,11 +85,32 @@ class MainActivity : ThemedActivity(),
         }
     }
 
+    private fun buildShortcut(context: Context) {
+        /**
+         * Publish the shortcuts as dynamic shortcuts instead of declaring it in
+         * shortcuts.xml. The system forcibly adds FLAG_ACTIVITY_NEW_TASK, FLAG_ACTIVITY_CLEAR_TASK
+         * and FLAG_ACTIVITY_TASK_ON_HOME to the first intent of every static shortcut, which puts
+         * the home task right below the launched task, so the foreground app is sent to the
+         * background when this transparent activity finishes. Dynamic shortcuts keep their own flags.
+         * Publish the shortcuts as dynamic shortcuts to avoid hardcoding targetPackage too.
+         */
+        try {
+            if (ShortcutManagerCompat.getDynamicShortcuts(context).size != 2) {
+                ShortcutManagerCompat.setDynamicShortcuts(context, listOf(
+                    QuickToggleShortcut.buildShortcut(context),
+                    ScannerActivity.buildShortcut(context)
+                ))
+            }
+        } catch (e: Exception) {
+            Logs.w(e)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         runOnDefaultDispatcher {
-            QuickToggleShortcut.publishShortcut(this@MainActivity)
+            buildShortcut(this@MainActivity)
         }
 
         binding = LayoutMainBinding.inflate(layoutInflater)

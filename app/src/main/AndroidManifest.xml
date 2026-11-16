@@ -95,9 +95,6 @@
         android:enableOnBackInvokedCallback="true"
         tools:targetApi="33"
         tools:ignore="Deprecated">
-        <meta-data
-            android:name="android.app.shortcuts"
-            android:resource="@xml/shortcuts" />
 
         <activity
             android:name="io.nekohasekai.sagernet.ui.MainActivity"
@@ -151,10 +148,6 @@
                 <data android:scheme="sq" />
                 <data android:scheme="shadowquic" />
             </intent-filter>
-
-            <meta-data
-                android:name="android.app.shortcuts"
-                android:resource="@xml/shortcuts" />
         </activity>
         <activity
             android:name="io.nekohasekai.sagernet.ui.VpnRequestActivity"

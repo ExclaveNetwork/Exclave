@@ -20,6 +20,7 @@
 package io.nekohasekai.sagernet.ui
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ShortcutManager
@@ -38,6 +39,8 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.graphics.drawable.IconCompat
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.DecodeHintType
 import com.google.zxing.NotFoundException
@@ -52,13 +55,20 @@ import io.nekohasekai.sagernet.group.RawUpdater
 import io.nekohasekai.sagernet.ktx.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import androidx.core.net.toUri
-import androidx.room.util.query
 import io.nekohasekai.sagernet.utils.ZxingQRCodeAnalyzer
-import libexclavecore.Libexclavecore
-import java.net.URI
 
 class ScannerActivity : ThemedActivity() {
+
+    companion object {
+        private const val SHORTCUT_ID = "scan"
+
+        fun buildShortcut(context: Context) = ShortcutInfoCompat.Builder(context, SHORTCUT_ID)
+            .setIntent(Intent(context, ScannerActivity::class.java).setAction(Intent.ACTION_MAIN))
+            .setIcon(IconCompat.createWithResource(context, R.drawable.ic_qu_camera_launcher))
+            .setShortLabel(context.getString(R.string.add_profile_methods_scan_qr_code))
+            .setLongLabel(context.getString(R.string.add_profile_methods_scan_qr_code))
+            .build()
+    }
 
     private lateinit var analysisExecutor: ExecutorService
     private lateinit var binding: LayoutScannerBinding

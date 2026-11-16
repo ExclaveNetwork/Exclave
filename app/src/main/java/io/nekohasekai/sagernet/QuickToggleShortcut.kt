@@ -34,7 +34,6 @@ import io.nekohasekai.sagernet.aidl.ISagerNetService
 import io.nekohasekai.sagernet.bg.BaseService
 import io.nekohasekai.sagernet.bg.SagerConnection
 import io.nekohasekai.sagernet.database.DataStore
-import io.nekohasekai.sagernet.ktx.Logs
 
 @Suppress("DEPRECATION")
 class QuickToggleShortcut : Activity(), SagerConnection.Callback {
@@ -42,27 +41,12 @@ class QuickToggleShortcut : Activity(), SagerConnection.Callback {
     companion object {
         private const val SHORTCUT_ID = "toggle"
 
-        private fun buildShortcut(context: Context) = ShortcutInfoCompat.Builder(context, SHORTCUT_ID)
+        fun buildShortcut(context: Context) = ShortcutInfoCompat.Builder(context, SHORTCUT_ID)
             .setIntent(Intent(context, QuickToggleShortcut::class.java).setAction(Intent.ACTION_MAIN))
             .setIcon(IconCompat.createWithResource(context, R.drawable.ic_qu_shadowsocks_launcher))
             .setShortLabel(context.getString(R.string.quick_toggle))
             .setLongLabel(context.getString(R.string.quick_toggle))
             .build()
-
-        /**
-         * Publish the toggle shortcut as a dynamic shortcut instead of declaring it in
-         * shortcuts.xml. The system forcibly adds FLAG_ACTIVITY_NEW_TASK, FLAG_ACTIVITY_CLEAR_TASK
-         * and FLAG_ACTIVITY_TASK_ON_HOME to the first intent of every static shortcut, which puts
-         * the home task right below the launched task, so the foreground app is sent to the
-         * background when this transparent activity finishes. Dynamic shortcuts keep their own flags.
-         */
-        fun publishShortcut(context: Context) {
-            try {
-                ShortcutManagerCompat.setDynamicShortcuts(context, listOf(buildShortcut(context)))
-            } catch (e: Exception) {
-                Logs.w(e)
-            }
-        }
     }
 
     private val connection = SagerConnection()
