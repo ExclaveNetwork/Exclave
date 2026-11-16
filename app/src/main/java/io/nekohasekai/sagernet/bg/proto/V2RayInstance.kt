@@ -123,10 +123,14 @@ abstract class V2RayInstance(
                                 writeText(bean.certificate)
                                 cacheFiles.add(this)
                                 env["SSL_CERT_FILE"] = canonicalPath
+                                // disable system directories
+                                env["SSL_CERT_DIR"] = "/not_exists"
                             }
                         } else if (providerRootCA == RootCAProvider.CUSTOM) {
                             File(app.externalAssets, "root_store.certs").apply {
                                 env["SSL_CERT_FILE"] = canonicalPath
+                                // disable system directories
+                                env["SSL_CERT_DIR"] = "/not_exists"
                             }
                         } else if (providerRootCA == RootCAProvider.MOZILLA || providerRootCA == RootCAProvider.ANDROID) {
                             if (pemFile == null) {
@@ -141,6 +145,8 @@ abstract class V2RayInstance(
                                 }
                             }
                             env["SSL_CERT_FILE"] = pemFile.canonicalPath
+                            // disable system directories
+                            env["SSL_CERT_DIR"] = "/not_exists"
                         }
                         val commands = mutableListOf(
                             initPlugin("naive-plugin").path, configFile.canonicalPath
