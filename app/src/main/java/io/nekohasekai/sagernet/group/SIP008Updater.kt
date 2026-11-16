@@ -52,7 +52,7 @@ object SIP008Updater : GroupUpdater() {
 
             val response = Libexclavecore.newHttpClient().apply {
                 if (SagerNet.started && DataStore.startedProfile > 0) {
-                    useUDS(app.cacheDir.toString() + "/ipc.sock")
+                    useUDS(SagerNet.deviceStorage.noBackupFilesDir.toString() + "/ipc.sock")
                 }
             }.newRequest().apply {
                 setURL(subscription.link)

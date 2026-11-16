@@ -215,7 +215,7 @@ class ProbeCertActivity : ThemedActivity() {
         runOnDefaultDispatcher {
             val certProber = Libexclavecore.newCertProber().apply {
                 if (SagerNet.started && DataStore.startedProfile > 0) {
-                    useUDS(app.cacheDir.toString() + "/ipc.sock")
+                    useUDS(SagerNet.deviceStorage.noBackupFilesDir.toString() + "/ipc.sock")
                 }
             }
             val result = when (binding.probeCertProtocol.selectedItemPosition) {
