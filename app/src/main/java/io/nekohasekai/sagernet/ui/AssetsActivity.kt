@@ -408,6 +408,13 @@ class AssetsActivity : ThemedActivity() {
         if (digest != null && !digest.contentEquals(cacheFile.sha256())) {
             error("checksum mismatch for ${file.name}")
         }
+        if (file.name.endsWith(".dat")) {
+            try {
+                cacheFile.validateGeoData()
+            } catch (e: IllegalArgumentException) {
+                throw IllegalStateException("Invalid asset file: ${file.name} is not a valid geodata file", e)
+            }
+        }
         if (!cacheFile.renameTo(file)) {
             error("failed to rename ${cacheFile.name} to ${file.name}")
         }
