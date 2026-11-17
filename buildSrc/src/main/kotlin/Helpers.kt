@@ -79,6 +79,14 @@ fun Project.setupCommon(projectName: String = "") {
         lint.checkAllWarnings = true
         lint.checkReleaseBuilds = false
         lint.warningsAsErrors = true
+        androidResources.apply {
+            ignoreAssetsPatterns.addAll(listOf(
+                "<file>geosite.version.txt",
+                "<file>geosite.sha256sum.txt",
+                "<file>geoip.version.txt",
+                "<file>geoip.sha256sum.txt",
+            ))
+        }
         packaging.jniLibs.useLegacyPackaging = true
         // Do not strip symbols by AGP to improve reproducibility. Symbols are manually stripped in advanced.
         packaging.jniLibs.keepDebugSymbols.add("**/*.so")
