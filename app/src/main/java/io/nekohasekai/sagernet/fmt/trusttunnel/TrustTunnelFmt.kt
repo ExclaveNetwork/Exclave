@@ -33,10 +33,7 @@ import java.io.StringWriter
 import java.security.cert.CertificateFactory
 import kotlin.io.encoding.Base64
 
-// https://github.com/TrustTunnel/TrustTunnel/blob/8856e7ba83ae0c9faace78aaf9a95b1b291cd3ed/DEEP_LINK.md
-// https://github.com/TrustTunnel/TrustTunnel/blob/8ba8f34da84b54ff49c248ec8c940c38010b511e/DEEP_LINK.md
-// https://github.com/TrustTunnel/TrustTunnel/blob/9e144fe4bcd0c2cf8f6690a97ba9b4df571a8ec0/DEEP_LINK.md
-// https://github.com/TrustTunnel/TrustTunnel/blob/3470404b7fca8187772b57c6641a0c571e0c165f/DEEP_LINK.md
+// https://github.com/TrustTunnel/TrustTunnel/blob/616e9ab714c0fcf7d6ccc4e57fe480a22913de87/DEEP_LINK.md
 
 private enum class Tag(val code: Long) {
     Version(0x00),
@@ -55,6 +52,7 @@ private enum class Tag(val code: Long) {
     DNSUptreams(0x0D),
     SubscriptionURL(0x0E),
     ClientRandomAuthKey(0x0F),
+    TLSProfile(0x10),
 }
 
 private enum class Version(val code: Byte) {
@@ -242,6 +240,9 @@ fun parseTrustTunnel(url: String): List<TrustTunnelBean> {
                 }
                 Tag.ClientRandomAuthKey.code -> {
                     error("client random auth key unsupported")
+                }
+                Tag.TLSProfile.code -> {
+                    // similar to uTLS fingerprint, ignored
                 }
                 else -> {
                     // "A parser MUST ignore unknown tags to allow forward-compatible extensions."
