@@ -300,6 +300,11 @@
         app:key="serverShCategory"
         app:title="@string/cag_splithttp">
         <SwitchPreference
+            app:icon="@drawable/ic_baseline_fingerprint_24"
+            app:key="serverSplithttpChromeParrot"
+            app:summary="@string/chrome_parrot_summary"
+            app:title="@string/chrome_parrot" />
+        <SwitchPreference
             app:icon="@drawable/ic_baseline_texture_24"
             app:key="serverShBrowserForwarding"
             app:title="@string/ws_browser_forwarding" />

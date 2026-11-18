@@ -881,11 +881,21 @@ fun buildV2RayConfig(
                                                 if (bean.allowInsecure) {
                                                     allowInsecure = true
                                                 }
-                                                val overrideFingerprint = DataStore.experimentalFlagsProperties.getProperty("overrideUTLSFingerprintForTLS")
-                                                if (!overrideFingerprint.isNullOrEmpty()) {
-                                                    fingerprint = overrideFingerprint
-                                                } else if (bean.utlsFingerprint.isNotEmpty()) {
-                                                    fingerprint = bean.utlsFingerprint
+                                                val canSetFingerprint = when (bean.type) {
+                                                    "kcp", "quic", "hysteria2" -> false
+                                                    "splithttp" -> !bean.shUseBrowserForwarder &&
+                                                            (bean.alpn.listByLineOrComma().size != 1 ||
+                                                            bean.alpn.listByLineOrComma()[0] != "h3")
+                                                    "ws" -> !bean.wsUseBrowserForwarder
+                                                    else -> true
+                                                }
+                                                if (canSetFingerprint) {
+                                                    val overrideFingerprint = DataStore.experimentalFlagsProperties.getProperty("overrideUTLSFingerprintForTLS")
+                                                    if (!overrideFingerprint.isNullOrEmpty()) {
+                                                        fingerprint = overrideFingerprint
+                                                    } else if (bean.utlsFingerprint.isNotEmpty()) {
+                                                        fingerprint = bean.utlsFingerprint
+                                                    }
                                                 }
                                                 if (bean.echEnabled) {
                                                     ech = TLSObject.ECHObject().apply {
@@ -916,11 +926,19 @@ fun buildV2RayConfig(
                                                 if (bean.realityMldsa65Verify.isNotEmpty()) {
                                                     mldsa65Verify = bean.realityMldsa65Verify
                                                 }
-                                                val overrideFingerprint = DataStore.experimentalFlagsProperties.getProperty("overrideUTLSFingerprintForREALITY")
-                                                if (!overrideFingerprint.isNullOrEmpty()) {
-                                                    fingerprint = overrideFingerprint
-                                                } else if (bean.realityFingerprint.isNotEmpty()) {
-                                                    fingerprint = bean.realityFingerprint
+                                                val canSetFingerprint = when (bean.type) {
+                                                    "kcp", "quic", "hysteria2" -> false
+                                                    "ws" -> !bean.wsUseBrowserForwarder
+                                                    "splithttp" -> !bean.wsUseBrowserForwarder
+                                                    else -> true
+                                                }
+                                                if (canSetFingerprint) {
+                                                    val overrideFingerprint = DataStore.experimentalFlagsProperties.getProperty("overrideUTLSFingerprintForREALITY")
+                                                    if (!overrideFingerprint.isNullOrEmpty()) {
+                                                        fingerprint = overrideFingerprint
+                                                    } else if (bean.realityFingerprint.isNotEmpty()) {
+                                                        fingerprint = bean.realityFingerprint
+                                                    }
                                                 }
                                                 if (DataStore.realityDisableX25519Mlkem768 || bean.realityDisableX25519Mlkem768 && !forExport) {
                                                     disableX25519MLKEM768 = true
@@ -1060,6 +1078,10 @@ fun buildV2RayConfig(
                                                 }
                                                 if (bean.splithttpMode != "auto") {
                                                     mode = bean.splithttpMode
+                                                }
+                                                if (bean.splithttpChromeParrot && bean.security == "tls" && bean.alpn.listByLineOrComma().size == 1 &&
+                                                    bean.alpn.listByLineOrComma()[0] == "h3") {
+                                                    chromeParrot = true
                                                 }
                                                 if (bean.splithttpExtra.isNotEmpty()) {
                                                     try {
@@ -1218,6 +1240,7 @@ fun buildV2RayConfig(
                                         && !(bean is ShadowsocksBean && bean.plugin.isNotEmpty() && PluginConfiguration(bean.plugin).selected.isNotEmpty())
                                         && !(network == "ws" && bean.wsUseBrowserForwarder)
                                         && !(network == "splithttp" && bean.shUseBrowserForwarder)
+                                        && !(network == "splithttp" && security == "tls" && bean.alpn.listByLineOrComma().size == 1 && bean.alpn.listByLineOrComma()[0] == "h3")
                                     ) {
                                         sockopt = StreamSettingsObject.SockoptObject().apply {
                                             tlsFragmentation = StreamSettingsObject.SockoptObject.TLSFragmentationObject().apply {

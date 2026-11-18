@@ -53,6 +53,7 @@ import io.nekohasekai.sagernet.fmt.v2ray.VLESSBean
 import io.nekohasekai.sagernet.fmt.v2ray.VMessBean
 import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.getBooleanProperty
+import io.nekohasekai.sagernet.ktx.listByLineOrComma
 import io.nekohasekai.sagernet.ktx.listenForPackageChanges
 import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.runOnMainDispatcher
@@ -132,6 +133,7 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
         DataStore.serverEarlyDataHeaderName = earlyDataHeaderName
         DataStore.serverSplithttpMode = splithttpMode
         DataStore.serverSplithttpExtra = splithttpExtra
+        DataStore.serverSplithttpChromeParrot = splithttpChromeParrot
         DataStore.serverUTLSFingerprint = utlsFingerprint
         DataStore.serverEchEnabled = echEnabled
         DataStore.serverEchConfigList = echConfigList
@@ -244,6 +246,7 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
         earlyDataHeaderName = DataStore.serverEarlyDataHeaderName
         splithttpMode = DataStore.serverSplithttpMode
         splithttpExtra = DataStore.serverSplithttpExtra
+        splithttpChromeParrot = DataStore.serverSplithttpChromeParrot
         utlsFingerprint = DataStore.serverUTLSFingerprint
         mtlsCertificate = DataStore.serverMtlsCertificate
         mtlsCertificatePrivateKey = DataStore.serverMtlsCertificatePrivateKey
@@ -343,6 +346,7 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
     lateinit var splithttpCategory: PreferenceCategory
     lateinit var splithttpMode: ListPreference
     lateinit var splithttpExtra: EditTextPreference
+    lateinit var splithttpChromeParrot: SwitchPreference
     lateinit var grpcCategory: PreferenceCategory
     lateinit var ssExperimentsCategory: PreferenceCategory
     lateinit var httpConnectUDPCategory: PreferenceCategory
@@ -453,6 +457,7 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
         splithttpCategory = findPreference(Key.SERVER_SH_CATEGORY)!!
         splithttpMode = findPreference(Key.SERVER_SPLITHTTP_MODE)!!
         splithttpExtra = findPreference(Key.SERVER_SPLITHTTP_EXTRA)!!
+        splithttpChromeParrot = findPreference(Key.SERVER_SPLITHTTP_CHROME_PARROT)!!
 
         grpcCategory = findPreference(Key.SERVER_GRPC_CATAGORY)!!
 
@@ -468,6 +473,13 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
             true
         }
 
+        alpn.setOnPreferenceChangeListener { _, newValue ->
+            newValue as String
+            splithttpChromeParrot.isVisible = network.value == "splithttp" && security.value == "tls" &&
+                    newValue.listByLineOrComma().size == 1 && newValue.listByLineOrComma()[0] == "h3"
+            true
+        }
+
         when (bean) {
             is VLESSBean -> {
                 encryption.isVisible = false
@@ -475,6 +487,7 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
                 if (xtlsFlow.value !in xfv) {
                     xtlsFlow.value = xfv[0]
                 }
+
             }
             is VMessBean -> {
                 vlessEncryption.isVisible = false
@@ -681,6 +694,8 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
         }
         // Do not translate this as it is not a stable string.
         splithttpExtra.dialogMessage = "`downloadSettings` is not supported. Use custom config for `downloadSettings`."
+        splithttpChromeParrot.isVisible = network == "splithttp" && security.value == "tls" &&
+                alpn.text?.listByLineOrComma()?.size == 1 && alpn.text!!.listByLineOrComma()[0] == "h3"
 
         grpcCategory.isVisible = network == "grpc"
 
@@ -819,9 +834,15 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
         realityPublicKey.isVisible = security == "reality"
         realityShortId.isVisible = security == "reality"
         realityMldsa65Verify.isVisible = security == "reality"
-        utlsFingerprint.isVisible = security == "tls" && (network == "tcp" || network == "ws"
-                || network == "http" || network == "meek" || network == "httpupgrade"
-                || network == "grpc" || network == "splithttp" || network == "mekya")
+        if (network == "splithttp") {
+            utlsFingerprint.isVisible = security == "tls"
+                    && alpn.text?.listByLineOrComma()?.size == 1
+                    && alpn.text!!.listByLineOrComma()[0] == "h3"
+        } else {
+            utlsFingerprint.isVisible = security == "tls" && (network == "tcp" || network == "ws"
+                    || network == "http" || network == "meek" || network == "httpupgrade"
+                    || network == "grpc" || network == "mekya")
+        }
         mtlsCertificate.isVisible = security == "tls"
         mtlsCertificatePrivateKey.isVisible = security == "tls"
         echEnabled.isVisible = security == "tls"
@@ -830,6 +851,10 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
         serverNameToVerify.isVisible = security == "tls"
         realityFingerprint.isVisible = security == "reality"
         realityDisableX25519Mlkem768.isVisible = security == "reality"
+
+        splithttpChromeParrot.isVisible = network == "splithttp" && security == "tls"
+                && alpn.text?.listByLineOrComma()?.size == 1
+                && alpn.text!!.listByLineOrComma()[0] == "h3"
     }
 
     override fun onAttachedToWindow() {
