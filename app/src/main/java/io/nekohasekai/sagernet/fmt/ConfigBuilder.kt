@@ -109,7 +109,6 @@ import io.nekohasekai.sagernet.fmt.wireguard.WireGuardBean
 import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.getArray
 import io.nekohasekai.sagernet.ktx.getBoolean
-import io.nekohasekai.sagernet.ktx.getBooleanProperty
 import io.nekohasekai.sagernet.ktx.getObject
 import io.nekohasekai.sagernet.ktx.getString
 import io.nekohasekai.sagernet.ktx.getStringArray
@@ -290,8 +289,8 @@ fun buildV2RayConfig(
     val destinationOverride = DataStore.destinationOverride
     val trafficStatistics = !forTest && DataStore.profileTrafficStatistics
     var hasTagDirect = false
-    val singUotEnabled = DataStore.experimentalFlagsProperties.getBooleanProperty("singuot")
-    val singMuxEnabled = DataStore.experimentalFlagsProperties.getBooleanProperty("singmux")
+    val singUotEnabled = DataStore.singuot
+    val singMuxEnabled = DataStore.singmux
 
     val shouldDumpUID = extraRules.any { it.packages.isNotEmpty() || it.customPackageNames.isNotEmpty() }
     val alerts = mutableListOf<Pair<Int, String>>()
@@ -749,8 +748,8 @@ fun buildV2RayConfig(
                                                         plugin = pluginConfiguration.selected
                                                         pluginOpts = pluginConfiguration.getOptions().toString()
                                                         if (!forExport
-                                                            && !(plugin == "v2ray-plugin" && DataStore.experimentalFlagsProperties.getBooleanProperty("useInternalV2RayPlugin"))
-                                                            && !(plugin == "obfs-local" && DataStore.experimentalFlagsProperties.getBooleanProperty("useInternalObfsLocal"))
+                                                            && !(plugin == "v2ray-plugin" && DataStore.useInternalV2RayPlugin)
+                                                            && !(plugin == "obfs-local" && DataStore.useInternalObfsLocal)
                                                         ) {
                                                             try {
                                                                 PluginManager.init(pluginConfiguration)?.let { (path, opts, isV2) ->
@@ -890,8 +889,8 @@ fun buildV2RayConfig(
                                                     else -> true
                                                 }
                                                 if (canSetFingerprint) {
-                                                    val overrideFingerprint = DataStore.experimentalFlagsProperties.getProperty("overrideUTLSFingerprintForTLS")
-                                                    if (!overrideFingerprint.isNullOrEmpty()) {
+                                                    val overrideFingerprint = DataStore.overrideUTLSFingerprintForTLS
+                                                    if (overrideFingerprint.isNotEmpty()) {
                                                         fingerprint = overrideFingerprint
                                                     } else if (bean.utlsFingerprint.isNotEmpty()) {
                                                         fingerprint = bean.utlsFingerprint
@@ -933,8 +932,8 @@ fun buildV2RayConfig(
                                                     else -> true
                                                 }
                                                 if (canSetFingerprint) {
-                                                    val overrideFingerprint = DataStore.experimentalFlagsProperties.getProperty("overrideUTLSFingerprintForREALITY")
-                                                    if (!overrideFingerprint.isNullOrEmpty()) {
+                                                    val overrideFingerprint = DataStore.overrideUTLSFingerprintForREALITY
+                                                    if (overrideFingerprint.isNotEmpty()) {
                                                         fingerprint = overrideFingerprint
                                                     } else if (bean.realityFingerprint.isNotEmpty()) {
                                                         fingerprint = bean.realityFingerprint
@@ -1658,8 +1657,8 @@ fun buildV2RayConfig(
                                                 if (bean.allowInsecure) {
                                                     allowInsecure = true
                                                 }
-                                                val overrideFingerprint = DataStore.experimentalFlagsProperties.getProperty("overrideUTLSFingerprintForTLS")
-                                                if (!overrideFingerprint.isNullOrEmpty()) {
+                                                val overrideFingerprint = DataStore.overrideUTLSFingerprintForTLS
+                                                if (overrideFingerprint.isNotEmpty()) {
                                                     fingerprint = overrideFingerprint
                                                 } else if (bean.utlsFingerprint.isNotEmpty()) {
                                                     fingerprint = bean.utlsFingerprint
@@ -1690,8 +1689,8 @@ fun buildV2RayConfig(
                                                 if (bean.realityShortId.isNotEmpty()) {
                                                     shortId = bean.realityShortId
                                                 }
-                                                val overrideFingerprint = DataStore.experimentalFlagsProperties.getProperty("overrideUTLSFingerprintForREALITY")
-                                                if (!overrideFingerprint.isNullOrEmpty()) {
+                                                val overrideFingerprint = DataStore.overrideUTLSFingerprintForREALITY
+                                                if (overrideFingerprint.isNotEmpty()) {
                                                     fingerprint = overrideFingerprint
                                                 } else if (bean.realityFingerprint.isNotEmpty()) {
                                                     fingerprint = bean.realityFingerprint
@@ -1815,7 +1814,7 @@ fun buildV2RayConfig(
                                     if (version == SnellBean.VERSION_6) {
                                         mode = bean.mode
                                     }
-                                    if (DataStore.experimentalFlagsProperties.getBooleanProperty("singSnellUserKey") && bean.userKey.isNotEmpty()) {
+                                    if (DataStore.singSnellUserKey && bean.userKey.isNotEmpty()) {
                                         userKey = bean.userKey
                                     }
                                 })
@@ -1906,8 +1905,8 @@ fun buildV2RayConfig(
                                             allowInsecure = true
                                         }
                                         if (bean.protocol == "https") {
-                                            val overrideFingerprint = DataStore.experimentalFlagsProperties.getProperty("overrideUTLSFingerprintForTLS")
-                                            if (!overrideFingerprint.isNullOrEmpty()) {
+                                            val overrideFingerprint = DataStore.overrideUTLSFingerprintForTLS
+                                            if (overrideFingerprint.isNotEmpty()) {
                                                 fingerprint = overrideFingerprint
                                             } else if (bean.utlsFingerprint.isNotEmpty()) {
                                                 fingerprint = bean.utlsFingerprint
@@ -2016,8 +2015,8 @@ fun buildV2RayConfig(
                                                 allowInsecure = true
                                             }
                                             if (!bean.http3) {
-                                                val overrideFingerprint = DataStore.experimentalFlagsProperties.getProperty("overrideUTLSFingerprintForTLS")
-                                                if (!overrideFingerprint.isNullOrEmpty()) {
+                                                val overrideFingerprint = DataStore.overrideUTLSFingerprintForTLS
+                                                if (overrideFingerprint.isNotEmpty()) {
                                                     fingerprint = overrideFingerprint
                                                 } else if (bean.utlsFingerprint.isNotEmpty()) {
                                                     fingerprint = bean.utlsFingerprint
@@ -2604,7 +2603,7 @@ fun buildV2RayConfig(
             settings = LazyOutboundConfigurationObject(this,
                 DNSOutboundConfigurationObject().apply {
                     userLevel = 1
-                    if (DataStore.experimentalFlagsProperties.getBooleanProperty("lookupAsExchange")) {
+                    if (DataStore.lookupAsExchange) {
                         lookupAsExchange = true
                     }
                 })
@@ -2700,8 +2699,8 @@ fun buildV2RayConfig(
         }
 
         if (DataStore.enableDnsRouting) {
-            val directDNSDomainList = DataStore.experimentalFlagsProperties.getProperty("directDNSDomainList")
-            if (directDNSDomainList != null) {
+            val directDNSDomainList = DataStore.directDNSDomainList
+            if (directDNSDomainList.isNotEmpty()) {
                 if (!forTest && DataStore.routeMode == RouteMode.RULE) {
                     bypassDomain.addAll(directDNSDomainList.split(","))
                 }
@@ -2712,8 +2711,8 @@ fun buildV2RayConfig(
                     }
                 }
             }
-            val remoteDNSDomainList = DataStore.experimentalFlagsProperties.getProperty("remoteDNSDomainList")
-            if (remoteDNSDomainList != null) {
+            val remoteDNSDomainList = DataStore.remoteDNSDomainList
+            if (remoteDNSDomainList.isNotEmpty()) {
                 if (!forTest && DataStore.routeMode == RouteMode.RULE) {
                     proxyDomain.addAll(remoteDNSDomainList.split(","))
                 }

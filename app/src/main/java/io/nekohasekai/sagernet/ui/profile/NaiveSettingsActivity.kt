@@ -28,7 +28,6 @@ import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.preference.EditTextPreferenceModifiers
 import io.nekohasekai.sagernet.fmt.naive.NaiveBean
-import io.nekohasekai.sagernet.ktx.getBooleanProperty
 import io.nekohasekai.sagernet.ktx.unwrapIDN
 
 class NaiveSettingsActivity : ProfileSettingsActivity<NaiveBean>() {
@@ -87,8 +86,7 @@ class NaiveSettingsActivity : ProfileSettingsActivity<NaiveBean>() {
             dialogMessage = getString(R.string.format, "\nKey1: Value1\nKey2: Value2")
         }
 
-        findPreference<PreferenceCategory>(Key.SERVER_SING_UOT_CATEGORY)!!.isVisible =
-            DataStore.experimentalFlagsProperties.getBooleanProperty("singuot")
+        findPreference<PreferenceCategory>(Key.SERVER_SING_UOT_CATEGORY)!!.isVisible = DataStore.singuot
 
         findPreference<EditTextPreference>(Key.SERVER_NAIVE_TUNNEL_TIMEOUT)!!.apply {
             setOnBindEditTextListener(EditTextPreferenceModifiers.Number)

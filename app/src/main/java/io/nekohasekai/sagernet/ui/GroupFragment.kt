@@ -57,7 +57,7 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
     lateinit var layoutManager: LinearLayoutManager
     lateinit var groupAdapter: GroupAdapter
     lateinit var undoManager: UndoSnackbarManager<ProxyGroup>
-    val showBackup = DataStore.experimentalFlagsProperties.getBooleanProperty("enableProfileBackup")
+    val showBackup = DataStore.enableProfileBackup
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

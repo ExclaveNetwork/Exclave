@@ -936,7 +936,7 @@ fun parseSingBoxOutbound(outbound: JsonObject): List<AbstractBean> {
                 outbound.getString("psk")?.also {
                     psk = it
                 }
-                if (DataStore.experimentalFlagsProperties.getBooleanProperty("singSnellUserKey")) {
+                if (DataStore.singSnellUserKey) {
                     outbound.getString("userkey")?.also {
                         userKey = it
                     }

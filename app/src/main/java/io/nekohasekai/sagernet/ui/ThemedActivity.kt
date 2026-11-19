@@ -35,7 +35,6 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.snackbar.Snackbar
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.R
-import io.nekohasekai.sagernet.ktx.getBooleanProperty
 import io.nekohasekai.sagernet.ktx.getColorAttr
 import io.nekohasekai.sagernet.utils.Theme
 
@@ -53,7 +52,7 @@ abstract class ThemedActivity : AppCompatActivity {
     var themeResId = 0
     var uiMode = 0
 
-    private val setNavigationBarColor = DataStore.experimentalFlagsProperties.getBooleanProperty("setNavigationBarColor")
+    private val setNavigationBarColor = DataStore.setNavigationBarColor
 
     override fun onCreate(savedInstanceState: Bundle?) {
         when (type) {

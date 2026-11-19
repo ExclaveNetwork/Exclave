@@ -25,7 +25,6 @@ import libexclavecore.URL
 import java.net.IDN
 import java.net.InetSocketAddress
 import java.net.Socket
-import java.util.Properties
 import kotlin.random.Random
 
 fun URL.queryParameter(key: String) = getQueryParameter(key).takeIf { it.isNotEmpty() }
@@ -229,8 +228,4 @@ fun String.unescapeLineFeed(): String {
         from += 1
     }
     return String(chars, 0, to)
-}
-
-fun Properties.getBooleanProperty(key: String): Boolean {
-    return getProperty(key) == "true"
 }

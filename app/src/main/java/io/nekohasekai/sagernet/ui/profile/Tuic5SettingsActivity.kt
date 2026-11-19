@@ -29,7 +29,6 @@ import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.preference.EditTextPreferenceModifiers
 import io.nekohasekai.sagernet.fmt.tuic5.Tuic5Bean
-import io.nekohasekai.sagernet.ktx.getBooleanProperty
 import io.nekohasekai.sagernet.ktx.unwrapIDN
 
 class Tuic5SettingsActivity : ProfileSettingsActivity<Tuic5Bean>() {
@@ -102,8 +101,7 @@ class Tuic5SettingsActivity : ProfileSettingsActivity<Tuic5Bean>() {
             summaryProvider = PasswordSummaryProvider
         }
 
-        findPreference<PreferenceCategory>(Key.SERVER_SING_UOT_CATEGORY)!!.isVisible =
-            DataStore.experimentalFlagsProperties.getBooleanProperty("singuot")
+        findPreference<PreferenceCategory>(Key.SERVER_SING_UOT_CATEGORY)!!.isVisible = DataStore.singuot
 
         val echEnabled = findPreference<SwitchPreference>(Key.SERVER_ECH_ENABLED)!!
         val echConfigList = findPreference<EditTextPreference>(Key.SERVER_ECH_CONFIG_LIST)!!

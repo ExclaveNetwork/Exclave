@@ -10,7 +10,6 @@ import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.preference.EditTextPreferenceModifiers
 import io.nekohasekai.sagernet.fmt.snell.SnellBean
-import io.nekohasekai.sagernet.ktx.getBooleanProperty
 import io.nekohasekai.sagernet.ktx.unwrapIDN
 
 class SnellSettingsActivity : ProfileSettingsActivity<SnellBean>() {
@@ -63,8 +62,7 @@ class SnellSettingsActivity : ProfileSettingsActivity<SnellBean>() {
         findPreference<EditTextPreference>(Key.SERVER_SNELL_USER_KEY)!!.apply {
             summaryProvider = PasswordSummaryProvider
         }
-        findPreference<PreferenceCategory>(Key.SERVER_SING_SNELL_CATEGORY)!!.isVisible =
-            DataStore.experimentalFlagsProperties.getBooleanProperty("singSnellUserKey")
+        findPreference<PreferenceCategory>(Key.SERVER_SING_SNELL_CATEGORY)!!.isVisible = DataStore.singSnellUserKey
         val versionPref = findPreference<ListPreference>(Key.SERVER_SNELL_VERSION)!!
         val modePref = findPreference<ListPreference>(Key.SERVER_SNELL_MODE)!!
         val obfsPref = findPreference<ListPreference>(Key.SERVER_SNELL_OBFS_MODE)!!

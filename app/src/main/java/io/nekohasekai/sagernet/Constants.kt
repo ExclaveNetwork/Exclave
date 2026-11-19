@@ -26,6 +26,8 @@ object Key {
     const val DB_PUBLIC = "configuration.db"
     const val DB_PROFILE = "sager_net.db"
 
+    const val APP_VERSION_CODE = "appVersionCode"
+
     const val PERSIST_ACROSS_REBOOT = "isAutoConnect"
     const val APP_THEME = "appTheme"
     const val NIGHT_THEME = "nightTheme"

@@ -1769,7 +1769,7 @@ fun parseV2RayOutbound(outbound: JsonObject): List<AbstractBean> {
                 settings.getString("psk")?.also {
                     snellBean.psk = it
                 }
-                if (DataStore.experimentalFlagsProperties.getBooleanProperty("singSnellUserKey")) {
+                if (DataStore.singSnellUserKey) {
                     settings.getString("userKey")?.also {
                         snellBean.userKey = it
                     }

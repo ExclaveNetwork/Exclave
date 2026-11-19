@@ -1058,7 +1058,7 @@ class ConfigurationFragment @JvmOverloads constructor(
         lateinit var proxyGroup: ProxyGroup
         var selected = false
         var scrolled = false
-        val showBackup = DataStore.experimentalFlagsProperties.getBooleanProperty("enableProfileBackup")
+        val showBackup = DataStore.enableProfileBackup
 
         override fun onCreateView(
             inflater: LayoutInflater,
