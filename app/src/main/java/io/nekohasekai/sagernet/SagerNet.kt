@@ -44,6 +44,7 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
+import androidx.core.content.pm.ShortcutManagerCompat
 import go.Seq
 import io.nekohasekai.sagernet.bg.SagerConnection
 import io.nekohasekai.sagernet.bg.SubscriptionUpdater
@@ -54,6 +55,7 @@ import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ui.MainActivity
+import io.nekohasekai.sagernet.ui.ScannerActivity
 import io.nekohasekai.sagernet.utils.CrashHandler
 import io.nekohasekai.sagernet.utils.DefaultNetworkListener
 import io.nekohasekai.sagernet.utils.DeviceStorageApp
@@ -367,6 +369,44 @@ class SagerNet : Application(),
 
         fun stopService() =
             application.sendBroadcast(Intent(Action.CLOSE).setPackage(application.packageName))
+
+        fun setDynamicShortcuts(context: Context) {
+            /**
+             * Publish the shortcuts as dynamic shortcuts instead of declaring it in
+             * shortcuts.xml. The system forcibly adds FLAG_ACTIVITY_NEW_TASK, FLAG_ACTIVITY_CLEAR_TASK
+             * and FLAG_ACTIVITY_TASK_ON_HOME to the first intent of every static shortcut, which puts
+             * the home task right below the launched task, so the foreground app is sent to the
+             * background when this transparent activity finishes. Dynamic shortcuts keep their own flags.
+             * Publish the shortcuts as dynamic shortcuts to avoid hardcoding targetPackage too.
+             */
+            try {
+                val shortcuts = if (DataStore.disableToggleShortcut) {
+                    listOf(ScannerActivity.buildShortcut(context))
+                } else {
+                    listOf(
+                        QuickToggleShortcut.buildShortcut(context),
+                        ScannerActivity.buildShortcut(context)
+                    )
+                }
+                val oldShortcuts = ShortcutManagerCompat.getDynamicShortcuts(context)
+                var identical = shortcuts.size == oldShortcuts.size
+                if (identical) {
+                    for ((i, shortcut) in shortcuts.withIndex()) {
+                        if (shortcut.id == oldShortcuts[i].id) {
+                            continue
+                        } else {
+                            identical = false
+                            break
+                        }
+                    }
+                }
+                if (!identical) {
+                    ShortcutManagerCompat.setDynamicShortcuts(context, shortcuts)
+                }
+            } catch (e: Exception) {
+                Logs.w(e)
+            }
+        }
 
     }
 

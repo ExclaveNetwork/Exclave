@@ -592,4 +592,6 @@
     <string name="naiveproxy_tunnel_timeout">隧道超时（秒）</string>
     <string name="naiveproxy_idle_timeout">空闲超时（秒）</string>
     <string name="uri_template">URI 模板</string>
+    <string name="disable_toggle_shortcut">禁用切换快捷方式</string>
+    <string name="disable_tasker_integration">禁用 Tasker 集成</string>
 </resources>

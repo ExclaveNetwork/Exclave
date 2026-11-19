@@ -179,7 +179,8 @@ abstract class ProfileSettingsActivity<T : AbstractBean>(
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.profile_config_menu, menu)
         menu.findItem(R.id.action_create_shortcut)?.apply {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && DataStore.editingId > 0L) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && DataStore.editingId > 0L &&
+                !DataStore.disableToggleShortcut) {
                 isVisible = true
             }
         }

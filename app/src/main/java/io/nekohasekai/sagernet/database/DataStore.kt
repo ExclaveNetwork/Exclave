@@ -188,6 +188,8 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var fabStyle by configurationStore.stringToInt(Key.FAB_STYLE) { 1 }
     var useIECUnit by configurationStore.boolean(Key.USE_IEC_UNIT)
     var queryAllPackagesAlternativeMethod by configurationStore.boolean(Key.QUERY_ALL_PACKAGES_ALTERNATIVE_METHOD)
+    var disableToggleShortcut by configurationStore.boolean(Key.DISABLE_TOGGLE_SHORTCUT)
+    var disableTaskerIntegration by configurationStore.boolean(Key.DISABLE_TASKER_INTEGRATION)
 
     var enableFragment by configurationStore.boolean(Key.ENABLE_FRAGMENT)
     var enableFragmentForDirect by configurationStore.boolean(Key.ENABLE_FRAGMENT_FOR_DIRECT)
@@ -517,6 +519,11 @@ object DataStore : OnPreferenceDataStoreChangeListener {
             Key.EXPERIMENTAL_FLAGS -> {
                 experimentalFlagsProperties = Properties().apply {
                     load(BufferedReader(StringReader(experimentalFlags)))
+                }
+            }
+            Key.DISABLE_TOGGLE_SHORTCUT -> {
+                runOnDefaultDispatcher {
+                    SagerNet.setDynamicShortcuts(app)
                 }
             }
         }

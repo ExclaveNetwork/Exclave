@@ -631,4 +631,6 @@
     <string name="naiveproxy_idle_timeout">Idle timeout (s)</string>
     <string name="uri_template">URI Template</string>
     <string name="action_masque" translatable="false">MASQUE</string>
+    <string name="disable_toggle_shortcut">Disable toggle shortcut</string>
+    <string name="disable_tasker_integration">Disable Tasker integration</string>
 </resources>

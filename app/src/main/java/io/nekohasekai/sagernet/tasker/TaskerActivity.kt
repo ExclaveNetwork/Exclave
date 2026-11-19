@@ -19,7 +19,9 @@
 package io.nekohasekai.sagernet.tasker
 
 import android.app.Activity
+import android.content.ComponentName
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -40,6 +42,7 @@ import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.preference.OnPreferenceDataStoreChangeListener
 import io.nekohasekai.sagernet.ktx.Logs
+import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ktx.runOnMainDispatcher
 import io.nekohasekai.sagernet.ui.ProfileSelectActivity
@@ -51,6 +54,26 @@ class TaskerActivity : ThemedActivity(R.layout.layout_config_settings),
 
     companion object {
         const val KEY_DIRTY = "dirty"
+
+        private val componentName by lazy { ComponentName(app, TaskerActivity::class.java) }
+        var enabled: Boolean
+            get() = when (app.packageManager.getComponentEnabledSetting(componentName)) {
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED -> true
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED -> false
+                PackageManager.COMPONENT_ENABLED_STATE_DEFAULT -> {
+                    app.packageManager.getReceiverInfo(componentName, 0).enabled
+                }
+                else -> true
+            }
+            set(value) = app.packageManager.setComponentEnabledSetting(
+                componentName,
+                if (value) {
+                    PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                } else {
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                },
+                PackageManager.DONT_KILL_APP,
+            )
     }
 
     val settings by lazy { TaskerBundle.fromIntent(intent) }
@@ -74,6 +97,10 @@ class TaskerActivity : ThemedActivity(R.layout.layout_config_settings),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (DataStore.disableTaskerIntegration) {
+            enabled = false
+            finish()
+        }
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.settings)) { v, insets ->
             val bars = insets.getInsets(
                 WindowInsetsCompat.Type.systemBars()

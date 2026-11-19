@@ -456,6 +456,14 @@
             app:title="@string/fab_style"
             app:useSimpleSummaryProvider="true" />
         <SwitchPreference
+            app:icon="@drawable/ic_baseline_timelapse_24"
+            app:key="disableToggleShortcut"
+            app:title="@string/disable_toggle_shortcut" />
+        <SwitchPreference
+            app:icon="@drawable/ic_baseline_timelapse_24"
+            app:key="disableTaskerIntegration"
+            app:title="@string/disable_tasker_integration" />
+        <SwitchPreference
             app:icon="@drawable/ic_baseline_shutter_speed_24"
             app:key="useIECUnit"
             app:summary="@string/use_iec_unit_sum"

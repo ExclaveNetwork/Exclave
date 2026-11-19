@@ -19,15 +19,44 @@
 package io.nekohasekai.sagernet.tasker
 
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.ProfileManager
+import io.nekohasekai.sagernet.ktx.app
 
 class TaskerReceiver : BroadcastReceiver() {
 
+    companion object {
+        private val componentName by lazy { ComponentName(app, TaskerReceiver::class.java) }
+        var enabled: Boolean
+            get() = when (app.packageManager.getComponentEnabledSetting(componentName)) {
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED -> true
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED -> false
+                PackageManager.COMPONENT_ENABLED_STATE_DEFAULT -> {
+                    app.packageManager.getReceiverInfo(componentName, 0).enabled
+                }
+                else -> true
+            }
+            set(value) = app.packageManager.setComponentEnabledSetting(
+                componentName,
+                if (value) {
+                    PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                } else {
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                },
+                PackageManager.DONT_KILL_APP,
+            )
+    }
+
     override fun onReceive(context: Context, intent: Intent) {
+        if (DataStore.disableTaskerIntegration) {
+            enabled = false
+            return
+        }
         val settings = TaskerBundle.fromIntent(intent)
         when (settings.action) {
             TaskerBundle.ACTION_START -> {
