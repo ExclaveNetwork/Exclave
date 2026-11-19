@@ -200,6 +200,10 @@ fun Fragment.needReload() {
     }
 }
 
+fun Fragment.needRestart() {
+    snackbar(getString(R.string.kill_and_restart)).show()
+}
+
 fun Context.getColour(@ColorRes colorRes: Int): Int {
     return ContextCompat.getColor(this, colorRes)
 }

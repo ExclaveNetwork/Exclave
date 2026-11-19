@@ -633,4 +633,5 @@
     <string name="action_masque" translatable="false">MASQUE</string>
     <string name="disable_toggle_shortcut">Disable toggle shortcut</string>
     <string name="disable_tasker_integration">Disable Tasker integration</string>
+    <string name="kill_and_restart">Kill and restart the app to take effect</string>
 </resources>

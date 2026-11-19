@@ -136,7 +136,11 @@ abstract class ThemedActivity : AppCompatActivity {
         }
     }
 
-    fun snackbar(@StringRes resId: Int): Snackbar = snackbar("").setText(resId)
+    fun snackbar(@StringRes resId: Int): Snackbar = snackbar("").setText(resId).apply {
+        view.findViewById<TextView>(com.google.android.material.R.id.snackbar_text).apply {
+            maxLines = 10
+        }
+    }
     fun snackbar(text: CharSequence): Snackbar = snackbarInternal(text).apply {
         view.findViewById<TextView>(com.google.android.material.R.id.snackbar_text).apply {
             maxLines = 10

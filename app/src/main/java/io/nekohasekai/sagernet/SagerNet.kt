@@ -154,6 +154,7 @@ class SagerNet : Application(),
             }
             Libexclavecore.updateSystemRoots(DataStore.providerRootCA)
         } catch (e: Exception) {
+            Logs.w(e)
             Toast.makeText(this, e.readableMessage, Toast.LENGTH_LONG).show()
         }
 
