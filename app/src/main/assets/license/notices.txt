@@ -959,6 +959,10 @@ github.com/pires/go-proxyproto
       See the License for the specific language governing permissions and
       limitations under the License.
 
+github.com/puzpuzpuz/xsync/v4
+
+      Apache License, Version 2.0
+
 github.com/quic-go/qpack
 
       Copyright 2019 Marten Seemann
