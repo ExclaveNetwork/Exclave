@@ -231,7 +231,7 @@
     <string name="off">خاموش</string>
     <string name="proxied_apps_summary">حذف یا افزودن برنامه‌های انتخاب‌شده از/به VPN</string>
     <string name="proxied_apps">حالت VPN برای برنامه ها</string>
-    <string name="mux_concurrency">اتصالات همزمان Mux</string>
+    <string name="mux_concurrency">حداکثر اتصالات همزمان</string>
     <string name="enable_mux">فعالسازی تسهیم کننده</string>
     <string name="traffic_sniffing">فعال کردن استشمام ترافیک</string>
     <string name="domain_strategy">استراتژی حل دامنه</string>
