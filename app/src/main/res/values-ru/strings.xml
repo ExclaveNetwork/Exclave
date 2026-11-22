@@ -598,4 +598,7 @@
     <string name="naiveproxy_tunnel_timeout">Тайм-аут туннеля (с)</string>
     <string name="naiveproxy_idle_timeout">Тайм-аут бездействия (с)</string>
     <string name="uri_template">Шаблон URI</string>
+    <string name="disable_toggle_shortcut">Отключить ярлык переключения</string>
+    <string name="disable_tasker_integration">Отключить интеграцию Tasker</string>
+    <string name="kill_and_restart">Принудительно закройте и перезапустите приложение, чтобы изменения вступили в силу</string>
 </resources>
