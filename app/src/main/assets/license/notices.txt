@@ -1713,6 +1713,7 @@ androidx.camera.featurecombinationquery:featurecombinationquery
 androidx.camera.viewfinder:viewfinder-core
 androidx.camera:camera-camera2
 androidx.camera:camera-camera2-pipe
+androidx.camera:camera-common
 androidx.camera:camera-core
 androidx.camera:camera-lifecycle
 androidx.camera:camera-video

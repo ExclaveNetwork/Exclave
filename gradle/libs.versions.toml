@@ -1,5 +1,5 @@
 [libraries]
-android-gradle-plugin = { module = "com.android.tools.build:gradle", version = "9.5.1" }
+android-gradle-plugin = { module = "com.android.tools.build:gradle", version = "9.5.2" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version = "2.4.21" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version = "5.5.1" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version = "1.11.0" }
@@ -10,11 +10,11 @@ activity-ktx = { module = "androidx.activity:activity-ktx", version = "1.13.0" }
 #noinspection SimilarGradleDependency
 fragment-ktx = { module = "androidx.fragment:fragment-ktx", version = "1.9.1" }
 #noinspection SimilarGradleDependency
-camera-view = { module = "androidx.camera:camera-view", version = "1.6.2" }
+camera-view = { module = "androidx.camera:camera-view", version = "1.7.0" }
 #noinspection SimilarGradleDependency
-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version = "1.6.2" }
+camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version = "1.7.0" }
 #noinspection SimilarGradleDependency
-camera-camera2 = { module = "androidx.camera:camera-camera2", version = "1.6.2" }
+camera-camera2 = { module = "androidx.camera:camera-camera2", version = "1.7.0" }
 swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version = "1.2.0" }
 #noinspection SimilarGradleDependency
 appcompat = { module = "androidx.appcompat:appcompat", version = "1.8.0" }
