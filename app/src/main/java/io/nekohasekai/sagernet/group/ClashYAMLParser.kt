@@ -23,6 +23,7 @@ package io.nekohasekai.sagernet.group
 import com.github.shadowsocks.plugin.PluginOptions
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
+import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.fmt.AbstractBean
 import io.nekohasekai.sagernet.fmt.anytls.AnyTLSBean
 import io.nekohasekai.sagernet.fmt.http.HttpBean
@@ -817,7 +818,8 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                 psk = proxy.getString("psk")
                 version = proxy.getInt("version")
                 when (version) {
-                    4 -> {
+                    4, 5 -> {
+                        version = 4
                         if (proxy.getString("mode")?.isNotEmpty() == true) return listOf()
                         proxy.getObject("obfs-opts")?.also { opts ->
                             when (opts.getString("mode")) {
@@ -846,11 +848,16 @@ fun parseClashProxy(proxy: Map<String, Any?>): List<AbstractBean> {
                                 "tls", "http" -> return listOf()
                             }
                         }
-                        when (proxy.getString("mode")) {
-                            null, "", "default" ->  mode = SnellBean.MODE_DEFAULT
-                            "unshaped" -> mode = SnellBean.MODE_UNSHAPED
-                            "unsafe-raw" -> mode = SnellBean.MODE_UNSAFE_RAW
+                        mode = when (proxy.getString("mode")) {
+                            null, "", "default" -> SnellBean.MODE_DEFAULT
+                            "unshaped" -> SnellBean.MODE_UNSHAPED
+                            "unsafe-raw" -> SnellBean.MODE_UNSAFE_RAW
                             else -> return listOf()
+                        }
+                        if (DataStore.singSnellUserKey) {
+                            proxy.getString("userkey")?.also {
+                                userKey = it
+                            }
                         }
                     }
                     else -> return listOf()
