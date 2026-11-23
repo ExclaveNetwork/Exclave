@@ -474,8 +474,7 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
 
         alpn.setOnPreferenceChangeListener { _, newValue ->
             newValue as String
-            splithttpChromeParrot.isVisible = network.value == "splithttp" && security.value == "tls" &&
-                    newValue.listByLineOrComma().size == 1 && newValue.listByLineOrComma()[0] == "h3"
+            updateTle(security.value, network.value, newValue)
             true
         }
 
@@ -486,7 +485,6 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
                 if (xtlsFlow.value !in xfv) {
                     xtlsFlow.value = xfv[0]
                 }
-
             }
             is VMessBean -> {
                 vlessEncryption.isVisible = false
@@ -540,7 +538,7 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
         }
 
         security.setOnPreferenceChangeListener { _, newValue ->
-            updateTle(newValue as String, network.value)
+            updateTle(newValue as String, network.value, alpn.text.orEmpty())
             true
         }
 
@@ -663,7 +661,7 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
             security.value = tlev[0]
         }
 
-        updateTle(security.value, network)
+        updateTle(security.value, network, alpn.text.orEmpty())
 
         hy2UpMbps.isVisible = network == "hysteria2"
         hy2DownMbps.isVisible = network == "hysteria2"
@@ -692,8 +690,6 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
         }
         // Do not translate this as it is not a stable string.
         splithttpExtra.dialogMessage = "`downloadSettings` is not supported. Use custom config for `downloadSettings`."
-        splithttpChromeParrot.isVisible = network == "splithttp" && security.value == "tls" &&
-                alpn.text?.listByLineOrComma()?.size == 1 && alpn.text!!.listByLineOrComma()[0] == "h3"
 
         grpcCategory.isVisible = network == "grpc"
 
@@ -820,7 +816,7 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
         }
     }
 
-    fun updateTle(security: String, network: String) {
+    fun updateTle(security: String, network: String, alpnString: String) {
         securityCategory.isVisible = security == "tls" || security == "reality"
         certificates.isVisible = security == "tls"
         pinnedCertificateChain.isVisible = security == "tls"
@@ -832,10 +828,11 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
         realityPublicKey.isVisible = security == "reality"
         realityShortId.isVisible = security == "reality"
         realityMldsa65Verify.isVisible = security == "reality"
+        val isSplitHTTP3 = network == "splithttp" && security == "tls"
+                && alpnString.listByLineOrComma().size == 1
+                && alpnString.listByLineOrComma()[0] == "h3"
         if (network == "splithttp") {
-            utlsFingerprint.isVisible = security == "tls"
-                    && alpn.text?.listByLineOrComma()?.size == 1
-                    && alpn.text!!.listByLineOrComma()[0] == "h3"
+            utlsFingerprint.isVisible = !isSplitHTTP3
         } else {
             utlsFingerprint.isVisible = security == "tls" && (network == "tcp" || network == "ws"
                     || network == "http" || network == "meek" || network == "httpupgrade"
@@ -850,9 +847,7 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
         realityFingerprint.isVisible = security == "reality"
         realityDisableX25519Mlkem768.isVisible = security == "reality"
 
-        splithttpChromeParrot.isVisible = network == "splithttp" && security == "tls"
-                && alpn.text?.listByLineOrComma()?.size == 1
-                && alpn.text!!.listByLineOrComma()[0] == "h3"
+        splithttpChromeParrot.isVisible = isSplitHTTP3
     }
 
     override fun onAttachedToWindow() {
