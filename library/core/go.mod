@@ -2,7 +2,7 @@ module libexclavecore
 
 go 1.27
 
-require github.com/exclavenetwork/libexclavecore v0.0.0-20261122080725-ef5f9bfc4d4d
+require github.com/exclavenetwork/libexclavecore v0.0.0-20261123125158-49f503e898cc
 
 require (
 	filippo.io/age v1.3.2 // indirect
@@ -15,11 +15,11 @@ require (
 	github.com/dgryski/go-camellia v0.0.0-20191119043421-69a8a13fb23d // indirect
 	github.com/dgryski/go-metro v0.0.0-20261008173524-5059e0b1da03 // indirect
 	github.com/enfein/mieru/v3 v3.39.0 // indirect
-	github.com/exclavenetwork/exclave-core/v5 v5.50.1-0.20261122080535-d6131795980a // indirect
+	github.com/exclavenetwork/exclave-core/v5 v5.50.1-0.20261123125029-14b42543a2cc // indirect
 	github.com/exclavenetwork/go-stun v0.1.7-0.20261116063833-c0f093f1db98 // indirect
 	github.com/exclavenetwork/hysteria/core/v2 v2.14.0-1 // indirect
 	github.com/exclavenetwork/hysteria/extras/v2 v2.14.0-1 // indirect
-	github.com/exclavenetwork/reality v0.0.0-20261109173840-a4b5d3c18d9a // indirect
+	github.com/exclavenetwork/reality v0.0.0-20261123081719-47883b52d9d9 // indirect
 	github.com/exclavenetwork/sing-juicity v0.3.1 // indirect
 	github.com/exclavenetwork/sing-shadowquic v0.0.0-20261109112126-ace0c2eed158 // indirect
 	github.com/gofrs/uuid/v5 v5.5.1 // indirect
@@ -41,7 +41,7 @@ require (
 	github.com/metacubex/utls v1.9.0-alpha.1 // indirect
 	github.com/miekg/dns v1.1.73 // indirect
 	github.com/molecule-man/go-brrr v1.3.1 // indirect
-	github.com/pion/transport/v5 v5.1.5 // indirect
+	github.com/pion/transport/v5 v5.1.6 // indirect
 	github.com/pires/go-proxyproto v0.16.0 // indirect
 	github.com/puzpuzpuz/xsync/v4 v4.5.0 // indirect
 	github.com/quic-go/qpack v0.6.0 // indirect
@@ -60,7 +60,7 @@ require (
 	github.com/v2fly/BrowserBridge v0.0.0-20210430233438-0570fc1d7d08 // indirect
 	github.com/v2fly/ss-bloomring v0.0.0-20210312155135-28617310f63e // indirect
 	github.com/v2fly/struc v0.0.0-20241227015403-8e8fa1badfd6 // indirect
-	github.com/xtaci/smux v1.5.61 // indirect
+	github.com/xtaci/smux v1.5.62 // indirect
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
 	go4.org/netipx v0.0.0-20260823151212-3075585bcbeb // indirect
 	golang.org/x/crypto v0.59.0 // indirect
@@ -76,7 +76,7 @@ require (
 	google.golang.org/grpc v1.85.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	gvisor.dev/gvisor v0.0.0-20250503011706-39ed1f5ac29c // indirect
-	lukechampine.com/blake3 v1.5.1 // indirect
+	lukechampine.com/blake3 v1.5.3 // indirect
 )
 
 // workaround https://github.com/google/gvisor/commit/868dfbce4fd59f03145e2bc5ac0b585917c371fa
