@@ -602,4 +602,7 @@
     <string name="naiveproxy_tunnel_timeout">Časový limit tunelu (s)</string>
     <string name="naiveproxy_idle_timeout">Časový limit nečinnosti (s)</string>
     <string name="uri_template">Šablona URI</string>
+    <string name="disable_toggle_shortcut">Zakázat zástupce pro přepnutí</string>
+    <string name="disable_tasker_integration">Zakázat integraci Tasker</string>
+    <string name="kill_and_restart">Aby se změny projevily, vynuceně ukončete a znovu spusťte aplikaci</string>
 </resources>
