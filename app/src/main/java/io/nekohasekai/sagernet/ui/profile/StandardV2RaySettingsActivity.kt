@@ -559,9 +559,13 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
         }
         xtlsFlow.setOnPreferenceChangeListener { _, newValue ->
             newValue as String
-            packetEncoding.isEnabled = newValue == fv[0]
-            if (newValue != fv[0]) {
+            val visionEnabled = newValue != fv[0]
+            packetEncoding.isEnabled = !visionEnabled
+            updateMux(!visionEnabled)
+            mux.isEnabled = !visionEnabled
+            if (visionEnabled) {
                 packetEncoding.value = pev[2]
+                mux.isChecked = false
             }
             true
         }
@@ -600,10 +604,9 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
         if (muxPacketEncoding.value !in pev) {
             muxPacketEncoding.value = pev[0]
         }
+        mux.isEnabled = xtlsFlow.value == fv[0]
         mux.setOnPreferenceChangeListener { _, newValue ->
-            newValue as Boolean
-            muxConcurrency.isVisible = newValue
-            muxPacketEncoding.isVisible = newValue
+            updateMux(newValue as Boolean)
             true
         }
 
@@ -650,6 +653,11 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
     val tcpHeadersValue = app.resources.getStringArray(R.array.tcp_headers_value)
     val kcpQuicHeadersValue = app.resources.getStringArray(R.array.kcp_quic_headers_value)
     val quicSecurityValue = app.resources.getStringArray(R.array.quic_security_value)
+
+    fun updateMux(enabled: Boolean) {
+        muxConcurrency.isVisible = enabled
+        muxPacketEncoding.isVisible = enabled
+    }
 
     fun updateView(network: String) {
         security.setEntries(R.array.transport_layer_encryption_entry)
