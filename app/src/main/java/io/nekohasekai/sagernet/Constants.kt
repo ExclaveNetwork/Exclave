@@ -408,8 +408,6 @@ object Action {
     const val RELOAD = "io.nekohasekai.sagernet.RELOAD"
     const val ABORT = "io.nekohasekai.sagernet.ABORT"
 
-    const val THEME_CHANGED = "io.nekohasekai.sagernet.THEME_CHANGED"
-
     const val EXTRA_PROFILE_ID = "io.nekohasekai.sagernet.EXTRA_PROFILE_ID"
 }
 

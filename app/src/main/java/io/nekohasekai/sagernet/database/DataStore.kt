@@ -21,13 +21,11 @@
 
 package io.nekohasekai.sagernet.database
 
-import android.content.Intent
 import android.os.Binder
 import android.os.Build
 import android.os.LocaleList
 import androidx.preference.PreferenceDataStore
 import io.nekohasekai.sagernet.*
-import io.nekohasekai.sagernet.SagerNet.Companion.application
 import io.nekohasekai.sagernet.bg.VpnService
 import io.nekohasekai.sagernet.database.preference.InMemoryDatabase
 import io.nekohasekai.sagernet.database.preference.OnPreferenceDataStoreChangeListener
@@ -46,7 +44,6 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     val profileCacheStore = RoomPreferenceDataStore(InMemoryDatabase.kvPairDao)
 
     fun init() {
-        configurationStore.registerChangeListener(this)
 
         // BuildConfig.VERSION_CODE is the version code of the armeabi-v7a APK
         val previousVersionCode = configurationStore.getInt(Key.APP_VERSION_CODE)
@@ -601,9 +598,6 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String) {
         when (key) {
             Key.PROFILE_ID -> {}
-            Key.APP_THEME -> {
-                application.sendBroadcast(Intent(Action.THEME_CHANGED).setPackage(application.packageName))
-            }
             Key.EXPERIMENTAL_FLAGS -> {
                 configureExperimentalFlags(experimentalFlags)
             }
