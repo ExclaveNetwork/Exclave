@@ -158,7 +158,7 @@ class ServiceNotification(
             service.registerReceiver(this, IntentFilter().apply {
                 addAction(Intent.ACTION_SCREEN_ON)
                 addAction(Intent.ACTION_SCREEN_OFF)
-            }, Context.RECEIVER_EXPORTED)
+            }, Context.RECEIVER_NOT_EXPORTED)
         } else {
             service.registerReceiver(this, IntentFilter().apply {
                 addAction(Intent.ACTION_SCREEN_ON)
@@ -211,7 +211,9 @@ class ServiceNotification(
 
     private fun show() = (service as Service).startForeground(notificationId, builder.build())
     private fun update() =
-        NotificationManagerCompat.from(service as Service).notify(notificationId, builder.build())
+        try {
+            NotificationManagerCompat.from(service as Service).notify(notificationId, builder.build())
+        } catch (_: SecurityException) {}
 
     fun destroy() {
         (service as Service).unregisterReceiver(this)

@@ -90,7 +90,7 @@ fun Context.listenForPackageChanges(onetime: Boolean = true, callback: () -> Uni
                 addAction(Intent.ACTION_PACKAGE_ADDED)
                 addAction(Intent.ACTION_PACKAGE_REMOVED)
                 addDataScheme("package")
-            }, Context.RECEIVER_EXPORTED)
+            }, Context.RECEIVER_NOT_EXPORTED)
         } else {
             registerReceiver(this, IntentFilter().apply {
                 addAction(Intent.ACTION_PACKAGE_ADDED)
