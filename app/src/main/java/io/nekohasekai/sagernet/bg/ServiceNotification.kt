@@ -159,14 +159,12 @@ class ServiceNotification(
                 addAction(Intent.ACTION_SCREEN_ON)
                 addAction(Intent.ACTION_SCREEN_OFF)
                 addAction(Action.THEME_CHANGED)
-                addAction(Intent.ACTION_LOCALE_CHANGED)
             }, Context.RECEIVER_EXPORTED)
         } else {
             service.registerReceiver(this, IntentFilter().apply {
                 addAction(Intent.ACTION_SCREEN_ON)
                 addAction(Intent.ACTION_SCREEN_OFF)
                 addAction(Action.THEME_CHANGED)
-                addAction(Intent.ACTION_LOCALE_CHANGED)
             })
         }
         show()
@@ -200,11 +198,7 @@ class ServiceNotification(
             service as Context
             Theme.apply(app)
             Theme.apply(service)
-            builder.color = service.getColorAttr(androidx.appcompat.R.attr.colorPrimary)
-            update()
-        }
-        if (intent.action == Intent.ACTION_LOCALE_CHANGED) {
-            updateActions()
+            builder.color =  service.getColorAttr(androidx.appcompat.R.attr.colorPrimary)
             update()
         }
         if (service.data.state == BaseService.State.Connected) {
