@@ -581,7 +581,7 @@ private fun parseV2RayN(json: JsonObject): VMessBean {
     when (bean.type) {
         "tcp" -> {
             bean.host = host?.split(",")?.joinToString("\n") // "http(tcp)->host中间逗号(,)隔开"
-            bean.path = path?.split(",")?.joinToString("\n") // See https://github.com/ExclaveNetwork/Exclave/issues/357
+            bean.path = path?.split(",")?.joinToString("\n")
             type?.let {
                 if (it != "http" && it != "none") error("unsupported headerType")
                 bean.headerType = it
@@ -794,10 +794,9 @@ fun StandardV2RayBean.toUri(): String? {
                 if (host.isNotEmpty()) {
                     builder.addQueryParameter("host", host.listByLineOrComma().joinToString(","))
                 }
-                // See https://github.com/ExclaveNetwork/Exclave/issues/357
-                /*if (path.isNotEmpty()) {
+                if (path.isNotEmpty()) {
                     builder.addQueryParameter("path", path.listByLineOrComma().joinToString(","))
-                }*/
+                }
             }
         }
         "kcp" -> {
