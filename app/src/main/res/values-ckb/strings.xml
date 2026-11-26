@@ -1,3 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="project">پرۆژە</string>
+    <string name="github">کۆدی سەرچاوە</string>
+    <string name="app_version">وەشان</string>
+    <string name="version_x">وەشان (%s)</string>
+    <string name="logcat">زانیاری چاکسازی هەناردە بکە</string>
+    <string name="menu_configuration">ڕێکخستن</string>
+    <string name="menu_group">گروپ</string>
+    <string name="menu_about">دەربارەی</string>
+    <string name="theme">ڕووکار</string>
+    <string name="group_default">بێ گرووپ</string>
+    <string name="quick_toggle">هەڵگۆڕ</string>
+    <string name="menu_traffic">ترافیک</string>
+    <string name="group_name">ناوی گرووپ</string>
+    <string name="group_update">نوێکردنەوە</string>
+    <string name="group_subscription_link">لینکی بەشداریکردن</string>
+    <string name="group_create">گرووپ دروست بکە</string>
+    <string name="group_edit">دەستکاریکردنی گرووپ</string>
+    <string name="group_status_empty">گرووپی بەتاڵ</string>
+    <string name="group_status_empty_subscription">هێشتا نوێ نەکراوەتەوە</string>
+    <plurals name="group_status_proxies">
+        <item quantity="one">%d پڕۆفایل</item>
+        <item quantity="other">%d پڕۆفایل</item>
+    </plurals>
+    <plurals name="group_status_proxies_subscription">
+        <item quantity="one">%d پڕۆفایل | دوا نوێکردنەوە: %s</item>
+        <item quantity="other">%d پڕۆفایل | دوا نوێکردنەوە: %s</item>
+    </plurals>
+    <string name="group_no_difference">%s: هیچ گۆڕانکارییەک نییە</string>
+    <plurals name="group_updated">
+        <item quantity="one">%s: نوێکرایەوە %d پڕۆفایل</item>
+        <item quantity="other">%s: نوێکرانەوەی %d پڕۆفایل تەواو بوو</item>
+    </plurals>
+    <string name="group_diff">جیاوازی (%s)</string>
+    <string name="group_delete_confirm_prompt">ئایا دڵنیایت دەتەوێت ئەم گرووپە بسڕیتەوە؟</string>
+    <string name="group_added">زیادکرا:\n%s</string>
+    <string name="group_changed">نوێکرایەوە:\n %s</string>
+    <string name="group_deleted">سڕایەوە:\n %s</string>
+    <string name="group_duplicate">دووبارەکراوە:\n %s</string>
+    <string name="service_mode">شێوازی خزمەتگوزاری</string>
+    <string name="service_mode_proxy">تەنها پرۆکسی</string>
+    <string name="service_mode_vpn">VPN</string>
+    <string name="port_proxy">پۆرتی پرۆکسی SOCKS5</string>
+    <string name="port_http">پۆرتی پرۆکسی HTTP</string>
+    <string name="port_transproxy">پۆرتی پرۆکسی شەفاف</string>
+    <string name="cag_route">ڕێکخستنەکانی ڕێڕەو</string>
+    <string name="allow_access">ڕێگەدان بە پەیوەندییەکانی تۆڕی ناوخۆ</string>
+    <string name="allow_access_sum">بەستنەوەی هاتووەکان بە 0.0.0.0</string>
+    <string name="inbound_settings">ڕێکخستنەکانی هاتووەکان</string>
+    <string name="general_settings">ڕێکخستنەکانی ئەپ</string>
+    <string name="require_http">چالاککردنی هاتووی HTTP</string>
+    <string name="cag_ws">ڕێکخستنەکانی WebSocket</string>
+    <string name="ws_max_early_data">زۆرترین داتای سەرەتایی</string>
+    <string name="ws_browser_forwarding">ناردنەوەی ترافیکی وێبگەڕ</string>
+    <string name="ws_browser_forwarding_sum">ناردنەوەی WebSocket لە ڕێگەی وێبگەڕ</string>
+    <string name="speed_interval">ماوەی نوێکردنەوەی خێرایی</string>
+    <string name="cag_misc">ڕێکخستنە جۆراوجۆرەکان</string>
+    <string name="show_direct_speed">نیشاندانی خێرایی ڕاستەوخۆ</string>
+    <string name="show_direct_speed_sum">نیشاندانی خێرایی ترافیکی ڕاستەوخۆ لە ئاگادارکردنەوەشدا</string>
+    <string name="security_settings">ڕێکخستنەکانی پاراستن</string>
+    <string name="allow_insecure">پشتگوێخستنی پشکنینی بڕوانامە</string>
+    <string name="allow_insecure_sum">چالاککردنی ئەم هەڵبژاردەیە بەبێ پاراستنی تر دەکرێت ببێتە هۆی هێرشی ناوەند-لە-ناوەند (MITM). ئەگەر بە تەواوی نازانیت چی دەکەیت، چالاکی مەکە.</string>
+    <string name="speed_detail">پرۆکسی: %1$s↑ %2$s↓\nڕاستەوخۆ: %3$s↑ %4$s↓</string>
+    <string name="speed">%s/s</string>
+    <string name="connection_test_testing">تاقیکردنەوە…</string>
+    <string name="connection_test_available">سەرکەوتوو: دەستی‌پێکردنی HTTPS %d ms خایاند</string>
+    <string name="connection_test_available_http">سەرکەوتوو: دەستی‌پێکردنی HTTP %d ms خایاند</string>
+    <string name="connection_test_error">سەرنەکەوت: %s</string>
+    <string name="cag_dns">ڕێکخستنەکانی DNS</string>
+    <string name="remote_dns">DNS ی دوور</string>
+    <string name="direct_dns">DNS ی ڕاستەوخۆ</string>
+    <string name="enable_dns_routing">چالاککردنی ڕێڕەوی DNS</string>
+    <string name="dns_routing_message">چارەسەرکردنی ناونیشانەکان لە ڕێڕەوە تێپەڕێنراوەکان بە DNS ی ڕاستەوخۆ</string>
 </resources>
