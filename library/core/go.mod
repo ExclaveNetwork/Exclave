@@ -2,7 +2,7 @@ module libexclavecore
 
 go 1.27
 
-require github.com/exclavenetwork/libexclavecore v0.0.0-20261123125158-49f503e898cc
+require github.com/exclavenetwork/libexclavecore v0.0.0-20261128104301-333fd5d0759c
 
 require (
 	filippo.io/age v1.3.2 // indirect
@@ -14,19 +14,19 @@ require (
 	github.com/apernet/quic-go v0.65.1-0.20261109005002-2895f039137a // indirect
 	github.com/dgryski/go-camellia v0.0.0-20191119043421-69a8a13fb23d // indirect
 	github.com/dgryski/go-metro v0.0.0-20261008173524-5059e0b1da03 // indirect
-	github.com/enfein/mieru/v3 v3.39.0 // indirect
-	github.com/exclavenetwork/exclave-core/v5 v5.50.1-0.20261123125029-14b42543a2cc // indirect
+	github.com/enfein/mieru/v3 v3.40.0 // indirect
+	github.com/exclavenetwork/exclave-core/v5 v5.50.1-0.20261128091335-c1c1e5b14dff // indirect
 	github.com/exclavenetwork/go-stun v0.1.7-0.20261116063833-c0f093f1db98 // indirect
 	github.com/exclavenetwork/hysteria/core/v2 v2.14.0-1 // indirect
 	github.com/exclavenetwork/hysteria/extras/v2 v2.14.0-1 // indirect
-	github.com/exclavenetwork/reality v0.0.0-20261123081719-47883b52d9d9 // indirect
+	github.com/exclavenetwork/reality v0.0.0-20261125094517-c9ff566005b7 // indirect
 	github.com/exclavenetwork/sing-juicity v0.3.1 // indirect
 	github.com/exclavenetwork/sing-shadowquic v0.0.0-20261109112126-ace0c2eed158 // indirect
 	github.com/gofrs/uuid/v5 v5.5.1 // indirect
 	github.com/golang-collections/go-datastructures v0.0.0-20150211160725-59788d5eb259 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/btree v1.1.3 // indirect
-	github.com/gorilla/websocket v1.5.3 // indirect
+	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674 // indirect
 	github.com/hashicorp/yamux v0.1.2 // indirect
 	github.com/klauspost/compress v1.20.5 // indirect
 	github.com/klauspost/cpuid/v2 v2.4.2 // indirect
@@ -45,16 +45,16 @@ require (
 	github.com/pires/go-proxyproto v0.16.0 // indirect
 	github.com/puzpuzpuz/xsync/v4 v4.5.0 // indirect
 	github.com/quic-go/qpack v0.6.0 // indirect
-	github.com/quic-go/quic-go v0.65.0 // indirect
+	github.com/quic-go/quic-go v0.66.0 // indirect
 	github.com/refraction-networking/utls v1.8.3-0.20261118233537-360383f893fb // indirect
 	github.com/riobard/go-bloom v0.0.0-20200614022211-cdc8013cb5b3 // indirect
-	github.com/sagernet/quic-go v0.61.0-sing-box-mod.14 // indirect
-	github.com/sagernet/sing v0.9.6 // indirect
-	github.com/sagernet/sing-mux v0.3.9 // indirect
-	github.com/sagernet/sing-quic v0.7.1 // indirect
-	github.com/sagernet/sing-shadowsocks v0.2.8 // indirect
-	github.com/sagernet/sing-shadowsocks2 v0.2.1 // indirect
-	github.com/sagernet/sing-snell v0.0.0-20261110094602-04667b0a321c // indirect
+	github.com/sagernet/quic-go v0.66.0-sing-box-mod.1 // indirect
+	github.com/sagernet/sing v0.9.7-0.20261127131305-db09250ecaed // indirect
+	github.com/sagernet/sing-mux v0.3.10-0.20261125130604-6c5b46f55eeb // indirect
+	github.com/sagernet/sing-quic v0.7.2-0.20261126024618-6fa4bb84d0bd // indirect
+	github.com/sagernet/sing-shadowsocks v0.2.9-0.20261114055504-854fa8eed597 // indirect
+	github.com/sagernet/sing-shadowsocks2 v0.2.2-0.20261110092058-52ade8ab7e95 // indirect
+	github.com/sagernet/sing-snell v0.0.0-20261125221246-3f5050388f83 // indirect
 	github.com/sagernet/smux v1.5.50-sing-box-mod.1 // indirect
 	github.com/seiflotfy/cuckoofilter v0.0.0-20240715131351-a2f2c23f1771 // indirect
 	github.com/v2fly/BrowserBridge v0.0.0-20210430233438-0570fc1d7d08 // indirect
