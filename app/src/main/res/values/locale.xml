@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="language_ar_display_name" translatable="false">العربية</string>
+    <string name="language_ckb_display_name" translatable="false">کوردیی ناوەندی</string>
     <string name="language_cs_display_name" translatable="false">Čeština</string>
     <string name="language_en_display_name" translatable="false">English</string>
     <string name="language_es_display_name" translatable="false">Español</string>

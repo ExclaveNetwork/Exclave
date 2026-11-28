@@ -128,6 +128,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             return when (code) {
                 "" -> getString(R.string.language_system_default)
                 "ar" -> getString(R.string.language_ar_display_name)
+                "ckb" -> getString(R.string.language_ckb_display_name)
                 "cs" -> getString(R.string.language_cs_display_name)
                 "en-US" -> getString(R.string.language_en_display_name)
                 "es" -> getString(R.string.language_es_display_name)
